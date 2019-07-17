@@ -1,8 +1,7 @@
 #include <nnwnp.h>
 
 int main(int argc, char **argv) {
-
-    test();
-
+    NN_Waveguide *waveguide = create_waveguide();
+    destroy_waveguide(waveguide);
     return 0;
 }
