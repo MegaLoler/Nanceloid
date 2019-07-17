@@ -1,6 +1,6 @@
 # Negative Nancy's Waveguide Network Playground
 
-a waveguide network engine with a vst frontend!
+a waveguide network engine with a planned vst frontend!
 
 VERY wip lol
 

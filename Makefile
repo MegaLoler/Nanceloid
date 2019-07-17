@@ -1,9 +1,9 @@
 build/test: build/libnnwnp.a src/test.c
-	gcc src/test.c -Iinclude -Lbuild -lnnwnp -Wall -o build/test
+	gcc src/test.c -g -Iinclude -Lbuild -lnnwnp -Wall -o build/test
 
 build/libnnwnp.a: src/nnwnp.c
 	mkdir -p build
-	gcc -c src/nnwnp.c -Iinclude -Wall -o build/nnwnp.o
+	gcc -g -c src/nnwnp.c -Iinclude -Wall -o build/nnwnp.o
 	ar rcs build/libnnwnp.a build/nnwnp.o
 
 # TODO: target for the vst plugin
@@ -15,3 +15,7 @@ clean:
 .PHONY:
 run: build/test
 	build/test
+
+.PHONY:
+debug: build/test
+	gdb build/test

@@ -35,6 +35,9 @@ double get_admittance(NN_Node *node);
 void set_impedance(NN_Node *node, double Z);
 void set_admittance(NN_Node *node, double Y);
 
+// distribute energy to all the links in a node
+void inject_energy(NN_Node *node, double energy);
+
 // represents a single link from a node to another node
 typedef struct NN_Link {
     NN_Node *source; // the linked source node
@@ -66,6 +69,14 @@ void destroy_waveguide(NN_Waveguide *waveguide);
 
 // run the waveguide simulation for a single time unit
 void run_waveguide(NN_Waveguide *waveguide);
+
+// create a new node and add it to a waveguide automatically
+// uses a default area of 1
+NN_Node *spawn_node(NN_Waveguide *waveguide, NN_NodeType type);
+
+// link two nodes mutually
+// returns the link from a to b
+NN_Link *link_nodes(NN_Node *a, NN_Node *b);
 
 
 

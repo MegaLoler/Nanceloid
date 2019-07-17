@@ -1,12 +1,24 @@
 #include <nnwnp.h>
 #include <malloc.h>
+#include <string.h>
 #include <math.h>
+
+// util function to dynamically append to an array
+// given pointer to the array, current lengeth, size of individual elements, and new element to add
+// returns new pointer
+// TODO: rework this, gonna need to have POINTERS TO POINTERS... i guessss!!!
+void *append(void *array, int *length, size_t size, void *new) {
+    void *new_array = realloc(array, size * ((*length) + 1));
+    memcpy(new_array + (*length) * size, new, size);
+    (*length)++;
+    return new_array;
+}
 
 NN_Node *create_node(NN_NodeType type, double area) {
     NN_Node *node = (NN_Node *)malloc(sizeof(NN_Node));
     node->type = type;
     node->area = area;
-    node->links = NULL;
+    node->links = malloc(0);
     node->num_links = 0;
     return node;
 }
@@ -95,27 +107,24 @@ double reflection(double source_Y, double target_Y) {
     }
 }
 
-void move_energy(NN_Link *link) {
+// source = originating node, OR NULL if none
+void distribute_energy(NN_Node *node, double energy, NN_Node *source) {
     // calculate the net admittance away from the target junction
     double admittance = 0;
 
     // the link to store reflection energy
     NN_Link *reflection_link = NULL;
 
-    NN_Node *node = link->target;
     for (int i = 0; i < node->num_links; i++) {
         NN_Link *jlink = &(node->links[i]);
         NN_Node *jtarget = jlink->target;
 
-        if (jtarget != link->source) {
+        if (jtarget != source) {
             admittance += get_admittance(jtarget);
         } else {
             reflection_link = jlink;
         }
     }
-
-    // energy to be diistributed
-    double energy = link->energy;
 
     if (reflection_link) {
         // get the reflected energy
@@ -143,9 +152,17 @@ void move_energy(NN_Link *link) {
     }
 }
 
+void move_energy(NN_Link *link) {
+    distribute_energy(link->target, link->energy, link->source);
+}
+
+void inject_energy(NN_Node *node, double energy) {
+    distribute_energy(node, energy, NULL);
+}
+
 NN_Waveguide *create_waveguide() {
     NN_Waveguide *waveguide = (NN_Waveguide *)malloc(sizeof(NN_Waveguide));
-    waveguide->nodes = NULL;
+    waveguide->nodes = malloc(0);
     waveguide->num_nodes = 0;
     return waveguide;
 }
@@ -161,8 +178,10 @@ void run_waveguide(NN_Waveguide *waveguide) {
     // calculate next state
     for (int i = 0; i < waveguide->num_nodes; i++) {
         NN_Node *node = &(waveguide->nodes[i]);
-        for (int j = 0; j < node->num_links; j++) {
-            move_energy(&(node->links[j]));
+        if (node->type != DRAIN) {
+            for (int j = 0; j < node->num_links; j++) {
+                move_energy(&(node->links[j]));
+            }
         }
     }
 
@@ -173,6 +192,20 @@ void run_waveguide(NN_Waveguide *waveguide) {
             flush_link(&(node->links[j]));
         }
     }
+}
+
+NN_Node *spawn_node(NN_Waveguide *waveguide, NN_NodeType type) {
+    NN_Node *node = create_node(type, 1);
+    waveguide->nodes = append(waveguide->nodes, &waveguide->num_nodes, sizeof(NN_Node), node);
+    return node;
+}
+
+NN_Link *link_nodes(NN_Node *a, NN_Node *b) {
+    NN_Link *link_a = create_link(a, b);
+    NN_Link *link_b = create_link(b, a);
+    a->links = append(a->links, &a->num_links, sizeof(NN_Link), link_a);
+    b->links = append(b->links, &b->num_links, sizeof(NN_Link), link_b);
+    return link_a;
 }
 
 uint8_t *serialize(NN_Waveguide *waveguide) {
