@@ -40,15 +40,15 @@ int main(int argc, char **argv) {
         // debug print
         printf("DEBUG:\n");
         printf("SOURCE: RIGHT=%023.5f\n",            link0->energy);
-        printf("NODE 1: RIGHT=%023.5f\tLEFT=%023.5f\n", link1->energy, node1->links[0]->energy);
-        printf("NODE 2: RIGHT=%023.5f\tLEFT=%023.5f\n", link2->energy, node2->links[0]->energy);
-        printf("NODE 3: RIGHT=%023.5f\tLEFT=%023.5f\n", link3->energy, node3->links[0]->energy);
-        printf("NODE 4: RIGHT=%023.5f\tLEFT=%023.5f\n", link4->energy, node4->links[0]->energy);
-        printf("NODE 5: RIGHT=%023.5f\tLEFT=%023.5f\n", link5->energy, node5->links[0]->energy);
-        printf("NODE 6: RIGHT=%023.5f\tLEFT=%023.5f\n", link6->energy, node6->links[0]->energy);
-        printf("NODE 7: RIGHT=%023.5f\tLEFT=%023.5f\n", link7->energy, node7->links[0]->energy);
-        printf("NODE 8: RIGHT=%023.5f\tLEFT=%023.5f\n", link8->energy, node8->links[0]->energy);
-        printf("DRAIN:                            \tLEFT=%023.5f\n",                node9->links[0]->energy);
+        printf("NODE 1: RIGHT=%023.5f\tLEFT=%023.5f\n", link1->energy, ((NN_Link *)list_get(node1->links, 0))->energy);
+        printf("NODE 2: RIGHT=%023.5f\tLEFT=%023.5f\n", link2->energy, ((NN_Link *)list_get(node2->links, 0))->energy);
+        printf("NODE 3: RIGHT=%023.5f\tLEFT=%023.5f\n", link3->energy, ((NN_Link *)list_get(node3->links, 0))->energy);
+        printf("NODE 4: RIGHT=%023.5f\tLEFT=%023.5f\n", link4->energy, ((NN_Link *)list_get(node4->links, 0))->energy);
+        printf("NODE 5: RIGHT=%023.5f\tLEFT=%023.5f\n", link5->energy, ((NN_Link *)list_get(node5->links, 0))->energy);
+        printf("NODE 6: RIGHT=%023.5f\tLEFT=%023.5f\n", link6->energy, ((NN_Link *)list_get(node6->links, 0))->energy);
+        printf("NODE 7: RIGHT=%023.5f\tLEFT=%023.5f\n", link7->energy, ((NN_Link *)list_get(node7->links, 0))->energy);
+        printf("NODE 8: RIGHT=%023.5f\tLEFT=%023.5f\n", link8->energy, ((NN_Link *)list_get(node8->links, 0))->energy);
+        printf("DRAIN:                            \tLEFT=%023.5f\n",                ((NN_Link *)list_get(node9->links, 0))->energy);
         printf("NET: %f\n", net_waveguide_energy(wg));
 
     }

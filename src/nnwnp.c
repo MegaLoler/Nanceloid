@@ -12,22 +12,26 @@ NN_Node *create_node(NN_NodeType type, double area) {
     NN_Node *node = (NN_Node *)malloc(sizeof(NN_Node));
     node->type = type;
     node->area = area;
-    node->links = (NN_Link **)malloc(sizeof(NN_Link *) * MAX_LINKS);
-    node->num_links = 0;
+    node->links = NULL;
     return node;
 }
 
 void destroy_node(NN_Node *node) {
-    for (int i = 0; i < node->num_links; i++) {
-        destroy_link(node->links[i]);
+    while (node->links != NULL) {
+        NN_Link *link = (NN_Link *)list_get(node->links, 0);
+        destroy_link(link);
+        node->links = list_remove(node->links, 0);
     }
     free(node);
 }
 
 double net_node_energy(NN_Node *node) {
     double energy = 0;
-    for (int i = 0; i < node->num_links; i++) {
-        energy += node->links[i]->energy;
+    List *links = node->links;
+    while (links != NULL) {
+        NN_Link *link = (NN_Link *)list_get(links, 0);
+        energy += link->energy;
+        links = links->next;
     }
     return energy;
 }
@@ -117,8 +121,11 @@ void distribute_energy(NN_Waveguide *waveguide, NN_Node *node, double energy, NN
     // the link to store reflection energy
     NN_Link *reflection_link = NULL;
 
-    for (int i = 0; i < node->num_links; i++) {
-        NN_Link *jlink = node->links[i];
+    List *links;
+
+    links = node->links;
+    while (links != NULL) {
+        NN_Link *jlink = (NN_Link *)list_get(links, 0);
         NN_Node *jtarget = jlink->target;
 
         if (jtarget != source) {
@@ -126,6 +133,8 @@ void distribute_energy(NN_Waveguide *waveguide, NN_Node *node, double energy, NN
         } else {
             reflection_link = jlink;
         }
+
+        links = links->next;
     }
 
     if (reflection_link) {
@@ -144,8 +153,9 @@ void distribute_energy(NN_Waveguide *waveguide, NN_Node *node, double energy, NN
     }
 
     // distribute the remainder of the energy
-    for (int i = 0; i < node->num_links; i++) {
-        NN_Link *jlink = node->links[i];
+    links = node->links;
+    while (links != NULL) {
+        NN_Link *jlink = (NN_Link *)list_get(links, 0);
 
         if (jlink != reflection_link) {
             // get the weight for this link
@@ -164,6 +174,8 @@ void distribute_energy(NN_Waveguide *waveguide, NN_Node *node, double energy, NN
             // move the weighted amonut of energy
             add_energy(jlink, weight * energy);
         }
+
+        links = links->next;
     }
 }
 
@@ -177,59 +189,75 @@ void inject_energy(NN_Waveguide *waveguide, NN_Node *node, double energy) {
 
 double net_waveguide_energy(NN_Waveguide *waveguide) {
     double energy = 0;
-    for (int i = 0; i < waveguide->num_nodes; i++) {
-        energy += net_node_energy(waveguide->nodes[i]);
+    List *nodes = waveguide->nodes;
+    while (nodes != NULL) {
+        NN_Node *node = (NN_Node *)list_get(nodes, 0);
+        energy += net_node_energy(node);
+        nodes = nodes->next;
     }
     return energy;
 }
 
 NN_Waveguide *create_waveguide() {
     NN_Waveguide *waveguide = (NN_Waveguide *)malloc(sizeof(NN_Waveguide));
-    waveguide->nodes = (NN_Node **)malloc(sizeof(NN_Node *) * MAX_NODES);
-    waveguide->num_nodes = 0;
+    waveguide->nodes = NULL;
     waveguide->damping = DAMPING;
     waveguide->turbulence = TURBULENCE;
     return waveguide;
 }
 
 void destroy_waveguide(NN_Waveguide *waveguide) {
-    for (int i = 0; i < waveguide->num_nodes; i++) {
-        destroy_node(waveguide->nodes[i]);
+    while (waveguide->nodes != NULL) {
+        NN_Node *node = (NN_Node *)list_get(waveguide->nodes, 0);
+        destroy_node(node);
+        waveguide->nodes = list_remove(waveguide->nodes, 0);
     }
     free(waveguide);
 }
 
 void run_waveguide(NN_Waveguide *waveguide) {
+    List *nodes;
+
     // calculate next state
-    for (int i = 0; i < waveguide->num_nodes; i++) {
-        NN_Node *node = waveguide->nodes[i];
+    nodes = waveguide->nodes;
+    while (nodes != NULL) {
+        NN_Node *node = (NN_Node *)list_get(nodes, 0);
         if (node->type != DRAIN) {
-            for (int j = 0; j < node->num_links; j++) {
-                move_energy(waveguide, node->links[j]);
+            List *links = node->links;
+            while (links != NULL) {
+                NN_Link *link = (NN_Link *)list_get(links, 0);
+                move_energy(waveguide, link);
+                links = links->next;
             }
         }
+        nodes = nodes->next;
     }
 
     // flush changes
-    for (int i = 0; i < waveguide->num_nodes; i++) {
-        NN_Node *node = waveguide->nodes[i];
-        for (int j = 0; j < node->num_links; j++) {
-            flush_link(node->links[j]);
+    nodes = waveguide->nodes;
+    while (nodes != NULL) {
+        NN_Node *node = (NN_Node *)list_get(nodes, 0);
+        List *links = node->links;
+        while (links != NULL) {
+            NN_Link *link = (NN_Link *)list_get(links, 0);
+            flush_link(link);
+            links = links->next;
         }
+        nodes = nodes->next;
     }
 }
 
 NN_Node *spawn_node(NN_Waveguide *waveguide, NN_NodeType type) {
     NN_Node *node = create_node(type, 1);
-    waveguide->nodes[waveguide->num_nodes++] = node;
+    list_append(waveguide->nodes, node);
     return node;
 }
 
 NN_Link *link_nodes(NN_Node *a, NN_Node *b) {
     NN_Link *link_a = create_link(a, b);
     NN_Link *link_b = create_link(b, a);
-    a->links[a->num_links++] = link_a;
-    b->links[b->num_links++] = link_b;
+    list_append(a->links, link_a);
+    list_append(b->links, link_b);
     return link_a;
 }
 

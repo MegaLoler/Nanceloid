@@ -3,9 +3,6 @@
 #include <list.h>
 #include <stdint.h>
 
-#define MAX_NODES 0x100
-#define MAX_LINKS 0x100
-
 // defaults
 #define DAMPING 0.04
 #define TURBULENCE 0.001
@@ -27,8 +24,7 @@ typedef enum NN_NodeType {
 typedef struct NN_Node {
     NN_NodeType type; // the type of node it is
     double area; // cross sectional area at node region (related to admittance and impedance)
-    NN_Link **links; // array of links to other nodes from here
-    int num_links; // how many links in the array
+    List *links; // list of links to other nodes from here
 } NN_Node;
 
 // create a new node of a given type and with a given area
@@ -65,8 +61,7 @@ void add_energy(NN_Link *link, double energy);
 
 // represents a waveguide network
 typedef struct NN_Waveguide {
-    NN_Node **nodes; // array of waveguide nodes
-    int num_nodes; // how many nodes in the array
+    List *nodes; // list of waveguide nodes
     double damping; // reflection loss coefficient 
     double turbulence; // turbulence amplitude coefficient
 } NN_Waveguide;
