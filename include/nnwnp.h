@@ -1,5 +1,6 @@
 // include file for the negative nancy's waveguide network playground C library
 
+#include <list.h>
 #include <stdint.h>
 
 #define MAX_NODES 0x100
