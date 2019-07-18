@@ -17,17 +17,17 @@ int main(int argc, char **argv) {
     NN_Link *link2 = link_nodes(node2, node3);
     NN_Link *link3 = link_nodes(node3, node4);
     NN_Link *link4 = link_nodes(node4, node5);
-    inject_energy(node1, 1);
+    inject_energy(wg, node1, 1);
 
     // now run it for 1k samples
     for (int i = 0; i < 1000; i++) {
         // debug print
         printf("DEBUG:\n");
-        printf("SOURCE: RIGHT=%.2f\n",            link1->energy);
-        printf("NODE 2: RIGHT=%.2f\tLEFT=%.2f\n", link2->energy, node2->links[0]->energy);
-        printf("NODE 3: RIGHT=%.2f\tLEFT=%.2f\n", link3->energy, node3->links[0]->energy);
-        printf("NODE 4: RIGHT=%.2f\tLEFT=%.2f\n", link4->energy, node4->links[0]->energy);
-        printf("DRAIN:            \tLEFT=%.2f\n",                node5->links[0]->energy);
+        printf("SOURCE: RIGHT=%.5f\n",            link1->energy);
+        printf("NODE 2: RIGHT=%.5f\tLEFT=%.5f\n", link2->energy, node2->links[0]->energy);
+        printf("NODE 3: RIGHT=%.5f\tLEFT=%.5f\n", link3->energy, node3->links[0]->energy);
+        printf("NODE 4: RIGHT=%.5f\tLEFT=%.5f\n", link4->energy, node4->links[0]->energy);
+        printf("DRAIN:            \tLEFT=%.5f\n",                node5->links[0]->energy);
 
         run_waveguide(wg);
     }

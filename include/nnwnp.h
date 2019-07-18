@@ -6,7 +6,8 @@
 #define MAX_LINKS 0x100
 
 // defaults
-#define DAMPING 0.004
+#define DAMPING 0.04
+#define TURBULENCE 0.001
 
 
 
@@ -41,9 +42,6 @@ double get_admittance(NN_Node *node);
 void set_impedance(NN_Node *node, double Z);
 void set_admittance(NN_Node *node, double Y);
 
-// distribute energy to all the links in a node
-void inject_energy(NN_Node *node, double energy);
-
 // represents a single link from a node to another node
 typedef struct NN_Link {
     NN_Node *source; // the linked source node
@@ -66,6 +64,7 @@ typedef struct NN_Waveguide {
     NN_Node **nodes; // array of waveguide nodes
     int num_nodes; // how many nodes in the array
     double damping; // reflection loss coefficient 
+    double turbulence; // turbulence amplitude coefficient
 } NN_Waveguide;
 
 // create a new waveguide network object
@@ -76,6 +75,9 @@ void destroy_waveguide(NN_Waveguide *waveguide);
 
 // run the waveguide simulation for a single time unit
 void run_waveguide(NN_Waveguide *waveguide);
+
+// distribute energy to all the links in a node
+void inject_energy(NN_Waveguide *waveguide, NN_Node *node, double energy);
 
 // create a new node and add it to a waveguide automatically
 // uses a default area of 1

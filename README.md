@@ -19,3 +19,9 @@ just type `make` and it'll build the library and a test program in the `build` d
 ## Library documentation
 
 check `include/nnwnp.h` for docs ;o
+
+## TODO
+
+- proper array lists with remove arbitrary element function
+- deleting links from nodes, and nodes from waveguide network objects
+- de/serialization of waveguide network objects

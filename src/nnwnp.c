@@ -2,6 +2,11 @@
 #include <malloc.h>
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
+
+double noise() {
+    return rand() / (RAND_MAX / 2.0) - 1;
+}
 
 NN_Node *create_node(NN_NodeType type, double area) {
     NN_Node *node = (NN_Node *)malloc(sizeof(NN_Node));
@@ -97,7 +102,7 @@ double reflection(double source_Y, double target_Y) {
 }
 
 // source = originating node, OR NULL if none
-void distribute_energy(NN_Node *node, double energy, NN_Node *source, double damping) {
+void distribute_energy(NN_Waveguide *waveguide, NN_Node *node, double energy, NN_Node *source) {
     // calculate the net admittance away from the target junction
     double admittance = 0;
 
@@ -118,10 +123,13 @@ void distribute_energy(NN_Node *node, double energy, NN_Node *source, double dam
     if (reflection_link) {
         // get the reflected energy
         double gamma = reflection(get_admittance(node), admittance);
-        double reflection = gamma * energy * (1 - damping);
+        double reflection = gamma * energy;
+
+        // get the turbulence
+        double turbulence = reflection * noise() * waveguide->turbulence;
 
         // send the reflected energy backward
-        add_energy(reflection_link, reflection);
+        add_energy(reflection_link, (reflection + turbulence) * (1 - waveguide->damping));
 
         // subtract from remaining energy to be distributed
         energy -= reflection;
@@ -151,12 +159,12 @@ void distribute_energy(NN_Node *node, double energy, NN_Node *source, double dam
     }
 }
 
-void move_energy(NN_Link *link, double damping) {
-    distribute_energy(link->target, link->energy, link->source, damping);
+void move_energy(NN_Waveguide *waveguide, NN_Link *link) {
+    distribute_energy(waveguide, link->target, link->energy, link->source);
 }
 
-void inject_energy(NN_Node *node, double energy) {
-    distribute_energy(node, energy, NULL, 0);
+void inject_energy(NN_Waveguide *waveguide, NN_Node *node, double energy) {
+    distribute_energy(waveguide, node, energy, NULL);
 }
 
 NN_Waveguide *create_waveguide() {
@@ -164,6 +172,7 @@ NN_Waveguide *create_waveguide() {
     waveguide->nodes = (NN_Node **)malloc(sizeof(NN_Node *) * MAX_NODES);
     waveguide->num_nodes = 0;
     waveguide->damping = DAMPING;
+    waveguide->turbulence = TURBULENCE;
     return waveguide;
 }
 
@@ -180,7 +189,7 @@ void run_waveguide(NN_Waveguide *waveguide) {
         NN_Node *node = waveguide->nodes[i];
         if (node->type != DRAIN) {
             for (int j = 0; j < node->num_links; j++) {
-                move_energy(node->links[j], waveguide->damping);
+                move_energy(waveguide, node->links[j]);
             }
         }
     }
