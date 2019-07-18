@@ -1,5 +1,5 @@
 build/test: build/libnnwnp.a src/test.c
-	gcc src/test.c -g -Iinclude -Lbuild -lnnwnp -Wall -o build/test
+	gcc src/test.c -g -Iinclude -Lbuild -lnnwnp -lm -Wall -o build/test
 
 build/libnnwnp.a: src/nnwnp.c include/nnwnp.h
 	mkdir -p build

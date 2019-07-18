@@ -126,7 +126,7 @@ void distribute_energy(NN_Waveguide *waveguide, NN_Node *node, double energy, NN
         double reflection = gamma * energy;
 
         // get the turbulence
-        double turbulence = reflection * noise() * waveguide->turbulence;
+        double turbulence = fmax(0, reflection) * noise() * waveguide->turbulence;
 
         // send the reflected energy backward
         add_energy(reflection_link, (reflection + turbulence) * (1 - waveguide->damping));
