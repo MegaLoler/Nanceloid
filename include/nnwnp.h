@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 
+#define MAX_NODES 0x100
+#define MAX_LINKS 0x100
+
 
 
 //////// "HOT" DATA TYPES //////////
@@ -19,7 +22,7 @@ typedef enum NN_NodeType {
 typedef struct NN_Node {
     NN_NodeType type; // the type of node it is
     double area; // cross sectional area at node region (related to admittance and impedance)
-    NN_Link *links; // array of links to other nodes from here
+    NN_Link **links; // array of links to other nodes from here
     int num_links; // how many links in the array
 } NN_Node;
 
@@ -57,7 +60,7 @@ void add_energy(NN_Link *link, double energy);
 
 // represents a waveguide network
 typedef struct NN_Waveguide {
-    NN_Node *nodes; // array of waveguide nodes
+    NN_Node **nodes; // array of waveguide nodes
     int num_nodes; // how many nodes in the array
 } NN_Waveguide;
 
