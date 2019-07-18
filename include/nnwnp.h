@@ -36,6 +36,9 @@ NN_Node *create_node(NN_NodeType type, double area);
 // destroy a node
 void destroy_node(NN_Node *node);
 
+// return the total energy in all the links of a node
+double net_node_energy(NN_Node *node);
+
 // get or set the impedance or admittance values of a node
 double get_impedance(NN_Node *node);
 double get_admittance(NN_Node *node);
@@ -78,6 +81,9 @@ void run_waveguide(NN_Waveguide *waveguide);
 
 // distribute energy to all the links in a node
 void inject_energy(NN_Waveguide *waveguide, NN_Node *node, double energy);
+
+// return the total energy in the entire waveguide network
+double net_waveguide_energy(NN_Waveguide *waveguide);
 
 // create a new node and add it to a waveguide automatically
 // uses a default area of 1

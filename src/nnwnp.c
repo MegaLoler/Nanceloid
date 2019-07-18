@@ -24,6 +24,14 @@ void destroy_node(NN_Node *node) {
     free(node);
 }
 
+double net_node_energy(NN_Node *node) {
+    double energy = 0;
+    for (int i = 0; i < node->num_links; i++) {
+        energy += node->links[i]->energy;
+    }
+    return energy;
+}
+
 double area_to_admittance(double area) {
     return area;
 }
@@ -165,6 +173,14 @@ void move_energy(NN_Waveguide *waveguide, NN_Link *link) {
 
 void inject_energy(NN_Waveguide *waveguide, NN_Node *node, double energy) {
     distribute_energy(waveguide, node, energy, NULL);
+}
+
+double net_waveguide_energy(NN_Waveguide *waveguide) {
+    double energy = 0;
+    for (int i = 0; i < waveguide->num_nodes; i++) {
+        energy += net_node_energy(waveguide->nodes[i]);
+    }
+    return energy;
 }
 
 NN_Waveguide *create_waveguide() {
