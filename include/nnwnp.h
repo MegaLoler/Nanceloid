@@ -5,6 +5,9 @@
 #define MAX_NODES 0x100
 #define MAX_LINKS 0x100
 
+// defaults
+#define DAMPING 0.004
+
 
 
 //////// "HOT" DATA TYPES //////////
@@ -62,6 +65,7 @@ void add_energy(NN_Link *link, double energy);
 typedef struct NN_Waveguide {
     NN_Node **nodes; // array of waveguide nodes
     int num_nodes; // how many nodes in the array
+    double damping; // reflection loss coefficient 
 } NN_Waveguide;
 
 // create a new waveguide network object
