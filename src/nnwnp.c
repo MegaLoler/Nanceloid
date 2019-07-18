@@ -133,7 +133,17 @@ void distribute_energy(NN_Node *node, double energy, NN_Node *source) {
 
         if (jlink != reflection_link) {
             // get the weight for this link
-            double weight = get_admittance(jlink->target) / admittance;
+
+            double weight;
+            if (admittance == INFINITY) {
+                weight = 0;
+            }
+            else if (admittance == 0) {
+                weight = 1;
+            }
+            else {
+                weight = get_admittance(jlink->target) / admittance;
+            }
 
             // move the weighted amonut of energy
             add_energy(jlink, weight * energy);
