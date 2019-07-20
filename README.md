@@ -28,8 +28,6 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 
 ## TODO
 
-- proper array lists with remove arbitrary element function
-- deleting links from nodes, and nodes from waveguide network objects
 - de/serialization of waveguide network objects
 - "exciter" nodes : generates sound by oscillating impedance in response to pressure
 - "pump" nodes : provides steady stream of pressure values
