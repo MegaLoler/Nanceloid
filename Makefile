@@ -1,20 +1,34 @@
-build/test: build/libnnwnp.a src/test.c
-	gcc -g src/test.c -Iinclude -Lbuild -lnnwnp -lm -Wall -o build/test
+# thanx S/O
+TOP := $(dir $(lastword $(MAKEFILE_LIST)))
 
-build/libnnwnp.a: src/nnwnp.c src/list.c include/*.h
-	mkdir -p build
-	gcc -g -c src/nnwnp.c -Iinclude -Wall -o build/nnwnp.o
-	gcc -g -c src/list.c -Iinclude -Wall -o build/list.o
-	ar rcs build/libnnwnp.a build/nnwnp.o build/list.o
+all: build/test
+
+build/test: build/test.o build/nnwnp.o build/list.o
+	gcc -Wall -g -lm build/test.o build/nnwnp.o build/list.o -o build/test
+
+build/test.o: build src/test.c
+	gcc -Wall -Isrc -g -c src/test.c -o build/test.o
+
+build/nnwnp.o: build src/nnwnp.h src/nnwnp.c
+	gcc -Wall -Isrc -g -c src/nnwnp.c -o build/nnwnp.o
+
+build/list.o: build src/list.h src/list.c
+	gcc -Wall -Isrc -g -c src/list.c -o build/list.o
 
 # TODO: target for the vst plugin
+
+vstsdk2.4:
+	$(error Please illegitimately obtain the VST SDK 2.4 and place the contents in "$(TOP)vstsdk2.4")
+
+build:
+	mkdir build
 
 .PHONY:
 clean:
 	rm -rf build
 
 .PHONY:
-run: build/test
+test: build/test
 	build/test
 
 .PHONY:

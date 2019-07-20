@@ -6,17 +6,29 @@ VERY wip lol
 
 a standalone frontend wld b cool too
 
+_TODO: add screenshots_
+
+## Dependencies
+
+_TODO: explanation of VST dependencies_
+
 ## How to build
 
-just type `make` and it'll build the library and a test program in the `build` directory (which it will create)
+Run `make` to produce the test program `build/test`.
 
-`make run` will run the test if u want
+## How to use
+
+Run `make test` to run the test program.
 
 ## Files
 
-`include/nnwnp.h` is the C header for using the library
+The `src` directory contains the following:
+- `test.c` contains the test program.
+- `nnwnp.h` and `nnwnp.c` contain the waveguide network engine.
+- `list.h` and `list.c` contain a linked list implementation.
 
-`build/libnnwnp.a` is the library itself
+After building, the `build` directory will contain the following:
+- `test` a test program used for debugging.
 
 ## Documentation
 
