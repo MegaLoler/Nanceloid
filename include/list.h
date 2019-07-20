@@ -23,7 +23,7 @@ void *list_get(List *list, int index);
 
 // add a new item to the end of a list
 // return the newly appended list node
-List *list_append(List *list, void *content);
+List *list_append(List **list, void *content);
 
 // delete an item from a list by its index
 // return the new start node

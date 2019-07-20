@@ -249,15 +249,15 @@ void run_waveguide(NN_Waveguide *waveguide) {
 
 NN_Node *spawn_node(NN_Waveguide *waveguide, NN_NodeType type) {
     NN_Node *node = create_node(type, 1);
-    list_append(waveguide->nodes, node);
+    list_append(&(waveguide->nodes), node);
     return node;
 }
 
 NN_Link *link_nodes(NN_Node *a, NN_Node *b) {
     NN_Link *link_a = create_link(a, b);
     NN_Link *link_b = create_link(b, a);
-    list_append(a->links, link_a);
-    list_append(b->links, link_b);
+    list_append(&(a->links), link_a);
+    list_append(&(b->links), link_b);
     return link_a;
 }
 

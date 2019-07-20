@@ -28,10 +28,10 @@ int main(int argc, char **argv) {
     NN_Link *link7 = link_nodes(node7, node8);
     NN_Link *link8 = link_nodes(node8, node9);
     inject_energy(wg, node1, 1);
-    set_admittance(node5, 1.1);
-    set_admittance(node6, 1.1);
-    set_admittance(node7, 1.1);
-    set_admittance(node8, 1.1);
+    //set_admittance(node5, 1.1);
+    //set_admittance(node6, 1.1);
+    //set_admittance(node7, 1.1);
+    //set_admittance(node8, 1.1);
 
     // now run it for 1k samples
     for (int i = 0; i < 1000; i++) {

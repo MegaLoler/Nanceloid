@@ -29,12 +29,18 @@ void *list_get(List *list, int index) {
     return list_get(list->next, index - 1);
 }
 
-List *list_append(List *list, void *content) {
-    if (list == NULL)
-        return create_list(content);
-    else if (list->next == NULL)
-        return list->next = create_list(content);
-    return list_append(list->next, content);
+List *list_append(List **list, void *content) {
+    // TODO: rewrite this more compact lol
+    List *new_node;
+    if (*list == NULL) {
+        new_node = create_list(content);
+        *list = new_node;
+    }
+    else if ((*list)->next == NULL)
+        new_node = (*list)->next = create_list(content);
+    else
+        new_node = list_append(&((*list)->next), content);
+    return new_node;
 }
 
 List *list_remove(List *list, int index) {

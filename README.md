@@ -33,3 +33,5 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 - de/serialization of waveguide network objects
 - "exciter" nodes : generates sound by oscillating impedance in response to pressure
 - "pump" nodes : provides steady stream of pressure values
+- refactor code and readme for style
+    - i'd rather not compile a static lib, just a normal object file is fine lol
