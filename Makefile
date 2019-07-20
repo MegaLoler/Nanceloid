@@ -1,36 +1,83 @@
-# thanx S/O
-TOP := $(dir $(lastword $(MAKEFILE_LIST)))
+# paths
+CUR_PATH      ::= $(dir $(lastword $(MAKEFILE_LIST)))
+SRC_PATH      ::= src
+BUILD_PATH    ::= build
+SDK_PATH      ::= vstsdk2.4
+SDK_SRC_PATH  ::= $(SDK)/public.sdk/source/vst2.x
 
-all: build/test
+# compilers
+COMP          ::= gcc
+XCOMP32       ::= i686-w64-mingw32-g++
+XCOMP64       ::= x86_64-w64-mingw32-g++
 
-build/test: build/test.o build/waveguide.o build/list.o
-	gcc -Wall -g -lm build/test.o build/waveguide.o build/list.o -o build/test
+# compiler options
+OPT           ::= -I$(SRC_PATH) -Wall -g
+XOPT          ::= -I$(SDK) -I$(SDK_SRC_PATH) -static
 
-build/test.o: build src/test.c
-	gcc -Wall -Isrc -g -c src/test.c -o build/test.o
+# compiler invocation
+CC            ::= $(COMP)    $(OPT)
+XC32          ::= $(XCOMP32) $(OPT) $(XOPT)
+XC64          ::= $(XCOMP64) $(OPT) $(XOPT)
 
-build/waveguide.o: build src/waveguide.h src/waveguide.c
-	gcc -Wall -Isrc -g -c src/waveguide.c -o build/waveguide.o
+# targets
+TARGET_TEST   ::= $(BUILD_PATH)/test
+TARGET_VST_32 ::= $(BUILD_PATH)/nnwgnp32.dll
+TARGET_VST_64 ::= $(BUILD_PATH)/nnwgnp64.dll
 
-build/list.o: build src/list.h src/list.c
-	gcc -Wall -Isrc -g -c src/list.c -o build/list.o
 
-# TODO: target for the vst plugin
 
-vstsdk2.4:
-	$(error Please illegitimately obtain the VST SDK 2.4 and place the contents in "$(TOP)vstsdk2.4")
+### TEST PROGRAM ###
 
-build:
-	mkdir build
+$(TARGET_TEST): $(BUILD_PATH)/test.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o
+	$(CC) -lm $(BUILD_PATH)/test.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o -o $(TARGET_TEST)
+
+$(BUILD_PATH)/test.o: $(BUILD_PATH) $(SRC_PATH)/test.c
+	$(CC) -c $(SRC_PATH)/test.c -o $(BUILD_PATH)/test.o
+
+$(BUILD_PATH)/waveguide.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.c
+	$(CC) -c $(SRC_PATH)/waveguide.c -o $(BUILD_PATH)/waveguide.o
+
+$(BUILD_PATH)/list.o: $(BUILD_PATH) $(SRC_PATH)/list.h $(SRC_PATH)/list.c
+	$(CC) -c $(SRC_PATH)/list.c -o $(BUILD_PATH)/list.o
+
+
+
+### 32-BIT VST ###
+
+$(TARGET_VST_32): $(SDK_PATH) $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/list_x32.o $(BUILD_PATH)/vst_x32.o
+	$(XC32) -shared $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/list_x32.o $(BUILD_PATH)/vst_x32.o "$(SDK_SRC_PATH)/*.o" -o $(TARGET_VST_32)
+
+$(BUILD_PATH)/waveguide_x32.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.c
+	$(XC32) -fPIC -c -x $(SRC_PATH)/waveguide.c -o $(BUILD_PATH)/waveguide_x32.o
+
+$(BUILD_PATH)/list_x32.o: $(BUILD_PATH) $(SRC_PATH)/list.h $(SRC_PATH)/list.c
+	$(XC32) -fPIC -c -x $(SRC_PATH)/list.c -o $(BUILD_PATH)/list_x32.o
+
+$(BUILD_PATH)/vst_x32.o: $(BUILD_PATH) $(SRC_PATH)/vst.h $(SRC_PATH)/vst.cpp
+	$(XC32) -fPIC -c $(SRC_PATH)/vst.cpp -o $(BUILD_PATH)/vst_x32.o
+
+
+
+### COMMON ###
+
+all: $(TARGET_TEST) vst
+
+vst: $(TARGET_VST_32) $(TARGET_VST_64)
+
+$(SDK_PATH):
+	$(error Please illegitimately obtain the VST SDK 2.4 and place the contents in "$(CUR_PATH)$(SDK_PATH)")
+
+$(BUILD_PATH):
+	mkdir $(BUILD_PATH)
 
 .PHONY:
 clean:
-	rm -rf build
+	rm -rf $(BUILD_PATH)
 
 .PHONY:
-test: build/test
-	build/test
+test: $(TARGET_TEST)
+	$(TARGET_TEST)
 
 .PHONY:
-debug: build/test
-	gdb build/test
+debug: $(TARGET_TEST)
+	gdb $(TARGET_TEST)
