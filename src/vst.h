@@ -1,6 +1,5 @@
 #include <audioeffectx.h>
 #include <math.h>
-#define PI 3.1415926535897
 
 class NN_VST : public AudioEffectX {
     public:

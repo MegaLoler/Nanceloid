@@ -41,9 +41,8 @@ void NN_VST::setSampleRate (float rate) {
 }
 
 void NN_VST::processReplacing (float **inputs, float **outputs, VstInt32 frames) {
-    while (frames--) {
-        (**outputs++) = (**inputs++);
-    }
+    while (frames--)
+        (*(*outputs)++) = (*(*inputs)++);
 }
 
 VstInt32 NN_VST::processEvents (VstEvents *event) {
