@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <nnwnp.h>
+#include <waveguide.h>
 
 int main(int argc, char **argv) {
 

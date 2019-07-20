@@ -3,14 +3,14 @@ TOP := $(dir $(lastword $(MAKEFILE_LIST)))
 
 all: build/test
 
-build/test: build/test.o build/nnwnp.o build/list.o
-	gcc -Wall -g -lm build/test.o build/nnwnp.o build/list.o -o build/test
+build/test: build/test.o build/waveguide.o build/list.o
+	gcc -Wall -g -lm build/test.o build/waveguide.o build/list.o -o build/test
 
 build/test.o: build src/test.c
 	gcc -Wall -Isrc -g -c src/test.c -o build/test.o
 
-build/nnwnp.o: build src/nnwnp.h src/nnwnp.c
-	gcc -Wall -Isrc -g -c src/nnwnp.c -o build/nnwnp.o
+build/waveguide.o: build src/waveguide.h src/waveguide.c
+	gcc -Wall -Isrc -g -c src/waveguide.c -o build/waveguide.o
 
 build/list.o: build src/list.h src/list.c
 	gcc -Wall -Isrc -g -c src/list.c -o build/list.o

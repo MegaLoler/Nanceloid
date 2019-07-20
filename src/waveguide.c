@@ -1,5 +1,4 @@
-#include <nnwnp.h>
-#include <malloc.h>
+#include <waveguide.h>
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
