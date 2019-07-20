@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 
+// produce a normalized random value between -1 and 1
 double noise() {
     return rand() / (RAND_MAX / 2.0) - 1;
 }

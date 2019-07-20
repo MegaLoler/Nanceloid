@@ -24,7 +24,7 @@ Run `make test` to run the test program.
 
 The `src` directory contains the following:
 - `test.c` contains the test program.
-- `nnwnp.h` and `nnwnp.c` contain the waveguide network engine.
+- `waveguide.h` and `waveguide.c` contain the waveguide network engine.
 - `list.h` and `list.c` contain a linked list implementation.
 
 After building, the `build` directory will contain the following:
@@ -34,14 +34,13 @@ After building, the `build` directory will contain the following:
 
 tutorial and documentation: COMING EVENTUALLY!!
 
-check `include/nnwnp.h` for explanation of the api ;o
+check `src/waveguide.h` and `src/waveguide.c` to see the waveguide simulation code
 
 see `src/test.c` for a simple example of manually creating a simple chain of nodes with a source on one end and drain on the other
 
-## TODO
+## Todo list
 
+- fix broken makefile lol
 - de/serialization of waveguide network objects
 - "exciter" nodes : generates sound by oscillating impedance in response to pressure
 - "pump" nodes : provides steady stream of pressure values
-- refactor code and readme for style
-    - i'd rather not compile a static lib, just a normal object file is fine lol
