@@ -12,7 +12,7 @@ XCOMP64       ::= x86_64-w64-mingw32-g++
 
 # compiler options
 OPT           ::= -I$(SRC_PATH) -Wall -g
-XOPT          ::= -I$(SDK_PATH) -I$(SDK_SRC_PATH) -static
+XOPT          ::= -I$(SDK_PATH) -I$(SDK_SRC_PATH) -Wno-multichar -Wno-narrowing -Wno-write-strings -static
 
 # compiler invocation
 CC            ::= $(COMP)    $(OPT)

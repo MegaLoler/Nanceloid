@@ -1,164 +1,133 @@
-#include "vst.h"
+#include <vst.h>
 #include <cstdio>
 
-AudioEffect* createEffectInstance(audioMasterCallback audioMaster)
-{
-  return new NN_VST(audioMaster);
+AudioEffect *createEffectInstance (audioMasterCallback audio_master) {
+    return new NN_VST (audio_master);
 }
 
-NN_VST::NN_VST(audioMasterCallback audioMaster)
-  : AudioEffectX(audioMaster, 0, PARAMETER_COUNT)
-{
-  setNumInputs(0);
-  setNumOutputs(2);
-  setUniqueID('nanc');
-  canProcessReplacing();
-  isSynth();
+NN_VST::NN_VST (audioMasterCallback audio_master)
+    : AudioEffectX (audio_master, 0, PARAMETER_COUNT) {
 
-  //init_synth();
+    // TODO: dynamically set num ins and outs depending on how many source and drain nodes there are
+    setNumInputs (1);
+    setNumOutputs (1);
+    setUniqueID ('nanc');
+    canProcessReplacing ();
+    isSynth ();
 }
 
-// TODO: deconstructor, make it call free_tract()
+NN_VST::~NN_VST () {
 
-VstInt32 NN_VST::canDo(char* text)
-{
-  if (!strcmp(text, "receiveVstEvents"))
+}
+
+VstInt32 NN_VST::canDo (char *string) {
+    if (!strcmp (string, "receiveVstEvents"))
+        return 1;
+    if (!strcmp (string, "receiveVstMidiEvent"))
+        return 1;
+    return -1;
+}
+
+VstInt32 NN_VST::getNumMidiInputChannels () {
     return 1;
-  if (!strcmp(text, "receiveVstMidiEvent"))
-    return 1;
-  return -1;  // explicitly can't do; 0 => don't know
 }
 
-VstInt32 NN_VST::getNumMidiInputChannels()
-{
-  return 1; // or up to 16 if you prefer
+VstInt32 NN_VST::getNumMidiOutputChannels () {
+    return 0;
 }
 
-VstInt32 NN_VST::getNumMidiOutputChannels()
-{
-  return 0; // no MIDI output back to host
+void NN_VST::setSampleRate (float rate) {
+    AudioEffectX::setSampleRate (rate);
 }
 
-void NN_VST::setSampleRate(float sampleRate)
-{
-  AudioEffectX::setSampleRate(sampleRate);
- // rate = sampleRate;
-//  init_tract(tract_length);
+void NN_VST::processReplacing (float **inputs, float **outputs, VstInt32 frames) {
+    while (frames--) {
+        (**outputs++) = (**inputs++);
+    }
 }
 
-void NN_VST::processReplacing(float** inputs, float** outputs, VstInt32 sampleFrames)
-{
-  float* out1 = outputs[0];
-  float* out2 = outputs[1];
-
-  while (sampleFrames--) {
-    (*out1++) = (*out2++) = 0;//run_tract(glottal_source());
-    //(*out++) = (*in++);
-  }
-}
-
-VstInt32 NN_VST::processEvents(VstEvents* ev)
-{
-    for (VstInt32 i = 0; i < ev->numEvents; i++) {
-        if ((ev->events[i])->type != kVstMidiType)
+VstInt32 NN_VST::processEvents (VstEvents *event) {
+    for (VstInt32 i = 0; i < event->numEvents; i++) {
+        if ((event->events[i])->type != kVstMidiType)
             continue;
 
-        VstMidiEvent* event = (VstMidiEvent*)ev->events[i];
-        char* midiData = event->midiData;
-        VstInt32 type = midiData[0] & 0xf0;
-        VstInt32 chan = midiData[0] & 0x0f;
+        /*
+        VstMidiEvent *midi_event = (VstMidiEvent *) event->events[i];
+        uint8_t *data = event->midiData;
+        VstInt32 type = data[0] & 0xf0;
+        VstInt32 chan = data[0] & 0x0f;
 
-        // control signal
         if(type == 0xb0) {
-            VstInt32 id = midiData[1];
-            VstInt32 value = midiData[2];
-        }
-        else if(type == 0x80) {
-            //uint8_t note = event.buffer[1];
-            //uint8_t velocity = event.buffer[2];
-            //printf("  [chan %02d] midi note OFF: 0x%x, 0x%x\n", chan, note, velocity);
-            //struct Phoneme *phoneme = get_mapped_phoneme(note);
-            //if (target_phoneme == phoneme) {
-            //    // TODO: a stack of notes to return to
-            //    target_phoneme = &ambient_phoneme;
-            //}
-        }
-        else if(type == 0x90) {
-            VstInt32 note = midiData[1];
-            VstInt32 velocity = midiData[2];
-            //printf("  [chan %02d] midi note ON:  0x%x, 0x%x\n", chan, note, velocity);
-            //target_phoneme = get_mapped_phoneme(note);
-            //ambient_phoneme = *get_mapped_phoneme(note);
+            // control signal
+            VstInt32 id = data[1];
+            VstInt32 value = data[2];
 
-            //// TMP: insert plosive transient
-            //if(note == 0x30) {
-            //    segments_front[nsegments-1].right += diaphram_pressure;
-            //}
-            //
+        } else if(type == 0x80) {
+            // note off
+            VstInt32 note = data[1];
+            VstInt32 velocity = data[2];
+
+        } else if(type == 0x90) {
+            // note on
+            VstInt32 note = data[1];
+            VstInt32 velocity = data[2];
+
         }
+        */
     }
     return 1;
 }
 
 
-VstInt32 NN_VST::getVendorVersion()
-{
-  return 1000;
+VstInt32 NN_VST::getVendorVersion () {
+    return 1000; // idk
 }
 
-bool NN_VST::getEffectName(char* name)
-{
-  vst_strncpy(name, "NN_VST sneek peek", kVstMaxEffectNameLen);
-  return true;
+bool NN_VST::getEffectName (char *name) {
+    vst_strncpy (name, "Negative Nancy's Waveguide Network Playground", kVstMaxEffectNameLen);
+    return true;
 }
 
-bool NN_VST::getProductString(char* text)
-{
-  vst_strncpy(text, "NN_VST sneek peek", kVstMaxProductStrLen);
-  return true;
+bool NN_VST::getProductString (char *string) {
+    vst_strncpy (string, "NNWGNP", kVstMaxProductStrLen);
+    return true;
 }
 
-bool NN_VST::getVendorString(char* text)
-{
-  vst_strncpy(text, "Negative Nancy Duh", kVstMaxVendorStrLen);
-  return true;
+bool NN_VST::getVendorString (char *string) {
+    vst_strncpy (string, "MegaLoler / Aardbei / Negative Nancy", kVstMaxVendorStrLen);
+    return true;
 }
 
-void NN_VST::setParameter(VstInt32 index, float value)
-{
-  switch (index) {
-    case PLACEHOLDER:
-        // placeholder
-        break;
-  }
+void NN_VST::setParameter (VstInt32 index, float value) {
+    switch (index) {
+        case PLACEHOLDER:
+            // placeholder
+            break;
+    }
 }
 
-float NN_VST::getParameter(VstInt32 index, float value)
-{
-  switch (index) {
-    case PLACEHOLDER:
-        return 0;
-        break;
-    default:
-        return 0;
-  }
+float NN_VST::getParameter (VstInt32 index, float value) {
+    switch (index) {
+        case PLACEHOLDER:
+            return 0;
+            break;
+        default:
+            return 0;
+    }
 }
 
-void NN_VST::getParameterName(VstInt32 index, char* label)
-{
-  vst_strncpy(label, paramNames[index], kVstMaxParamStrLen);
+void NN_VST::getParameterName (VstInt32 index, char *name) {
+    vst_strncpy (name, parameter_names[index], kVstMaxParamStrLen);
 }
 
-void NN_VST::getParameterLabel(VstInt32 index, char* label)
-{
-  vst_strncpy(label, paramLabels[index], kVstMaxParamStrLen);
+void NN_VST::getParameterLabel (VstInt32 index, char *label) {
+    vst_strncpy (label, parameter_labels[index], kVstMaxParamStrLen);
 }
 
-void NN_VST::getParameterDisplay(VstInt32 index, char* text)
-{
-  switch (index) {
-    case PLACEHOLDER:
-        sprintf(text, "placeholder");
-        break;
-  }
+void NN_VST::getParameterDisplay (VstInt32 index, char *string) {
+    switch (index) {
+        case PLACEHOLDER:
+            sprintf(string, "placeholder");
+            break;
+    }
 }
