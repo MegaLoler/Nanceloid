@@ -49,7 +49,9 @@ The `src` directory contains the following:
 - `list.h` and `list.c` contain a linked list implementation.
 
 After building, the `build` directory will contain the following:
-- `test` a test program used for debugging the waveguide network engine.
+- `test` is a test program used for debugging the waveguide network engine.
+- `nnwgnp32.dll` is the 32-bit version of the VST plugin.
+- `nnwgnp64.dll` is the 64-bit version of the VST plugin.
 
 ## Documentation
 
