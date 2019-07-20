@@ -1,4 +1,4 @@
-#include <malloc.h>
+#include <stdlib.h>
 #include <list.h>
 
 List* create_list (void *content) {
