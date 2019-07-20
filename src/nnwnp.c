@@ -8,6 +8,26 @@ double noise() {
     return rand() / (RAND_MAX / 2.0) - 1;
 }
 
+// destroy and remove reciprocal links
+void destroy_reciprocal_links(NN_Link *link) {
+    List *target_links = link->target->links;
+    List *target_prev = NULL;
+    while (target_links != NULL) {
+        NN_Link *target_link = (NN_Link *)list_get(target_links, 0);
+        List *next = target_links->next;
+        if (target_link->target == link->source) {
+            free(target_link);
+            free(target_links);
+            if (target_prev)
+                target_prev->next = next;
+            else
+                link->target->links = next;
+        }
+        target_prev = target_links;
+        target_links = next;
+    }
+}
+
 NN_Node *create_node(NN_NodeType type, double area) {
     NN_Node *node = (NN_Node *)malloc(sizeof(NN_Node));
     node->type = type;
@@ -19,7 +39,8 @@ NN_Node *create_node(NN_NodeType type, double area) {
 void destroy_node(NN_Node *node) {
     while (node->links != NULL) {
         NN_Link *link = (NN_Link *)list_get(node->links, 0);
-        destroy_link(link);
+        destroy_reciprocal_links(link);
+        free(link);
         list_remove(&(node->links), 0);
     }
     free(node);
@@ -86,7 +107,26 @@ NN_Link *create_link(NN_Node *source, NN_Node *target) {
 }
 
 void destroy_link(NN_Link *link) {
-    // TODO: also destroy accompanying link and remove self from source and targets list of links
+    // destroy reciprocal links
+    destroy_reciprocal_links(link);
+
+    // remove from source list
+    List *links = link->source->links;
+    List *prev = NULL;
+    while (links != NULL) {
+        NN_Link *source_link = (NN_Link *)list_get(links, 0);
+        List *next = links->next;
+        if (source_link == link) {
+            free(links);
+            if (prev)
+                prev->next = next;
+            else
+                link->source->links = next;
+            break;
+        }
+        prev = links;
+        links = next;
+    }
     free(link);
 }
 
