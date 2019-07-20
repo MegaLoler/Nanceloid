@@ -20,7 +20,7 @@ void destroy_node(NN_Node *node) {
     while (node->links != NULL) {
         NN_Link *link = (NN_Link *)list_get(node->links, 0);
         destroy_link(link);
-        node->links = list_remove(node->links, 0);
+        list_remove(&(node->links), 0);
     }
     free(node);
 }
@@ -210,7 +210,7 @@ void destroy_waveguide(NN_Waveguide *waveguide) {
     while (waveguide->nodes != NULL) {
         NN_Node *node = (NN_Node *)list_get(waveguide->nodes, 0);
         destroy_node(node);
-        waveguide->nodes = list_remove(waveguide->nodes, 0);
+        list_remove(&(waveguide->nodes), 0);
     }
     free(waveguide);
 }

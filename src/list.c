@@ -10,7 +10,7 @@ List* create_list(void *content) {
 
 void destroy_list(List *list) {
     while (list != NULL)
-        list = list_remove(list, 0);
+        list_remove(&list, 0);
 }
 
 int list_length(List *list) {
@@ -43,15 +43,15 @@ List *list_append(List **list, void *content) {
     return new_node;
 }
 
-List *list_remove(List *list, int index) {
-    if (list == NULL)
-        return NULL;
+void list_remove(List **list, int index) {
+    // TODO: rewrite this more compact lol
+    if (*list == NULL)
+        return;
     else if (index == 0) {
-        List *next = list->next;
-        free(list);
-        return next;
+        List *next = (*list)->next;
+        free(*list);
+        *list = next;
     }
-    else if (list->next != NULL)
-        list->next = list_remove(list->next, index - 1);
-    return list;
+    else if ((*list)->next != NULL)
+        list_remove(&((*list)->next), index - 1);
 }

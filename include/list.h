@@ -26,5 +26,4 @@ void *list_get(List *list, int index);
 List *list_append(List **list, void *content);
 
 // delete an item from a list by its index
-// return the new start node
-List *list_remove(List *list, int index);
+void list_remove(List **list, int index);
