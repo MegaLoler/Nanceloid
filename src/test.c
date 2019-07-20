@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
     NN_Node *node7 = spawn_node(wg, GUIDE);
     NN_Node *node8 = spawn_node(wg, GUIDE);
     NN_Node *node9 = spawn_node(wg, DRAIN);
+    //NN_Node *node9 = spawn_node(wg, SOURCE);
     NN_Link *link0 = link_nodes(node0, node1);
     NN_Link *link1 = link_nodes(node1, node2);
     NN_Link *link2 = link_nodes(node2, node3);
@@ -27,13 +28,14 @@ int main(int argc, char **argv) {
     NN_Link *link6 = link_nodes(node6, node7);
     NN_Link *link7 = link_nodes(node7, node8);
     NN_Link *link8 = link_nodes(node8, node9);
-    inject_energy(wg, node9, 1);
+    inject_energy(wg, node0, 1);
     //set_admittance(node5, 1.1);
     //set_admittance(node6, 1.1);
     //set_admittance(node7, 1.1);
     //set_admittance(node8, 1.1);
     //destroy_node(node4);
-    destroy_link((NN_Link *)list_get(node5->links, 0));
+    //destroy_link((NN_Link *)list_get(node5->links, 0));
+    //destroy_link(link4);
 
     // now run it for 1k samples
     for (int i = 0; i < 1000; i++) {
