@@ -26,21 +26,47 @@ typedef struct Parameters {
     double surface_tension;  // tendency of constrictions to stick together (0 to 1)
     double tract_length;     // length of vocal tract (cm)
 
+    // musical parameters
+    double vibrato_rate;    // how quickly the singing vibrato should be (hz)
+    double vibrato_depth;   // how wide the vibrato peak should be (semitones)
+
 } Parameters;
+
+// what model to use to generate glottal source
+typedef enum PhonationModel {
+    SAWTOOTH,
+    LF
+} PhonationModel;
+
+// the note that you want to play
+typedef struct TargetNote {
+    uint8_t note;    // midi note value
+    double detune;   // offset in semitones
+    double velocity; // note velocity (0 to 1)
+} TargetNote;
 
 // represents a synth instance
 typedef struct Voice {
 
-    NN_Waveguide *waveguide;
-    Parameters parameters;
+    NN_Waveguide *waveguide;    // the waveguide network to simulate the tract
+    NN_Node *source;            // the glottal source node
+    NN_Node *drain;             // the drain node for tract output
+
+    Parameters parameters;      // the synth parameters
+    PhonationModel model;       // how to model glottal source sound
+    TargetNote note;            // what note to play
+
+    int rate;                   // sample rate
+    double saw_phase;           // sawtooth oscillator current phase
+    double vibrato_phase;       // vibrato lfo current phase
 
 } Voice;
 
 // initialize a parameters struct
 void init_parameters (Parameters *p);
 
-// initialize the waveguide
-void init_tract (NN_Waveguide *waveguide);
+// initialize the waveguide of a synth
+void init_tract (Voice *voice);
 
 // create and initialize a new synth instance
 Voice *create_voice ();

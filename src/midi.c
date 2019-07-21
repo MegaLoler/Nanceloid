@@ -43,6 +43,7 @@ void process_midi (Voice *voice, uint8_t *data) {
             case CONTROLLER_TRACT_LENGTH:
                 voice->parameters.tract_length = map_to_range (value, 8, 24);
                 break;
+            // TODO: standard midi controllers such as modulation wheel and pitch bend
         }
     }
 

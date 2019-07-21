@@ -93,3 +93,4 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 ### Miscellaneous stuff
 - fix broken makefile lol
 - optimize ? ? idk lol
+- consider other backends for the standalone (alsa? pulse? sdl? windows? rtmidi?)

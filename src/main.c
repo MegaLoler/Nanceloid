@@ -29,16 +29,20 @@ int jack_process (jack_nframes_t num_frames, void *arg) {
     jack_nframes_t num_events = jack_midi_get_event_count (midi_port_buffer);
 
     // process midi events
-    // TODO: consider timing
+    // TODO: consider event timing
     for (int i = 0; i < num_events; i++) {
         jack_midi_event_get (&event, midi_port_buffer, i);
         uint8_t *data = event.buffer;
         process_midi (voice, data);
     }
 
+    // update rate
+    // TODO: can this be changed to a callback?
+    voice->rate = jack_get_sample_rate(client);
+
     // process audio frames
     for (int i = 0; i < num_frames; i++) {
-        audio_buffer_left[0] = audio_buffer_right[0] = step_voice (voice);
+        audio_buffer_left[i] = audio_buffer_right[i] = step_voice (voice);
     }
 
     return 0;
@@ -80,7 +84,7 @@ int main (int argc, char **argv) {
     }
 
     // setup the synth
-    voice = create_voice ();
+    voice = create_voice (SAWTOOTH, jack_get_sample_rate(client));
 
     // activate the client
     if (jack_activate (client)) {
