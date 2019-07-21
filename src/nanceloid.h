@@ -26,9 +26,10 @@ typedef struct Parameters {
     double surface_tension;  // tendency of constrictions to stick together (0 to 1)
     double tract_length;     // length of vocal tract (cm)
 
-    // musical parameters
+    // musical and audio parameters
     double vibrato_rate;    // how quickly the singing vibrato should be (hz)
     double vibrato_depth;   // how wide the vibrato peak should be (semitones)
+    double volume;          // overall volume (0 to 1)
 
 } Parameters;
 
@@ -57,7 +58,8 @@ typedef struct Voice {
     TargetNote note;            // what note to play
 
     int rate;                   // sample rate
-    double saw_phase;           // sawtooth oscillator current phase
+    double osc;                 // last oscillator sample
+    double osc_phase;           // glottal oscillator current phase
     double vibrato_phase;       // vibrato lfo current phase
 
 } Voice;

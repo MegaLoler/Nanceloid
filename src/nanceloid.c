@@ -24,10 +24,36 @@ void init_parameters (Parameters *p) {
     p->surface_tension  = 0.5;
     p->tract_length     = 17.5;
 
-    // musical parameters
+    // musical and audio parameters
     p->vibrato_rate  = 4;
     p->vibrato_depth = 0.25;
+    p->volume = 0.5;
 
+}
+
+Voice *create_voice (PhonationModel model, int rate) {
+    Voice *voice = (Voice *) malloc (sizeof (Voice));
+
+    init_parameters (&voice->parameters);
+    voice->waveguide = create_waveguide ();
+    init_tract (voice);
+    voice->model = model;
+
+    voice->note.note = 45;
+    voice->note.detune = 0;
+    voice->note.velocity = 1;
+
+    voice->rate = rate;
+    voice->osc = 0;
+    voice->osc_phase = 0;
+    voice->vibrato_phase = 0;
+
+    return voice;
+}
+
+void destroy_voice (Voice *voice) {
+    destroy_waveguide (voice->waveguide);
+    free (voice);
 }
 
 void init_tract (Voice *voice) {
@@ -48,6 +74,10 @@ void init_tract (Voice *voice) {
         // create the next node
         NN_Node *node = spawn_node (voice->waveguide, type);
 
+        // test
+        if (i == 10)
+            set_admittance (node, 0.9);
+
         // link the node with the previous node
         // (unless this is the first node of course)
         if (previous != NULL)
@@ -67,30 +97,6 @@ void init_tract (Voice *voice) {
 
 // TODO: resize tract function
 
-Voice *create_voice (PhonationModel model, int rate) {
-    Voice *voice = (Voice *) malloc (sizeof (Voice));
-
-    init_parameters (&voice->parameters);
-    voice->waveguide = create_waveguide ();
-    init_tract (voice);
-    voice->model = model;
-
-    voice->note.note = 45;
-    voice->note.detune = 0;
-    voice->note.velocity = 1;
-
-    voice->rate = rate;
-    voice->saw_phase = 0;
-    voice->vibrato_phase = 0;
-
-    return voice;
-}
-
-void destroy_voice (Voice *voice) {
-    destroy_waveguide (voice->waveguide);
-    free (voice);
-}
-
 // return frequency in hertz given midi note
 // equal temperament for now
 double get_frequency (double note) {
@@ -100,19 +106,26 @@ double get_frequency (double note) {
 // simple sawtooth source synth
 double phonate_saw (Voice *voice) {
 
+    // TODO: use lungs for intensity instead of velocity directly
+    // and adjust lungs to note velocity
+
     // vibrato lfo
     double vibrato = sin (voice->vibrato_phase * 2 * M_PI) * voice->parameters.vibrato_depth;
     voice->vibrato_phase += voice->parameters.vibrato_rate / voice->rate;
 
     // saw osc
-    double saw = voice->saw_phase * voice->note.velocity;
+    double saw = voice->osc_phase;
     double freq = get_frequency (voice->note.note + voice->note.detune + vibrato);
-    voice->saw_phase += freq / voice->rate;
-    voice->saw_phase = fmod (voice->saw_phase, 1);
+    voice->osc_phase += freq / voice->rate;
+    voice->osc_phase = fmod (voice->osc_phase, 1);
 
-    // TODO: low pass filter
+    // filter
+    double sample = voice->osc;
+    double delta = saw - sample;
+    double k = pow (voice->note.velocity, 3);
+    voice->osc += delta * k;
 
-    return saw;
+    return sample * voice->parameters.volume;
 }
 
 // lf model of glottal excitation
@@ -134,7 +147,10 @@ double phonate (Voice *voice) {
 
 double step_voice (Voice *voice) {
 
-    // handle phonation
+    // air pressure from lungs
+    inject_energy (voice->waveguide, voice->source, voice->parameters.lungs);
+
+    // vocal cord vibration
     double glottal_source = phonate (voice);
     inject_energy (voice->waveguide, voice->source, glottal_source);
 
