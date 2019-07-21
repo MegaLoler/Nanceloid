@@ -29,9 +29,8 @@ void destroy_reciprocal_links (NN_Link *link) {
     }
 }
 
-NN_Node *create_node (NN_NodeType type, double area) {
+NN_Node *create_node (double area) {
     NN_Node *node = (NN_Node *) malloc(sizeof(NN_Node));
-    node->type = type;
     node->area = area;
     node->links = NULL;
     return node;
@@ -71,27 +70,11 @@ double admittance_to_area (double Y) {
 }
 
 double get_impedance (NN_Node *node) {
-    switch (node->type) {
-        case SOURCE:
-            return INFINITY;
-        case DRAIN:
-            return 1 / AMBIENT_ADMITTANCE;
-        case GUIDE:
-        default:
-            return 1 / get_admittance (node);
-    }
+    return 1 / get_admittance (node);
 }
 
 double get_admittance (NN_Node *node) {
-    switch (node->type) {
-        case SOURCE:
-            return 0;
-        case DRAIN:
-            return AMBIENT_ADMITTANCE;
-        case GUIDE:
-        default:
-            return area_to_admittance (node->area);
-    }
+    return area_to_admittance (node->area);
 }
 
 void set_impedance (NN_Node *node, double Z) {
@@ -159,82 +142,76 @@ double reflection (double source_Y, double target_Y) {
     }
 }
 
-// source = originating node, OR NULL if none
-void distribute_energy (NN_Waveguide *waveguide, NN_Node *node, double energy, NN_Node *source, int reflect) {
-    // calculate the net admittance away from the target junction
-    double admittance = 0;
-
-    // the link to store reflection energy
-    NN_Link *reflection_link = NULL;
+// weighted distribution of energy into target node's links
+// but dont distribute back to source
+// return any energy that was not distributed
+// (such as if there is no where for it to go)
+double distribute_energy (NN_Node *target, NN_Node *source, double energy) {
 
     List *links;
 
-    links = node->links;
+    // calculate the net admittance away from the target junction
+    double admittance = 0;
+    links = target->links;
     while (links != NULL) {
-        // TODO: optimize getting list node contents
-        NN_Link *jlink = (NN_Link *) list_get (links, 0);
-        NN_Node *jtarget = jlink->target;
+        NN_Link *link = (NN_Link *) list_get (links, 0);
 
-        if (jtarget != source) {
-            admittance += get_admittance (jtarget);
-        } else {
-            reflection_link = jlink;
-        }
+        // don't distribute back to source
+        //if (link->target != source)
+            admittance += get_admittance (link->target);
 
         links = links->next;
     }
 
-    if (reflection_link && reflect) {
-        // get the reflected energy
-        double gamma = reflection (get_admittance (node), admittance);
-        double reflection = gamma * energy;
-
-        // get the turbulence
-        double turbulence = fmax (0, reflection) * noise () * waveguide->turbulence;
-
-        // send the reflected energy backward
-        double total = (reflection + turbulence) * (1 - waveguide->damping);
-        distribute_energy (waveguide, reflection_link->target, total, reflection_link->source, 0);
-        //add_energy (reflection_link, total);
-
-        // subtract from remaining energy to be distributed
-        energy -= reflection;
-    }
-
-    // distribute the remainder of the energy
-    links = node->links;
+    // distribute with weights
+    double total = 0; // total distributed energy
+    links = target->links;
     while (links != NULL) {
-        // TODO: optimize getting list node contents
-        NN_Link *jlink = (NN_Link *) list_get(links, 0);
+        NN_Link *link = (NN_Link *) list_get (links, 0);
 
-        if (jlink != reflection_link) {
-            // get the weight for this link
+        // don't distribute back to source
+        //if (link->target != source) {
+            double link_admittance = get_admittance (link->target);
 
             double weight;
-            if (admittance == INFINITY) {
-                weight = 1;
-            }
-            else if (admittance == 0) {
+            if (admittance == INFINITY)
+                weight = link_admittance == INFINITY ? 1 : 0;
+            else if (admittance == 0)
                 weight = 0;
-            }
-            else {
-                weight = get_admittance (jlink->target) / admittance;
-            }
+            else
+                weight = link_admittance / admittance;
 
-            // move the weighted amonut of energy
-            add_energy (jlink, weight * energy);
-        }
+            double distribution = weight * energy;
+            total += distribution;
+            add_energy (link, distribution);
+        //}
 
         links = links->next;
     }
+
+    // return drain
+    return energy - total;
 }
 
 void move_energy (NN_Waveguide *waveguide, NN_Link *link) {
-    distribute_energy (waveguide, link->target, link->energy, link->source, 1);
+    // calculate reflected energy
+    double gamma = reflection (get_admittance (link->source), get_admittance (link->target));
+    double reflection = gamma * link->energy;
+
+    // generate some turbulence
+    double turbulence = fmax (0, reflection) * noise () * waveguide->turbulence;
+
+    // send the reflected energy backward
+    double total_reflection = (reflection + turbulence) * (1 - waveguide->damping);
+    distribute_energy (link->source, link->target, total_reflection);
+
+    // distribute remaining energy to target and collect drain
+    double remainder = link->energy - reflection;
+    waveguide->drain += distribute_energy (link->target, link->source, remainder);
 }
 
 void inject_energy (NN_Waveguide *waveguide, NN_Node *node, double energy) {
-    distribute_energy (waveguide, node, energy, NULL, 0);
+    distribute_energy (node, NULL, energy);
 }
 
 double net_waveguide_energy (NN_Waveguide *waveguide) {
@@ -249,11 +226,18 @@ double net_waveguide_energy (NN_Waveguide *waveguide) {
     return energy;
 }
 
+double collect_drain (NN_Waveguide *waveguide) {
+    double drain = waveguide->drain;
+    waveguide->drain = 0;
+    return drain;
+}
+
 NN_Waveguide *create_waveguide () {
     NN_Waveguide *waveguide = (NN_Waveguide *) malloc (sizeof (NN_Waveguide));
     waveguide->nodes = NULL;
     waveguide->damping = DAMPING;
     waveguide->turbulence = TURBULENCE;
+    waveguide->drain = 0;
     return waveguide;
 }
 
@@ -277,14 +261,12 @@ void run_waveguide (NN_Waveguide *waveguide) {
     while (nodes != NULL) {
         // TODO: optimize getting list node contents
         NN_Node *node = (NN_Node *) list_get (nodes, 0);
-        if (node->type != DRAIN) {
-            List *links = node->links;
-            while (links != NULL) {
-                // TODO: optimize getting list node contents
-                NN_Link *link = (NN_Link *) list_get (links, 0);
-                move_energy (waveguide, link);
-                links = links->next;
-            }
+        List *links = node->links;
+        while (links != NULL) {
+            // TODO: optimize getting list node contents
+            NN_Link *link = (NN_Link *) list_get (links, 0);
+            move_energy (waveguide, link);
+            links = links->next;
         }
         nodes = nodes->next;
     }
@@ -305,18 +287,25 @@ void run_waveguide (NN_Waveguide *waveguide) {
     }
 }
 
-NN_Node *spawn_node (NN_Waveguide *waveguide, NN_NodeType type) {
-    NN_Node *node = create_node (type, 1);
+NN_Node *spawn_node (NN_Waveguide *waveguide) {
+    NN_Node *node = create_node (1);
     list_append (&(waveguide->nodes), node);
     return node;
 }
 
-NN_Link *link_nodes (NN_Node *a, NN_Node *b) {
-    NN_Link *link_a = create_link (a, b);
-    NN_Link *link_b = create_link (b, a);
-    list_append (&(a->links), link_a);
-    list_append (&(b->links), link_b);
-    return link_a;
+NN_Link *single_link_nodes (NN_Node *source, NN_Node *target) {
+    NN_Link *link = create_link (source, target);
+    list_append (&(source->links), link);
+    return link;
+}
+
+NN_Link *double_link_nodes (NN_Node *source, NN_Node *target) {
+    single_link_nodes (target, source);
+    return single_link_nodes (source, target);
+}
+
+NN_Link *terminate_node (NN_Node *node) {
+    return single_link_nodes (node, node);
 }
 
 uint8_t *serialize (NN_Waveguide *waveguide) {

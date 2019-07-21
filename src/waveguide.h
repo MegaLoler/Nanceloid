@@ -4,8 +4,6 @@
 #include <list.h>
 #include <stdint.h>
 
-#define AMBIENT_ADMITTANCE 10
-
 // defaults
 #define DAMPING 0//0.04
 #define TURBULENCE 0//0.001
@@ -22,22 +20,14 @@ extern "C" {
 
 typedef struct NN_Link NN_Link;
 
-// representns a type of waveguide node
-typedef enum NN_NodeType {
-    GUIDE,      // a normal node that guides energy
-    SOURCE,     // a node that emits energy (input node)
-    DRAIN       // a node that absorbs energy (output node)
-} NN_NodeType;
-
 // represents a waveguide node
 typedef struct NN_Node {
-    NN_NodeType type;   // the type of node it is
     double area;        // cross sectional area at node region (related to admittance and impedance)
     List *links;        // list of links to other nodes from here
 } NN_Node;
 
 // create a new node of a given type and with a given area
-NN_Node *create_node (NN_NodeType type, double area);
+NN_Node *create_node (double area);
 
 // destroy a node
 void destroy_node (NN_Node *node);
@@ -73,6 +63,7 @@ typedef struct NN_Waveguide {
     List *nodes;        // list of waveguide nodes
     double damping;     // reflection loss coefficient 
     double turbulence;  // turbulence amplitude coefficient
+    double drain;       // lost acoustic energy
 } NN_Waveguide;
 
 // create a new waveguide network object
@@ -90,13 +81,21 @@ void inject_energy (NN_Waveguide *waveguide, NN_Node *node, double energy);
 // return the total energy in the entire waveguide network
 double net_waveguide_energy (NN_Waveguide *waveguide);
 
+// return the drain and then clear it
+double collect_drain (NN_Waveguide *waveguide);
+
 // create a new node and add it to a waveguide automatically
 // uses a default area of 1
-NN_Node *spawn_node (NN_Waveguide *waveguide, NN_NodeType type);
+NN_Node *spawn_node (NN_Waveguide *waveguide);
 
-// link two nodes mutually
-// returns the link from a to b
-NN_Link *link_nodes (NN_Node *a, NN_Node *b);
+// singly link source node to target node
+NN_Link *single_link_nodes (NN_Node *source, NN_Node *target);
+
+// mutually link source and target nodes
+NN_Link *double_link_nodes (NN_Node *source, NN_Node *target);
+
+// link a node with itself
+NN_Link *terminate_node (NN_Node *node);
 
 
 
