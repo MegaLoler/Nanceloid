@@ -1,14 +1,16 @@
-# Negative Nancy's Waveguide Network Playground
+# Nanceloid
 
-a waveguide network engine with a planned vst frontend!
+A physically-modelled vocal synthesizer using digital waveguide networks!
 
-VERY wip lol
+*(currently reorganizing things quite a bit...)*
 
-a standalone frontend wld b cool too
+its a WIP O_O
 
 _TODO: add screenshots_
 
 ## Dependencies
+
+In order to build and run the standalone synth you will need the [JACK audio connection kit](http://jackaudio.org/).
 
 In order to build the VST plugins you will need the following:
 - `i686-w64-mingw32-g++`
@@ -24,13 +26,15 @@ artwork  bin  doc  index.html  pluginterfaces  public.sdk  vstgui.sf
 
 ## How to build
 
-Run `make` to produce the 32-bit VST plugin `build/nnwgnp32.dll`, the 64-bit VST plugin `build/nnwgnp64.dll`, and the waveguide network engine test program `build/test`.
+Run `make` to produce the standalone JACK client `nanceloid`, the 32-bit VST plugin `build/nanceloid.dll`, the 64-bit VST plugin `build/nanceloid.dll`, and the waveguide network engine test program `build/test`.
 
 Run `make clean` to remove the `build` directory and its contents once it has been created.
 
 ## How to run
 
-Load `build/nnwgnp32.dll` or `build/nnwgnp64.dll` into your DAW to use the VST plugin.
+Run `make run` to run the standalone synth.
+
+Load `build/nanceloid32.dll` or `build/nanceloid64.dll` into your DAW to use the VST plugin.
 
 Run `make test` to run the waveguide network engine test program.
 
@@ -43,15 +47,19 @@ _TODO: tutorial, explanation, theory, etc_
 ## Files
 
 The `src` directory contains the following:
-- `test.c` contains the test program.
+- `main.c` contains the the standalone JACK client.
 - `vst.h` and `vst.cpp` contain the VST plugin.
+- `midi.h` and `midi.c` contain the MIDI event handler.
+- `nanceloid.h` and `nanceloid.c` contain the top-level synth.
 - `waveguide.h` and `waveguide.c` contain the waveguide network engine.
 - `list.h` and `list.c` contain a linked list implementation.
+- `test.c` contains a test program.
 
 After building, the `build` directory will contain the following:
+- `nanceloid` is the standalone JACK client.
+- `nanceloid32.dll` is the 32-bit version of the VST plugin.
+- `nanceloid64.dll` is the 64-bit version of the VST plugin.
 - `test` is a test program used for debugging the waveguide network engine.
-- `nnwgnp32.dll` is the 32-bit version of the VST plugin.
-- `nnwgnp64.dll` is the 64-bit version of the VST plugin.
 
 ## Documentation
 
@@ -63,16 +71,23 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 
 ## Todo list
 
+### Jack frontend stuff
+- basic jack client
+
+### VST stuff
+- basic vst interface
+
+### Midi stuff
+- basic midi event handling
+
+### Nanceloid stuff
+- basic structure
+
 ### Waveguide stuff
 - de/serialization of waveguide network objects
 - "exciter" nodes : generates sound by oscillating impedance in response to pressure
 - "pump" nodes : provides steady stream of pressure values
-
-### Stand-alone frontend stuff
-- sdl
-
-### VST stuff
-- basic vst interface
+- maybe a LF model glottis node....
 
 ### Miscellaneous stuff
 - fix broken makefile lol
