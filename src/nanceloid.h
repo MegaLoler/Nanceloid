@@ -3,6 +3,8 @@
 
 #include <waveguide.h>
 
+#define AMBIENT_ADMITTANCE INFINITY
+
 // represents synth parameters
 typedef struct Parameters {
 
@@ -50,8 +52,7 @@ typedef struct TargetNote {
 typedef struct Voice {
 
     NN_Waveguide *waveguide;    // the waveguide network to simulate the tract
-    NN_Node *source;            // the glottal source node
-    NN_Node *drain;             // the drain node for tract output
+    NN_Link *source;            // the link to inject glottal source sound
 
     Parameters parameters;      // the synth parameters
     PhonationModel model;       // how to model glottal source sound

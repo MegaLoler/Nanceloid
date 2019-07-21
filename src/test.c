@@ -31,9 +31,12 @@ int main (int argc, char **argv) {
     NN_Link *link7 = double_link_nodes (node7, node8);
     NN_Link *link8 = double_link_nodes (node8, node9);
     NN_Link *link9 = single_link_nodes (node9, drain);
-    set_admittance (drain, 0);
-    //set_admittance (node7, 0.5);
-    //set_admittance (node8, 0.5);
+    set_admittance (drain, INFINITY);
+    //set_admittance (node5, 0.5);
+    //set_admittance (node6, 2);
+    //set_admittance (node7, 2);
+    //set_admittance (node8, 2);
+    //set_admittance (node9, 2);
     //destroy_node (node4);
     //destroy_link ((NN_Link *) list_get (node5->links, 0));
     //destroy_link (link4);

@@ -150,41 +150,27 @@ double distribute_energy (NN_Node *target, NN_Node *source, double energy) {
 
     List *links;
 
-    // calculate the net admittance away from the target junction
-    double admittance = 0;
+    // calculate how many ways to go there are
+    int length = 0;
     links = target->links;
     while (links != NULL) {
         NN_Link *link = (NN_Link *) list_get (links, 0);
-
-        // don't distribute back to source
-        //if (link->target != source)
-            admittance += get_admittance (link->target);
-
+        if (link->target != source)
+            length++;
         links = links->next;
     }
 
-    // distribute with weights
     double total = 0; // total distributed energy
     links = target->links;
     while (links != NULL) {
         NN_Link *link = (NN_Link *) list_get (links, 0);
 
         // don't distribute back to source
-        //if (link->target != source) {
-            double link_admittance = get_admittance (link->target);
-
-            double weight;
-            if (admittance == INFINITY)
-                weight = link_admittance == INFINITY ? 1 : 0;
-            else if (admittance == 0)
-                weight = 0;
-            else
-                weight = link_admittance / admittance;
-
-            double distribution = weight * energy;
+        if (link->target != source) {
+            double distribution = energy / length;
             total += distribution;
             add_energy (link, distribution);
-        //}
+        }
 
         links = links->next;
     }

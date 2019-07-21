@@ -60,39 +60,31 @@ void init_tract (Voice *voice) {
 
     // create a straight tube closed off at one end
     // (temporary)
-    const int tube_length = 20;
+    const int tube_length = 25;
     NN_Node *previous = NULL;
     for (int i = 0; i < tube_length; i++) {
 
-        // figure out what kind of node it should be
-        NN_NodeType type = GUIDE;
-        if (i == 0)
-            type = SOURCE;
-        else if (i == tube_length - 1)
-            type = DRAIN;
-
         // create the next node
-        NN_Node *node = spawn_node (voice->waveguide, type);
+        NN_Node *node = spawn_node (voice->waveguide);
 
         // test
-        if (i == 10)
-            set_admittance (node, 0.5);
+        //if (i == 10)
+        //    set_admittance (node, 0.5);
 
         // link the node with the previous node
         // (unless this is the first node of course)
         if (previous != NULL)
-            link_nodes (previous, node);
+            double_link_nodes (previous, node);
+        else
+            voice->source = terminate_node (node);
 
         // set the previous node for next iteration
         previous = node;
 
-        // set the active source and drain nodes
-        if (i == 0)
-            voice->source = node;
-        else if (i == tube_length - 1)
-            voice->drain = node;
+        // set ambient admittance
+        if (i == tube_length - 1)
+            set_admittance (node, AMBIENT_ADMITTANCE);
     }
-
 }
 
 // TODO: resize tract function
@@ -148,11 +140,11 @@ double phonate (Voice *voice) {
 double step_voice (Voice *voice) {
 
     // air pressure from lungs
-    inject_energy (voice->waveguide, voice->source, voice->parameters.lungs);
+    //add_energy (voice->source, voice->parameters.lungs);
 
     // vocal cord vibration
     double glottal_source = phonate (voice);
-    inject_energy (voice->waveguide, voice->source, glottal_source);
+    add_energy (voice->source, glottal_source);
 
     // handle articulatory dynamics
     // TODO
@@ -164,5 +156,5 @@ double step_voice (Voice *voice) {
     run_waveguide (voice->waveguide);
 
     // return the drain output
-    return net_node_energy (voice->drain);
+    return collect_drain (voice->waveguide);
 }

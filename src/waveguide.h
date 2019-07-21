@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 // defaults
-#define DAMPING 0//0.04
+#define DAMPING 0.04
 #define TURBULENCE 0//0.001
 
 
