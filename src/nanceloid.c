@@ -76,7 +76,7 @@ void init_tract (Voice *voice) {
 
         // test
         if (i == 10)
-            set_admittance (node, 0.9);
+            set_admittance (node, 0.5);
 
         // link the node with the previous node
         // (unless this is the first node of course)

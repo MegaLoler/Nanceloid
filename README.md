@@ -88,7 +88,7 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 - maybe a LF model glottis node....
 
 ### Waveguide stuff
-- de/serialization of waveguide network objects
+- re dang write the whole thing
 
 ### Miscellaneous stuff
 - fix broken makefile lol

@@ -4,9 +4,11 @@
 #include <list.h>
 #include <stdint.h>
 
+#define AMBIENT_ADMITTANCE 10
+
 // defaults
-#define DAMPING 0.04
-#define TURBULENCE 0.001
+#define DAMPING 0//0.04
+#define TURBULENCE 0//0.001
 
 
 

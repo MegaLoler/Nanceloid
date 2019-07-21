@@ -75,7 +75,7 @@ double get_impedance (NN_Node *node) {
         case SOURCE:
             return INFINITY;
         case DRAIN:
-            return 0;
+            return 1 / AMBIENT_ADMITTANCE;
         case GUIDE:
         default:
             return 1 / get_admittance (node);
@@ -87,7 +87,7 @@ double get_admittance (NN_Node *node) {
         case SOURCE:
             return 0;
         case DRAIN:
-            return INFINITY;
+            return AMBIENT_ADMITTANCE;
         case GUIDE:
         default:
             return area_to_admittance (node->area);
@@ -160,7 +160,7 @@ double reflection (double source_Y, double target_Y) {
 }
 
 // source = originating node, OR NULL if none
-void distribute_energy (NN_Waveguide *waveguide, NN_Node *node, double energy, NN_Node *source) {
+void distribute_energy (NN_Waveguide *waveguide, NN_Node *node, double energy, NN_Node *source, int reflect) {
     // calculate the net admittance away from the target junction
     double admittance = 0;
 
@@ -184,7 +184,7 @@ void distribute_energy (NN_Waveguide *waveguide, NN_Node *node, double energy, N
         links = links->next;
     }
 
-    if (reflection_link) {
+    if (reflection_link && reflect) {
         // get the reflected energy
         double gamma = reflection (get_admittance (node), admittance);
         double reflection = gamma * energy;
@@ -193,7 +193,9 @@ void distribute_energy (NN_Waveguide *waveguide, NN_Node *node, double energy, N
         double turbulence = fmax (0, reflection) * noise () * waveguide->turbulence;
 
         // send the reflected energy backward
-        add_energy (reflection_link, (reflection + turbulence) * (1 - waveguide->damping));
+        double total = (reflection + turbulence) * (1 - waveguide->damping);
+        distribute_energy (waveguide, reflection_link->target, total, reflection_link->source, 0);
+        //add_energy (reflection_link, total);
 
         // subtract from remaining energy to be distributed
         energy -= reflection;
@@ -228,11 +230,11 @@ void distribute_energy (NN_Waveguide *waveguide, NN_Node *node, double energy, N
 }
 
 void move_energy (NN_Waveguide *waveguide, NN_Link *link) {
-    distribute_energy (waveguide, link->target, link->energy, link->source);
+    distribute_energy (waveguide, link->target, link->energy, link->source, 1);
 }
 
 void inject_energy (NN_Waveguide *waveguide, NN_Node *node, double energy) {
-    distribute_energy (waveguide, node, energy, NULL);
+    distribute_energy (waveguide, node, energy, NULL, 0);
 }
 
 double net_waveguide_energy (NN_Waveguide *waveguide) {

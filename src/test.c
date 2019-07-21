@@ -28,19 +28,19 @@ int main (int argc, char **argv) {
     NN_Link *link6 = link_nodes (node6, node7);
     NN_Link *link7 = link_nodes (node7, node8);
     NN_Link *link8 = link_nodes (node8, node9);
-    inject_energy (wg, node0, 1);
-    //set_admittance (node5, 1.1);
-    //set_admittance (node6, 1.1);
-    //set_admittance (node7, 1.1);
-    //set_admittance (node8, 1.1);
+    set_admittance (node6, 0.5);
+    set_admittance (node7, 0.5);
+    set_admittance (node8, 0.5);
     //destroy_node (node4);
     //destroy_link ((NN_Link *) list_get (node5->links, 0));
     //destroy_link (link4);
 
+        inject_energy (wg, node0, 1);
     // now run it for 1k samples
     for (int i = 0; i < 1000; i++) {
         run_waveguide (wg);
 
+        //inject_energy (wg, node0, 1);
         // debug print
         printf ("DEBUG:\n");
         printf ("SOURCE: RIGHT=%023.5f\n",            link0->energy);
