@@ -78,14 +78,24 @@ int main (int argc, char **argv) {
         exit (EXIT_FAILURE);
     }
 
-    // TODO: auto connect audio out to system out
-
     // setup the synth
     voice = create_voice ();
 
     // activate the client
     if (jack_activate (client)) {
         fprintf (stderr, "Could not activate JACK client.\n");
+        exit (EXIT_FAILURE);
+    }
+
+    // automatically connect to system audio out if possible
+    const char **ports;
+	ports = jack_get_ports (client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
+    if (ports == NULL) {
+        fprintf (stderr, "Could not find system audio output ports.\n");
+        exit (EXIT_FAILURE);
+    } else if (jack_connect (client, jack_port_name (audio_output_port_left), ports[0]) ||
+               jack_connect (client, jack_port_name (audio_output_port_right), ports[1])) {
+        fprintf (stderr, "Could not connect to system audio output ports.\n");
         exit (EXIT_FAILURE);
     }
 
