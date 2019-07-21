@@ -32,7 +32,7 @@ Run `make` to produce the `build` directory containing the following:
 - `nanceloid64.dll` is the 64-bit version of the VST plugin.
 - `test` is a test program used for debugging the waveguide network engine.
 
-Run `make clean` to remove the `build` directory and its contents once it has been created.
+Run `make clean` to remove the `build` directory and its contents after it has been created.
 
 ## How to run
 
@@ -58,12 +58,6 @@ The `src` directory contains the following:
 - `waveguide.h` and `waveguide.c` contain the waveguide network engine.
 - `list.h` and `list.c` contain a linked list implementation.
 - `test.c` contains a test program.
-
-After building, the `build` directory will contain the following:
-- `nanceloid` is the standalone JACK client.
-- `nanceloid32.dll` is the 32-bit version of the VST plugin.
-- `nanceloid64.dll` is the 64-bit version of the VST plugin.
-- `test` is a test program used for debugging the waveguide network engine.
 
 ## Documentation
 
