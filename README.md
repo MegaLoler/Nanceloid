@@ -63,10 +63,16 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 
 ## Todo list
 
-- basic vst
-- basic vst interface
+### Waveguide stuff
 - de/serialization of waveguide network objects
 - "exciter" nodes : generates sound by oscillating impedance in response to pressure
 - "pump" nodes : provides steady stream of pressure values
+
+### Stand-alone frontend stuff
+
+### VST stuff
+- basic vst interface
+
+### Miscellaneous stuff
 - fix broken makefile lol
 - optimize ? ? idk lol
