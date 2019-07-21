@@ -3,6 +3,10 @@
 #include <unistd.h>
 #include <jack/jack.h>
 #include <jack/midiport.h>
+#include <nanceloid.h>
+
+// the vocal synth instance
+Voice *voice;
 
 jack_client_t *client;
 jack_port_t *midi_input_port;
@@ -33,14 +37,12 @@ int jack_process (jack_nframes_t num_frames, void *arg) {
 
     // process audio frames
     for (int i = 0; i < num_frames; i++) {
-        // TODO: run synth and set audio buffer sample to result
-        audio_buffer_left[0] = audio_buffer_right[0] = 0; // temporary
+        audio_buffer_left[0] = audio_buffer_right[0] = step_voice (voice);
     }
 
     return 0;
 }
 
-// jack shutdown callback
 void jack_shutdown (void *arg) {
     fprintf (stderr, "JACK server shutting down.\n");
     exit (EXIT_FAILURE);
@@ -67,7 +69,7 @@ int main (int argc, char **argv) {
     jack_on_shutdown (client, jack_shutdown, 0);
 
     // create in and out port
-    midi_input_port = jack_port_register (client, "Nanceloid Controller", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
+    midi_input_port = jack_port_register (client, "Controller", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
     audio_output_port_left = jack_port_register (client, "L", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
     audio_output_port_right = jack_port_register (client, "R", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
 
@@ -76,8 +78,10 @@ int main (int argc, char **argv) {
         exit (EXIT_FAILURE);
     }
 
+    // TODO: auto connect audio out to system out
+
     // setup the synth
-    // TODO
+    voice = create_voice ();
 
     // activate the client
     if (jack_activate (client)) {
@@ -89,7 +93,7 @@ int main (int argc, char **argv) {
     sleep(-1);
     
     // cleanup
-    // TODO: destroy synth
+    destroy_voice (voice);
     jack_client_close (client);
 
     return 0;
