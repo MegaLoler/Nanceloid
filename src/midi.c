@@ -45,6 +45,8 @@ void process_midi (Voice *voice, uint8_t *data) {
                 break;
             // TODO: standard midi controllers such as modulation wheel and pitch bend
         }
+
+        debug_parameters (voice->parameters);
     }
 
     // TODO: handle normal midi notes

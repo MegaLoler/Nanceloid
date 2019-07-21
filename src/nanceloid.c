@@ -1,6 +1,28 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <nanceloid.h>
+
+void debug_parameters (Parameters p) {
+    printf ("[DEBUG PARAMETERS]\n");
+    printf ("lungs            %.8f\n", p.lungs);
+    printf ("glottal_tension  %.8f\n", p.glottal_tension);
+    printf ("laryngeal_height %.8f\n", p.laryngeal_height);
+    printf ("lips_roundedness %.8f\n", p.lips_roundedness);
+    printf ("jaw_height       %.8f\n", p.jaw_height);
+    printf ("tongue_frontness %.8f\n", p.tongue_frontness);
+    printf ("tongue_height    %.8f\n", p.tongue_height);
+    printf ("tongue_flatness  %.8f\n", p.tongue_flatness);
+    printf ("acoustic_damping %.8f\n", p.acoustic_damping);
+    printf ("physical_damping %.8f\n", p.physical_damping);
+    printf ("enunciation      %.8f\n", p.enunciation);
+    printf ("frication        %.8f\n", p.frication);
+    printf ("surface_tension  %.8f\n", p.surface_tension);
+    printf ("tract_length     %.8f\n", p.tract_length);
+    printf ("vibrato_rate     %.8f\n", p.vibrato_rate);
+    printf ("vibrato_depth    %.8f\n", p.vibrato_depth);
+    printf ("volume           %.8f\n", p.volume);
+}
 
 void init_parameters (Parameters *p) {
 
@@ -60,7 +82,7 @@ void init_tract (Voice *voice) {
 
     // create a straight tube closed off at one end
     // (temporary)
-    const int tube_length = 25;
+    const int tube_length = 20;
     NN_Node *previous = NULL;
     for (int i = 0; i < tube_length; i++) {
 

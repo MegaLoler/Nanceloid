@@ -80,4 +80,7 @@ void destroy_voice (Voice *voice);
 // run the simulation and return the next sample
 double step_voice (Voice *voice);
 
+// debug print the state of the parameters
+void debug_parameters (Parameters parameters);
+
 #endif
