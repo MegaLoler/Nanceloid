@@ -3,7 +3,8 @@
 
 #include <waveguide.h>
 
-#define AMBIENT_ADMITTANCE 10 //INFINITY
+// defaults
+#define AMBIENT_ADMITTANCE 10
 
 // represents synth parameters
 typedef struct Parameters {

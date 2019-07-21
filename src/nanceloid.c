@@ -93,8 +93,8 @@ void init_tract (Voice *voice) {
         NN_Node *node = spawn_node (voice->waveguide);
 
         // test
-        //if (i == 10)
-        //    set_admittance (node, 0.5);
+        if (i == 15)
+            set_admittance (node, 0.1);
 
         // link the node with the previous node
         // (unless this is the first node of course)
@@ -123,9 +123,6 @@ double get_frequency (double note) {
 // simple sawtooth source synth
 double phonate_saw (Voice *voice) {
 
-    // TODO: use lungs for intensity instead of velocity directly
-    // and adjust lungs to note velocity
-
     // vibrato lfo
     double vibrato = sin (voice->vibrato_phase * 2 * M_PI) * voice->parameters.vibrato_depth;
     voice->vibrato_phase += voice->parameters.vibrato_rate / voice->rate;
@@ -136,13 +133,17 @@ double phonate_saw (Voice *voice) {
     voice->osc_phase += freq / voice->rate;
     voice->osc_phase = fmod (voice->osc_phase, 1);
 
+    // intensity depending on glottal tension
+    double intensity = voice->parameters.lungs * (voice->parameters.glottal_tension + 1) / 2;
+    double loudness = voice->parameters.lungs * (fmin (voice->parameters.glottal_tension, 0) + 1);
+
     // filter
     double sample = voice->osc;
     double delta = saw - sample;
-    double k = pow (voice->note.velocity, 3);
+    double k = pow (intensity, 3);
     voice->osc += delta * k;
 
-    return sample * voice->parameters.volume;
+    return sample * loudness;
 }
 
 // lf model of glottal excitation
@@ -165,7 +166,8 @@ double phonate (Voice *voice) {
 double step_voice (Voice *voice) {
 
     // air pressure from lungs
-    //add_energy (voice->source, voice->parameters.lungs);
+    double opening = fmax (-voice->parameters.glottal_tension, 0);
+    add_energy (voice->source, voice->parameters.lungs * opening);
 
     // vocal cord vibration
     double glottal_source = phonate (voice);
@@ -175,11 +177,11 @@ double step_voice (Voice *voice) {
     // TODO
 
     // set physical attributes
-    // TODO
+    voice->parameters.lungs = voice->note.velocity;
 
     // simulate acoustics
     run_waveguide (voice->waveguide);
 
     // return the drain output
-    return collect_drain (voice->waveguide);
+    return collect_drain (voice->waveguide) * voice->parameters.volume;
 }

@@ -3,7 +3,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-// produce a normalized random value between -1 and 1
 double noise () {
     return rand () / (RAND_MAX / 2.0) - 1;
 }
@@ -185,6 +184,8 @@ void move_energy (NN_Waveguide *waveguide, NN_Link *link) {
     double reflection = gamma * link->energy;
 
     // generate some turbulence
+    // TODO: more accurate turbulence
+    //double turbulence = fmax (0, gamma * abs (link->energy)) * noise () * waveguide->turbulence;
     double turbulence = fmax (0, reflection) * noise () * waveguide->turbulence;
 
     // send the reflected energy backward

@@ -6,7 +6,7 @@
 
 // defaults
 #define DAMPING 0.04
-#define TURBULENCE 0//0.001
+#define TURBULENCE 0.05
 
 
 
@@ -97,6 +97,8 @@ NN_Link *double_link_nodes (NN_Node *source, NN_Node *target);
 // link a node with itself
 NN_Link *terminate_node (NN_Node *node);
 
+// produce a normalized random value between -1 and 1
+double noise ();
 
 
 //////// "COLD" DATA TYPES ////////////////
