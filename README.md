@@ -26,7 +26,11 @@ artwork  bin  doc  index.html  pluginterfaces  public.sdk  vstgui.sf
 
 ## How to build
 
-Run `make` to produce the standalone JACK client `nanceloid`, the 32-bit VST plugin `build/nanceloid.dll`, the 64-bit VST plugin `build/nanceloid.dll`, and the waveguide network engine test program `build/test`.
+Run `make` to produce the `build` directory containing the following:
+- `nanceloid` is the standalone JACK client.
+- `nanceloid32.dll` is the 32-bit version of the VST plugin.
+- `nanceloid64.dll` is the 64-bit version of the VST plugin.
+- `test` is a test program used for debugging the waveguide network engine.
 
 Run `make clean` to remove the `build` directory and its contents once it has been created.
 
