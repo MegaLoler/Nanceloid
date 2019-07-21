@@ -69,6 +69,7 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 - "pump" nodes : provides steady stream of pressure values
 
 ### Stand-alone frontend stuff
+- sdl
 
 ### VST stuff
 - basic vst interface
