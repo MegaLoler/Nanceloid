@@ -5,6 +5,45 @@ AudioEffect *createEffectInstance (audioMasterCallback audio_master) {
     return new NN_VST (audio_master);
 }
 
+void NN_VST::init_waveguide () {
+    // delete an existing one if it has already been established
+    destroy_waveguide (waveguide);
+
+    // create a new one
+    waveguide = create_waveguide ();
+
+    // create a straight tube closed off at one end
+    // (temporary)
+    const int tube_length = 20;
+    NN_Node *previous = NULL;
+    for (int i = 0; i < tube_length; i++) {
+
+        // figure out what kind of node it should be
+        NN_NodeType type = GUIDE;
+        if (i == 0)
+            type = SOURCE;
+        else if (i == tube_length - 1)
+            type = DRAIN;
+
+        // create the next node
+        NN_Node *node = spawn_node (waveguide, type);
+
+        // link the node with the previous node
+        // (unless this is the first node of course)
+        if (previous != NULL)
+            link_nodes (previous, node);
+
+        // set the previous node for next iteration
+        previous = node;
+
+        // set the active source and drain nodes
+        if (i == 0)
+            source_node = node;
+        else if (i == tube_length - 1)
+            drain_node = node;
+    }
+}
+
 NN_VST::NN_VST (audioMasterCallback audio_master)
     : AudioEffectX (audio_master, 0, PARAMETER_COUNT) {
 
@@ -14,10 +53,13 @@ NN_VST::NN_VST (audioMasterCallback audio_master)
     setUniqueID ('nanc');
     canProcessReplacing ();
     isSynth ();
+
+    // setup the waveguide network
+    init_waveguide ();
 }
 
 NN_VST::~NN_VST () {
-
+    destroy_waveguide (waveguide);
 }
 
 VstInt32 NN_VST::canDo (char *string) {
@@ -41,8 +83,14 @@ void NN_VST::setSampleRate (float rate) {
 }
 
 void NN_VST::processReplacing (float **inputs, float **outputs, VstInt32 frames) {
-    while (frames--)
-        (*(*outputs)++) = (*(*inputs)++);
+    float *in = inputs[0];
+    float *out = outputs[0];
+
+    while (frames--) {
+        inject_energy (waveguide, source_node, *in++);
+        run_waveguide (waveguide);
+        *out++ = net_node_energy (drain_node);
+    }
 }
 
 VstInt32 NN_VST::processEvents (VstEvents *event) {

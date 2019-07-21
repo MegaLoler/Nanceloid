@@ -38,6 +38,8 @@ NN_Node *create_node (NN_NodeType type, double area) {
 }
 
 void destroy_node (NN_Node *node) {
+    if (node == NULL)
+        return;
     while (node->links != NULL) {
         // TODO: optimize getting list node contents
         NN_Link *link = (NN_Link *) list_get(node->links, 0);
@@ -45,7 +47,7 @@ void destroy_node (NN_Node *node) {
         free (link);
         list_remove (&(node->links), 0);
     }
-    free(node);
+    free (node);
 }
 
 double net_node_energy (NN_Node *node) {
@@ -131,7 +133,7 @@ void destroy_link (NN_Link *link) {
         prev = links;
         links = next;
     }
-    free(link);
+    free (link);
 }
 
 void add_energy (NN_Link *link, double energy) {
@@ -208,10 +210,10 @@ void distribute_energy (NN_Waveguide *waveguide, NN_Node *node, double energy, N
 
             double weight;
             if (admittance == INFINITY) {
-                weight = 0;
+                weight = 1;
             }
             else if (admittance == 0) {
-                weight = 1;
+                weight = 0;
             }
             else {
                 weight = get_admittance (jlink->target) / admittance;
@@ -254,6 +256,8 @@ NN_Waveguide *create_waveguide () {
 }
 
 void destroy_waveguide (NN_Waveguide *waveguide) {
+    if (waveguide == NULL)
+        return;
     while (waveguide->nodes != NULL) {
         // TODO: optimize getting list node contents
         NN_Node *node = (NN_Node *) list_get (waveguide->nodes, 0);

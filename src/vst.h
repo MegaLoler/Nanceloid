@@ -1,4 +1,5 @@
 #include <audioeffectx.h>
+#include <waveguide.h>
 #include <math.h>
 
 class NN_VST : public AudioEffectX {
@@ -24,6 +25,13 @@ class NN_VST : public AudioEffectX {
         virtual void getParameterName (VstInt32 index, char *name);
         virtual void getParameterLabel (VstInt32 index, char *label);
         virtual void getParameterDisplay (VstInt32 index, char *string);
+
+    private:
+        NN_Waveguide *waveguide;
+        NN_Node *source_node;
+        NN_Node *drain_node;
+
+        void init_waveguide ();
 };
 
 enum PARAMETER_TYPE {

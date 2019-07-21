@@ -69,3 +69,4 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 - "exciter" nodes : generates sound by oscillating impedance in response to pressure
 - "pump" nodes : provides steady stream of pressure values
 - fix broken makefile lol
+- optimize ? ? idk lol

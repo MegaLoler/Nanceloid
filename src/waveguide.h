@@ -9,6 +9,12 @@
 
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 //////// "HOT" DATA TYPES //////////
 
 typedef struct NN_Link NN_Link;
@@ -100,3 +106,9 @@ uint8_t *serialize (NN_Waveguide *waveguide);
 
 // deserialize a previously serialized waveguide
 NN_Waveguide *deserialize (uint8_t *data);
+
+
+
+#ifdef __cplusplus
+}
+#endif
