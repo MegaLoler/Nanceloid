@@ -78,10 +78,10 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 - basic vst interface
 
 ### Midi stuff
-- normal note events
 - preset phoneme mapped notes
 
 ### Nanceloid stuff
+- polyphony saw
 - all sorts of dynamics n stuff
 - "exciter" nodes : generates sound by oscillating impedance in response to pressure
 - lung "pump" node

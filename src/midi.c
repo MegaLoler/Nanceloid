@@ -12,8 +12,9 @@ void process_midi (Voice *voice, uint8_t *data) {
     uint8_t type = data[0] & 0xf0;
     //uint8_t chan = data[0] & 0x0f;
 
-    // handle control signals
     if (type == 0xb0) {
+
+        // handle control events
         uint8_t id = data[1];
         uint8_t value = data[2];
         printf("Received midi controller event: 0x%x 0x%x\n", id, value);
@@ -47,6 +48,25 @@ void process_midi (Voice *voice, uint8_t *data) {
         }
 
         debug_parameters (voice->parameters);
+
+    } else if (type == 0x80) {
+
+        // handle note off events
+        uint8_t note = data[1];
+        uint8_t velocity = data[2];
+
+        if (note == voice->note.note)
+            voice->note.velocity = map_to_range (velocity, 0, 1);
+
+    } else if (type == 0x90) {
+
+        // handle note on events
+        uint8_t note = data[1];
+        uint8_t velocity = data[2];
+
+        voice->note.note = note;
+        voice->note.velocity = map_to_range (velocity, 0, 1);
+
     }
 
     // TODO: handle normal midi notes

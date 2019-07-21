@@ -5,23 +5,25 @@
 
 void debug_parameters (Parameters p) {
     printf ("[DEBUG PARAMETERS]\n");
-    printf ("lungs            %.8f\n", p.lungs);
-    printf ("glottal_tension  %.8f\n", p.glottal_tension);
-    printf ("laryngeal_height %.8f\n", p.laryngeal_height);
-    printf ("lips_roundedness %.8f\n", p.lips_roundedness);
-    printf ("jaw_height       %.8f\n", p.jaw_height);
-    printf ("tongue_frontness %.8f\n", p.tongue_frontness);
-    printf ("tongue_height    %.8f\n", p.tongue_height);
-    printf ("tongue_flatness  %.8f\n", p.tongue_flatness);
-    printf ("acoustic_damping %.8f\n", p.acoustic_damping);
-    printf ("physical_damping %.8f\n", p.physical_damping);
-    printf ("enunciation      %.8f\n", p.enunciation);
-    printf ("frication        %.8f\n", p.frication);
-    printf ("surface_tension  %.8f\n", p.surface_tension);
-    printf ("tract_length     %.8f\n", p.tract_length);
-    printf ("vibrato_rate     %.8f\n", p.vibrato_rate);
-    printf ("vibrato_depth    %.8f\n", p.vibrato_depth);
-    printf ("volume           %.8f\n", p.volume);
+    printf ("lungs              %.8f\n", p.lungs);
+    printf ("glottal_tension    %.8f\n", p.glottal_tension);
+    printf ("laryngeal_height   %.8f\n", p.laryngeal_height);
+    printf ("lips_roundedness   %.8f\n", p.lips_roundedness);
+    printf ("jaw_height         %.8f\n", p.jaw_height);
+    printf ("tongue_frontness   %.8f\n", p.tongue_frontness);
+    printf ("tongue_height      %.8f\n", p.tongue_height);
+    printf ("tongue_flatness    %.8f\n", p.tongue_flatness);
+    printf ("acoustic_damping   %.8f\n", p.acoustic_damping);
+    printf ("physical_damping   %.8f\n", p.physical_damping);
+    printf ("enunciation        %.8f\n", p.enunciation);
+    printf ("frication          %.8f\n", p.frication);
+    printf ("surface_tension    %.8f\n", p.surface_tension);
+    printf ("tract_length       %.8f\n", p.tract_length);
+    printf ("ambient_admittance %.8f\n", p.ambient_admittance);
+    printf ("vibrato_rate       %.8f\n", p.vibrato_rate);
+    printf ("vibrato_depth      %.8f\n", p.vibrato_depth);
+    printf ("volume             %.8f\n", p.volume);
+    printf ("\n");
 }
 
 void init_parameters (Parameters *p) {
@@ -39,12 +41,13 @@ void init_parameters (Parameters *p) {
     p->tongue_flatness  = 0;   // middle curvature
 
     // physical parameters
-    p->acoustic_damping = DAMPING;
-    p->physical_damping = 0.4;
-    p->enunciation      = 0.75;
-    p->frication        = TURBULENCE;
-    p->surface_tension  = 0.5;
-    p->tract_length     = 17.5;
+    p->acoustic_damping   = DAMPING;
+    p->physical_damping   = 0.4;
+    p->enunciation        = 0.75;
+    p->frication          = TURBULENCE;
+    p->surface_tension    = 0.5;
+    p->tract_length       = 17.5;
+    p->ambient_admittance = AMBIENT_ADMITTANCE;
 
     // musical and audio parameters
     p->vibrato_rate  = 4;
@@ -105,7 +108,7 @@ void init_tract (Voice *voice) {
 
         // set ambient admittance
         if (i == tube_length - 1)
-            set_admittance (node, AMBIENT_ADMITTANCE);
+            set_admittance (node, voice->parameters.ambient_admittance);
     }
 }
 

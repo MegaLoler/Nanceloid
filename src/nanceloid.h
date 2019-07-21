@@ -3,35 +3,36 @@
 
 #include <waveguide.h>
 
-#define AMBIENT_ADMITTANCE INFINITY
+#define AMBIENT_ADMITTANCE 10 //INFINITY
 
 // represents synth parameters
 typedef struct Parameters {
 
     // phonation parameters
-    double lungs;            // continuous air pressure from the lungs (-1 to 1)
-    double glottal_tension;  // how tightly shut the glottis is (-1 to 1)
-    double laryngeal_height; // effects pitch and extents tract (-1 to 1)
+    double lungs;              // continuous air pressure from the lungs (-1 to 1)
+    double glottal_tension;    // how tightly shut the glottis is (-1 to 1)
+    double laryngeal_height;   // effects pitch and extents tract (-1 to 1)
 
     // articulatory parameters
-    double lips_roundedness; // closedness of the lips (0 to 1)
-    double jaw_height;       // jaw openness/height (0 to 1)
-    double tongue_frontness; // position of peak of tongue (0 to 1)
-    double tongue_height;    // how close to touching the roof of the mouth (0 to 1)
-    double tongue_flatness;  // distribution of the tongue curve (-1 to 1)
+    double lips_roundedness;   // closedness of the lips (0 to 1)
+    double jaw_height;         // jaw openness/height (0 to 1)
+    double tongue_frontness;   // position of peak of tongue (0 to 1)
+    double tongue_height;      // how close to touching the roof of the mouth (0 to 1)
+    double tongue_flatness;    // distribution of the tongue curve (-1 to 1)
 
     // physical parameters
-    double acoustic_damping; // sound absorbsion, loss of energy at reflections (0 to 1)
-    double physical_damping; // damping of tract reshaping (0 to 1)
-    double enunciation;      // strength of tract reshaping (0 to 1)
-    double frication;        // turbulence coefficient (0 to 1)
-    double surface_tension;  // tendency of constrictions to stick together (0 to 1)
-    double tract_length;     // length of vocal tract (cm)
+    double acoustic_damping;   // sound absorbsion, loss of energy at reflections (0 to 1)
+    double physical_damping;   // damping of tract reshaping (0 to 1)
+    double enunciation;        // strength of tract reshaping (0 to 1)
+    double frication;          // turbulence coefficient (0 to 1)
+    double surface_tension;    // tendency of constrictions to stick together (0 to 1)
+    double tract_length;       // length of vocal tract (cm)
+    double ambient_admittance; // admittance of the drain
 
     // musical and audio parameters
-    double vibrato_rate;    // how quickly the singing vibrato should be (hz)
-    double vibrato_depth;   // how wide the vibrato peak should be (semitones)
-    double volume;          // overall volume (0 to 1)
+    double vibrato_rate;       // how quickly the singing vibrato should be (hz)
+    double vibrato_depth;      // how wide the vibrato peak should be (semitones)
+    double volume;             // overall volume (0 to 1)
 
 } Parameters;
 
