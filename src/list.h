@@ -1,3 +1,6 @@
+#ifndef LIST_H
+#define LIST_H
+
 // simple linked list implementation
 
 // a list node
@@ -27,3 +30,5 @@ List *list_append (List **list, void *content);
 
 // delete an item from a list by its index
 void list_remove (List **list, int index);
+
+#endif

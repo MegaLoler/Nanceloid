@@ -70,24 +70,25 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 ## Todo list
 
 ### Jack frontend stuff
-- attach the synth!
 - consider command line args
 - switch to ALSA for midi
 
 ### VST stuff
+- use nanceloid.h/c and midi.h/c
 - basic vst interface
 
 ### Midi stuff
-- basic midi event handling
+- normal note events
+- preset phoneme mapped notes
 
 ### Nanceloid stuff
-- basic structure
+- all sorts of dynamics n stuff
+- "exciter" nodes : generates sound by oscillating impedance in response to pressure
+- lung "pump" node
+- maybe a LF model glottis node....
 
 ### Waveguide stuff
 - de/serialization of waveguide network objects
-- "exciter" nodes : generates sound by oscillating impedance in response to pressure
-- "pump" nodes : provides steady stream of pressure values
-- maybe a LF model glottis node....
 
 ### Miscellaneous stuff
 - fix broken makefile lol

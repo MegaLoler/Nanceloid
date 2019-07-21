@@ -9,9 +9,8 @@ void init_parameters (Parameters *p) {
     p->laryngeal_height = 0; // neutral pitch
 
     // articulatory parameters
-    p->lips_extrusion   = 0;   // resting lips
-    p->lips_roundedness = 0.5; // neutral position
-    p->jaw_height       = 0.5; // neutral position
+    p->lips_roundedness = 0;   // resting lips
+    p->jaw_height       = 0.5; // resting jaw
     p->tongue_frontness = 0.5; // center tongue
     p->tongue_height    = 0;   // schwa position
     p->tongue_flatness  = 0;   // middle curvature

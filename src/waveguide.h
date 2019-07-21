@@ -1,4 +1,5 @@
-// include file for the negative nancy's waveguide network playground C library
+#ifndef WAVEGUIDE_H
+#define WAVEGUIDE_H
 
 #include <list.h>
 #include <stdint.h>
@@ -111,4 +112,8 @@ NN_Waveguide *deserialize (uint8_t *data);
 
 #ifdef __cplusplus
 }
+#endif
+
+
+
 #endif

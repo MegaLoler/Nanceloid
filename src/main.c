@@ -4,6 +4,7 @@
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include <nanceloid.h>
+#include <midi.h>
 
 // the vocal synth instance
 Voice *voice;
@@ -31,8 +32,8 @@ int jack_process (jack_nframes_t num_frames, void *arg) {
     // TODO: consider timing
     for (int i = 0; i < num_events; i++) {
         jack_midi_event_get (&event, midi_port_buffer, i);
-        //uint8_t *data = event.buffer;
-        // TODO: process data using midi.h/c
+        uint8_t *data = event.buffer;
+        process_midi (voice, data);
     }
 
     // process audio frames

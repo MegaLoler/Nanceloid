@@ -31,9 +31,9 @@ all: $(TARGET_MAIN) $(TARGET_TEST) vst
 
 ### JACK CLIENT ###
 
-$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o
+$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o
 	$(CC) -lm -ljack \
-		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o \
+		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o \
 		-o $(TARGET_MAIN)
 
 $(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.c
@@ -45,6 +45,11 @@ $(BUILD_PATH)/nanceloid.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.c
 	$(CC) -c \
 		$(SRC_PATH)/nanceloid.c \
 		-o $(BUILD_PATH)/nanceloid.o
+
+$(BUILD_PATH)/midi.o: $(BUILD_PATH) $(SRC_PATH)/midi.c
+	$(CC) -c \
+		$(SRC_PATH)/midi.c \
+		-o $(BUILD_PATH)/midi.o
 
 
 
