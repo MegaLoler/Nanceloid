@@ -20,13 +20,28 @@ XC32          ::= $(XCOMP32) $(OPT) $(XOPT)
 XC64          ::= $(XCOMP64) $(OPT) $(XOPT)
 
 # targets
+TARGET_MAIN   ::= $(BUILD_PATH)/nanceloid
 TARGET_TEST   ::= $(BUILD_PATH)/test
-TARGET_VST_32 ::= $(BUILD_PATH)/nnwgnp32.dll
-TARGET_VST_64 ::= $(BUILD_PATH)/nnwgnp64.dll
+TARGET_VST_32 ::= $(BUILD_PATH)/nanceloid32.dll
+TARGET_VST_64 ::= $(BUILD_PATH)/nanceloid64.dll
+
+all: $(TARGET_MAIN) $(TARGET_TEST) vst
 
 
 
-all: $(TARGET_TEST) vst
+### JACK CLIENT ###
+
+$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o
+	$(CC) -lm -ljack \
+		$(BUILD_PATH)/main.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o \
+		-o $(TARGET_MAIN)
+
+$(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.c
+	$(CC) -c \
+		$(SRC_PATH)/main.c \
+		-o $(BUILD_PATH)/main.o
+
+
 
 ### TEST PROGRAM ###
 
@@ -39,6 +54,10 @@ $(BUILD_PATH)/test.o: $(BUILD_PATH) $(SRC_PATH)/test.c
 	$(CC) -c \
 		$(SRC_PATH)/test.c \
 		-o $(BUILD_PATH)/test.o
+
+
+
+### COMMON ###
 
 $(BUILD_PATH)/waveguide.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.c
 	$(CC) -c \

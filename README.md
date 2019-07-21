@@ -70,7 +70,9 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 ## Todo list
 
 ### Jack frontend stuff
-- basic jack client
+- attach the synth!
+- consider command line args
+- switch to ALSA for midi
 
 ### VST stuff
 - basic vst interface
