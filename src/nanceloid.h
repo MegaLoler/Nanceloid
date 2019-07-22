@@ -9,6 +9,7 @@
 #define MAX_POLYPHONY 8
 #define LARYNX_Z 5
 #define NEUTRAL_Z 1
+#define NASAL_Z 5
 #define ENUNCIATION 0.001
 #define PORTAMENTO 0.001
 
@@ -76,9 +77,11 @@ typedef struct Voice {
     NN_Node *larynx[MAX];       // nodes of the larynx
     NN_Node *tongue[MAX];       // nodes of the tongue
     NN_Node *lips[MAX];         // nodes of the lips
+    NN_Node *nose[MAX];         // nodes of the nose
     int larynx_length;          // number of nodes in the larynx
     int tongue_length;          // number of nodes in the tongue
     int lips_length;            // number of nodes in the lips
+    int nose_length;            // number of nodes in the nose
 
     Parameters parameters;      // the synth parameters
     PhonationModel model;       // how to model glottal source sound

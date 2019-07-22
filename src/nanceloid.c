@@ -42,7 +42,7 @@ void init_parameters (Parameters *p) {
     p->tongue_frontness   = 0.5; // center tongue
     p->tongue_height      = 0;   // schwa position
     p->tongue_flatness    = 0;   // middle curvature
-    p->velic_closure      = 1;   // no nasal
+    p->velic_closure      = 0;   // no nasal
 
     // physical parameters
     p->acoustic_damping   = DAMPING;
@@ -51,7 +51,7 @@ void init_parameters (Parameters *p) {
     p->portamento         = 0.5;
     p->frication          = TURBULENCE;
     p->surface_tension    = 0.5;
-    p->tract_length       = 17.5;
+    p->tract_length       = 11;
     p->ambient_admittance = AMBIENT_ADMITTANCE;
 
     // musical and audio parameters
@@ -66,7 +66,7 @@ Voice *create_voice (PhonationModel model, int rate) {
     Voice *voice = (Voice *) malloc (sizeof (Voice));
     voice->model = model;
 
-    voice->note.note = 45;
+    voice->note.note = 57;
     voice->note.detune = 0;
     voice->note.velocity = 1;
 
@@ -99,7 +99,7 @@ void target_admittance (Voice *voice, NN_Node *node, double target) {
 void reshape_tract (Voice *voice) {
 
     // shape the lips
-    double lips_admittance = 1 / NEUTRAL_Z * (1 - voice->parameters.lips_roundedness);
+    double lips_admittance = (1 - voice->parameters.lips_roundedness) / NEUTRAL_Z;
     for (int i = 0; i < voice->lips_length; i++) {
         NN_Node *node = voice->lips[i];
         target_admittance (voice, node, lips_admittance);
@@ -111,13 +111,16 @@ void reshape_tract (Voice *voice) {
 
         // TEMP
         // TODO: enhance this lol
-        double unit_pos = i / (double)(voice->tongue_length - 1);
+        double unit_pos = i / (double) (voice->tongue_length - 1);
         double phase = unit_pos - voice->parameters.tongue_frontness;
-        double value = cos(phase * M_PI / 2) * voice->parameters.tongue_height;
+        double value = cos (phase * M_PI / 2) * voice->parameters.tongue_height;
         double unit_area = 1 - value;
-        target_admittance (voice, node, 1 / NEUTRAL_Z * unit_area);
+        target_admittance (voice, node, unit_area / NEUTRAL_Z);
     }
 
+    // shape the velum
+    double velum_admittance = (1 - voice->parameters.velic_closure) / NASAL_Z;
+    set_admittance (voice->nose[0], velum_admittance);
 }
 
 void init_tract (Voice *voice) {
@@ -126,20 +129,22 @@ void init_tract (Voice *voice) {
     double unit = (double) SPEED_OF_SOUND / voice->rate;
 
     // calculate the positions of various landmarks along the tract
+    // TODO: calculate proportions based on overal tract length
     double larynx_start = voice->parameters.tract_length * 0;
     double tongue_start = voice->parameters.tract_length * 0.2;
     double lips_start   = voice->parameters.tract_length * 0.9;
+    double nose_start   = voice->parameters.tract_length * 0.2;
 
     voice->larynx_length = 0;
     voice->tongue_length = 0;
     voice->lips_length = 0;
-
-    printf ("%f\n", unit);
+    voice->nose_length = 0;
 
     // generate enough nodes to meet the desired length
     // plus one extra for the drain
     int i = 0;
     NN_Node *previous = NULL;
+    NN_Node *nose = NULL;
     double required_length = voice->parameters.tract_length + unit;
     while (unit * i < required_length) {
 
@@ -147,7 +152,7 @@ void init_tract (Voice *voice) {
         NN_Node *node = spawn_node (voice->waveguide);
 
         // figure out where we are in the tract
-        double amount = unit * i;
+        double amount = unit * i++;
 
         // set landmark nodes
         if (amount >= lips_start) {
@@ -164,6 +169,10 @@ void init_tract (Voice *voice) {
 
         }
 
+        // lookout for nasal junction
+        if (nose == NULL && amount >= nose_start)
+            nose = node;
+
         // link the node with the previous node
         // (unless this is the first node of course)
         if (previous != NULL)
@@ -174,15 +183,30 @@ void init_tract (Voice *voice) {
         // set the previous node for next iteration
         previous = node;
 
-        // next
-        i++;
+        // create nasal nodes
+        if (nose != NULL) {
+
+            // create the next nasal node
+            NN_Node *nasal_node = spawn_node (voice->waveguide);
+
+            // add it to nasal nodes
+            voice->nose[voice->nose_length++] = nasal_node;
+
+            // link it with the previous node
+            double_link_nodes (nose, nasal_node);
+
+            // set previous for next iteration
+            nose = nasal_node;
+        }
     }
 
     // the last node is the drain and not part of the lips
     voice->lips_length--;
+    voice->nose_length--;
 
     // set ambient admittance
     set_admittance (previous, voice->parameters.ambient_admittance);
+    set_admittance (nose, voice->parameters.ambient_admittance);
 
 }
 
