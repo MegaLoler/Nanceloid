@@ -88,6 +88,9 @@ void init_tract (Voice *voice);
 // update the shape of the tract according to parameters
 void reshape_tract (Voice *voice);
 
+// update the size of the tract by regenerated a new one
+void resize_tract (Voice *voice);
+
 // create and initialize a new synth instance
 Voice *create_voice ();
 

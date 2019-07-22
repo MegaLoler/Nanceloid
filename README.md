@@ -81,11 +81,12 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 - preset phoneme mapped notes
 
 ### Nanceloid stuff
+- nasal and lateral passages
+- copy energy from one waveguide to another function
 - polyphony saw
 - all sorts of dynamics n stuff
-- "exciter" nodes : generates sound by oscillating impedance in response to pressure
-- lung "pump" node
-- maybe a LF model glottis node....
+- lf source model
+- experimental source model
 
 ### Waveguide stuff
 - fix destroying things dangit

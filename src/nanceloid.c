@@ -72,6 +72,7 @@ Voice *create_voice (PhonationModel model, int rate) {
     voice->vibrato_phase = 0;
 
     init_parameters (&voice->parameters);
+    voice->waveguide = create_waveguide ();
     init_tract (voice);
     reshape_tract (voice);
 
@@ -106,10 +107,6 @@ void reshape_tract (Voice *voice) {
 }
 
 void init_tract (Voice *voice) {
-
-    if (voice->waveguide != NULL)
-        destroy_waveguide (voice->waveguide);
-    voice->waveguide = create_waveguide ();
 
     // calculate the length of a single node
     double unit = (double) SPEED_OF_SOUND / voice->rate;
@@ -175,7 +172,24 @@ void init_tract (Voice *voice) {
 
 }
 
-// TODO: resize tract function
+// copy energy from one waveguide to another
+void copy_energy (NN_Waveguide *source, NN_Waveguide *target) {
+    // TODO
+}
+
+void resize_tract (Voice *voice) {
+
+    // keep the old one handy and create and initialize a new one
+    NN_Waveguide *old = voice->waveguide;
+    voice->waveguide = create_waveguide ();
+    init_tract (voice);
+
+    // copy the old sound energy into the new one
+    copy_energy (old, voice->waveguide);
+
+    // destray the old one
+    //destroy_waveguide (old);
+}
 
 // return frequency in hertz given midi note
 // equal temperament for now

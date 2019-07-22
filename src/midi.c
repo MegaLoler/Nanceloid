@@ -23,27 +23,36 @@ void process_midi (Voice *voice, uint8_t *data) {
             case CONTROLLER_GLOTTAL_TENSION:
                 voice->parameters.glottal_tension = map_to_range (value, -1, 1);
                 break;
+
             case CONTROLLER_LIPS_ROUNDEDNESS:
                 voice->parameters.lips_roundedness = map_to_range (value, 0, 1);
                 break;
+
             case CONTROLLER_JAW_HEIGHT:
                 voice->parameters.jaw_height = map_to_range (value, 0, 1);
                 break;
+
             case CONTROLLER_TONGUE_FRONTNESS:
                 voice->parameters.tongue_frontness = map_to_range (value, 0, 1);
                 break;
+
             case CONTROLLER_TONGUE_HEIGHT:
                 voice->parameters.tongue_height = map_to_range (value, 0, 1);
                 break;
+
             case CONTROLLER_TONGUE_FLATNESS:
                 voice->parameters.tongue_flatness = map_to_range (value, -1, 1);
                 break;
+
             case CONTROLLER_ENUNCIATION:
                 voice->parameters.enunciation = map_to_range (value, 0, 1);
                 break;
+
             case CONTROLLER_TRACT_LENGTH:
                 voice->parameters.tract_length = map_to_range (value, 8, 24);
+                resize_tract (voice);
                 break;
+
             // TODO: standard midi controllers such as modulation wheel and pitch bend
         }
 
