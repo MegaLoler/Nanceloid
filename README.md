@@ -99,17 +99,21 @@ The `src` directory contains the following:
 - preset phoneme mapped notes
 
 ### Nanceloid stuff
+- surface tension
 - nasal and lateral passages
+- velic closure
+- laryngeal extension
+- dynamic larynx proportions
+- lips extrusion
+- jaw control
 - copy energy from one waveguide to another function
 - polyphony saw
-- all sorts of dynamics n stuff
 - lf source model
 - experimental source model
 
 ### Waveguide stuff
 - fix destroying things dangit
 - more realistic turbulence
-- dynamics
 
 ### Miscellaneous stuff
 - fix broken makefile lol
