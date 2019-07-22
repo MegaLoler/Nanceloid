@@ -3,8 +3,12 @@
 
 #include <waveguide.h>
 
-// defaults
+#define SPEED_OF_SOUND 34300 // cm/s
 #define AMBIENT_ADMITTANCE 10
+#define MAX 128
+#define MAX_POLYPHONY 8
+#define LARYNX_Z 5
+#define NEUTRAL_Z 1
 
 // represents synth parameters
 typedef struct Parameters {
@@ -20,6 +24,7 @@ typedef struct Parameters {
     double tongue_frontness;   // position of peak of tongue (0 to 1)
     double tongue_height;      // how close to touching the roof of the mouth (0 to 1)
     double tongue_flatness;    // distribution of the tongue curve (-1 to 1)
+    double velic_closure;      // the closing off of the nasal cavity (0 to 1)
 
     // physical parameters
     double acoustic_damping;   // sound absorbsion, loss of energy at reflections (0 to 1)
@@ -55,6 +60,13 @@ typedef struct Voice {
 
     NN_Waveguide *waveguide;    // the waveguide network to simulate the tract
     NN_Link *source;            // the link to inject glottal source sound
+    
+    NN_Node *larynx[MAX];       // nodes of the larynx
+    NN_Node *tongue[MAX];       // nodes of the tongue
+    NN_Node *lips[MAX];         // nodes of the lips
+    int larynx_length;          // number of nodes in the larynx
+    int tongue_length;          // number of nodes in the tongue
+    int lips_length;            // number of nodes in the lips
 
     Parameters parameters;      // the synth parameters
     PhonationModel model;       // how to model glottal source sound
@@ -72,6 +84,9 @@ void init_parameters (Parameters *p);
 
 // initialize the waveguide of a synth
 void init_tract (Voice *voice);
+
+// update the shape of the tract according to parameters
+void reshape_tract (Voice *voice);
 
 // create and initialize a new synth instance
 Voice *create_voice ();

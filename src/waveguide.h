@@ -6,7 +6,7 @@
 
 // defaults
 #define DAMPING 0.04
-#define TURBULENCE 0.05
+#define TURBULENCE 0.1
 
 
 

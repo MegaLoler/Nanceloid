@@ -56,7 +56,7 @@ void process_midi (Voice *voice, uint8_t *data) {
         uint8_t velocity = data[2];
 
         if (note == voice->note.note)
-            map_to_range (velocity, 0, 1);
+            voice->note.velocity = map_to_range (velocity, 0, 1);
 
     } else if (type == 0x90) {
 
@@ -69,6 +69,5 @@ void process_midi (Voice *voice, uint8_t *data) {
 
     }
 
-    // TODO: handle normal midi notes
     // TODO: handle phoneme mapped notes
 }
