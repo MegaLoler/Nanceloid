@@ -14,7 +14,24 @@
 #define CONTROLLER_ENUNCIATION      0x1b
 #define CONTROLLER_TRACT_LENGTH     0x1c
 
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 // process a midi event
 void process_midi (Voice *voice, uint8_t *data);
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
+
 
 #endif

@@ -33,13 +33,8 @@ int jack_process (jack_nframes_t num_frames, void *arg) {
     // TODO: consider event timing
     for (int i = 0; i < num_events; i++) {
         jack_midi_event_get (&event, midi_port_buffer, i);
-        uint8_t *data = event.buffer;
-        process_midi (voice, data);
+        process_midi (voice, event.buffer);
     }
-
-    // update rate
-    // TODO: can this be changed to a callback?
-    voice->rate = jack_get_sample_rate(client);
 
     // process audio frames
     for (int i = 0; i < num_frames; i++) {

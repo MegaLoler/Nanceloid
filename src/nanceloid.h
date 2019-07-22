@@ -10,6 +10,14 @@
 #define LARYNX_Z 5
 #define NEUTRAL_Z 1
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 // represents synth parameters
 typedef struct Parameters {
 
@@ -92,7 +100,7 @@ void reshape_tract (Voice *voice);
 void resize_tract (Voice *voice);
 
 // create and initialize a new synth instance
-Voice *create_voice ();
+Voice *create_voice (PhonationModel model, int rate);
 
 // destroy a synth instance
 void destroy_voice (Voice *voice);
@@ -102,5 +110,13 @@ double step_voice (Voice *voice);
 
 // debug print the state of the parameters
 void debug_parameters (Parameters parameters);
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
+
 
 #endif

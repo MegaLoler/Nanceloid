@@ -74,7 +74,6 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 - better alsa midi interfacing lol
 
 ### VST stuff
-- use nanceloid.h/c and midi.h/c
 - basic vst interface
 
 ### Midi stuff
