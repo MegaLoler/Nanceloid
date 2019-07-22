@@ -46,6 +46,30 @@ Run `make debug` to run the same thing in GDB.
 
 ## How to use
 
+### Synth parameters
+
+| Parameter          | Midi Controller | Description                                 |
+|--------------------|-----------------|---------------------------------------------|
+| Lungs              | Note velocity   | Continuous air pressure from the lungs      |
+| Glottis            | 0x15            | How tightly shut the vocal folds are        |
+| Larynx             | Note pitch      | Vertical positioning of the larynx          |
+| Lips               | 0x16            | Rounding and extrusion of the lips          |
+| Jaw                | 0x17            | Elevation of the jaw                        |
+| Frontness          | 0x18            | Tongue position                             |
+| Height             | 0x19            | Tongue height                               |
+| Flatness           | 0x1a            | Tongue spread                               |
+| Velum              |                 | Velic closure                               |
+| Acoustic damping   |                 | Sound absorbtion coefficient                |
+| Physical damping   |                 | Damping of tract shape dynamics             |
+| Enunciation        | 0x1b            | Force used to reshape tract                 |
+| Frication          |                 | Turbulence coefficient                      |
+| Surface tension    |                 | "Stickiness"                                |
+| Tract length       | 0x1c            | Overal length of the vocal tract            |
+| Ambient admittance |                 | Acoustic ddmittance outside the vocal tract |
+| Vibrato rate       |                 | Speed of vibrato                            |
+| Vibrato depth      |                 | Intensity of vibrato                        |
+| Volume             |                 | Master volume                               |
+
 _TODO: tutorial, explanation, theory, etc_
 
 ## Files
@@ -92,6 +116,8 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 
 ### Waveguide stuff
 - fix destroying things dangit
+- more realistic turbulence
+- dynamics
 
 ### Miscellaneous stuff
 - fix broken makefile lol
