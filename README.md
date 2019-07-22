@@ -2,11 +2,9 @@
 
 A physically-modelled vocal synthesizer using digital waveguide networks!
 
-*(currently reorganizing things quite a bit...)*
+its a work in progress O_O
 
-its a WIP O_O
-
-_TODO: add screenshots_
+_TODO: add screenshots (once there is a gui lol)_
 
 ## Dependencies
 
@@ -70,7 +68,7 @@ Run `make debug` to run the same thing in GDB.
 | Vibrato depth      |                 | Intensity of vibrato                        |
 | Volume             |                 | Master volume                               |
 
-_TODO: tutorial, explanation, theory, etc_
+_TODO: tutorial, explanation, theory, docs, etc_
 
 ## Files
 
@@ -82,14 +80,6 @@ The `src` directory contains the following:
 - `waveguide.h` and `waveguide.c` contain the waveguide network engine.
 - `list.h` and `list.c` contain a linked list implementation.
 - `test.c` contains a test program.
-
-## Documentation
-
-tutorial and documentation: COMING EVENTUALLY!!
-
-check `src/waveguide.h` and `src/waveguide.c` to see the waveguide simulation code
-
-see `src/test.c` for a simple example of manually creating a simple chain of nodes with a source on one end and drain on the other
 
 ## Immediate todo list
 
