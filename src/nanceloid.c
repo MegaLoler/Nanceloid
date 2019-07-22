@@ -17,12 +17,14 @@ void debug_parameters (Parameters p) {
     printf ("acoustic_damping   %.8f\n", p.acoustic_damping);
     printf ("physical_damping   %.8f\n", p.physical_damping);
     printf ("enunciation        %.8f\n", p.enunciation);
+    printf ("portamento         %.8f\n", p.portamento);
     printf ("frication          %.8f\n", p.frication);
     printf ("surface_tension    %.8f\n", p.surface_tension);
     printf ("tract_length       %.8f\n", p.tract_length);
     printf ("ambient_admittance %.8f\n", p.ambient_admittance);
     printf ("vibrato_rate       %.8f\n", p.vibrato_rate);
     printf ("vibrato_depth      %.8f\n", p.vibrato_depth);
+    printf ("frequency          %.8f\n", p.frequency);
     printf ("volume             %.8f\n", p.volume);
     printf ("\n");
 }
@@ -32,7 +34,7 @@ void init_parameters (Parameters *p) {
     // phonation parameters
     p->lungs            = 0; // not breathing
     p->glottal_tension  = 0; // modal voice
-    p->laryngeal_height = 0; // neutral pitch
+    p->laryngeal_height = 0; // neutral position
 
     // articulatory parameters
     p->lips_roundedness   = 0;   // resting lips
@@ -45,7 +47,8 @@ void init_parameters (Parameters *p) {
     // physical parameters
     p->acoustic_damping   = DAMPING;
     p->physical_damping   = 0.4;
-    p->enunciation        = 0.75;
+    p->enunciation        = 0.25;
+    p->portamento         = 0.5;
     p->frication          = TURBULENCE;
     p->surface_tension    = 0.5;
     p->tract_length       = 17.5;
@@ -54,6 +57,7 @@ void init_parameters (Parameters *p) {
     // musical and audio parameters
     p->vibrato_rate  = 4;
     p->vibrato_depth = 0.25;
+    p->frequency     = 0;
     p->volume        = 0.5;
 
 }
@@ -84,12 +88,21 @@ void destroy_voice (Voice *voice) {
     free (voice);
 }
 
+// dynamics
+void target_admittance (Voice *voice, NN_Node *node, double target) {
+    double current = get_admittance (node);
+    double delta = (target - current) * voice->parameters.enunciation * ENUNCIATION;
+    double new = current + delta;
+    set_admittance (node, new);
+}
+
 void reshape_tract (Voice *voice) {
 
     // shape the lips
+    double lips_admittance = 1 / NEUTRAL_Z * (1 - voice->parameters.lips_roundedness);
     for (int i = 0; i < voice->lips_length; i++) {
         NN_Node *node = voice->lips[i];
-        set_admittance (node, 1 / NEUTRAL_Z * (1 - voice->parameters.lips_roundedness));
+        target_admittance (voice, node, lips_admittance);
     }
 
     // shape the tongue
@@ -97,11 +110,12 @@ void reshape_tract (Voice *voice) {
         NN_Node *node = voice->tongue[i];
 
         // TEMP
+        // TODO: enhance this lol
         double unit_pos = i / (double)(voice->tongue_length - 1);
         double phase = unit_pos - voice->parameters.tongue_frontness;
         double value = cos(phase * M_PI / 2) * voice->parameters.tongue_height;
         double unit_area = 1 - value;
-        set_admittance (node, 1 / NEUTRAL_Z * unit_area);
+        target_admittance (voice, node, 1 / NEUTRAL_Z * unit_area);
     }
 
 }
@@ -200,14 +214,9 @@ double get_frequency (double note) {
 // simple sawtooth source synth
 double phonate_saw (Voice *voice) {
 
-    // vibrato lfo
-    double vibrato = sin (voice->vibrato_phase * 2 * M_PI) * voice->parameters.vibrato_depth;
-    voice->vibrato_phase += voice->parameters.vibrato_rate / voice->rate;
-
     // saw osc
     double saw = voice->osc_phase;
-    double freq = get_frequency (voice->note.note + voice->note.detune + vibrato);
-    voice->osc_phase += freq / voice->rate;
+    voice->osc_phase += voice->parameters.frequency / voice->rate;
     voice->osc_phase = fmod (voice->osc_phase, 1);
 
     // intensity depending on glottal tension
@@ -242,6 +251,17 @@ double phonate (Voice *voice) {
 
 double step_voice (Voice *voice) {
 
+    // musical dynamics
+    double vibrato = sin (voice->vibrato_phase * 2 * M_PI) * voice->parameters.vibrato_depth;
+    voice->vibrato_phase += voice->parameters.vibrato_rate / voice->rate;
+
+    double frequency = get_frequency (voice->note.note + voice->note.detune + vibrato);
+    voice->parameters.frequency +=
+        (frequency - voice->parameters.frequency) * voice->parameters.portamento * PORTAMENTO;
+
+    voice->parameters.lungs +=
+        (voice->note.velocity - voice->parameters.lungs) * voice->parameters.portamento * PORTAMENTO;
+
     // air pressure from lungs
     double opening = fmax (-voice->parameters.glottal_tension, 0);
     add_energy (voice->source, voice->parameters.lungs * opening);
@@ -253,9 +273,6 @@ double step_voice (Voice *voice) {
     // handle articulatory dynamics
     // TODO
     reshape_tract (voice);
-
-    // set physical attributes
-    voice->parameters.lungs = voice->note.velocity;
 
     // simulate acoustics
     run_waveguide (voice->waveguide);

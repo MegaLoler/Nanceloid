@@ -60,12 +60,14 @@ Run `make debug` to run the same thing in GDB.
 | Acoustic damping   |                 | Sound absorbtion coefficient                |
 | Physical damping   |                 | Damping of tract shape dynamics             |
 | Enunciation        | 0x1b            | Force used to reshape tract                 |
+| Portamento         |                 | How quickly pitch and velocity change       |
 | Frication          |                 | Turbulence coefficient                      |
 | Surface tension    |                 | "Stickiness"                                |
 | Tract length       | 0x1c            | Overal length of the vocal tract            |
 | Ambient admittance |                 | Acoustic ddmittance outside the vocal tract |
 | Vibrato rate       |                 | Speed of vibrato                            |
 | Vibrato depth      |                 | Intensity of vibrato                        |
+| Frequency          |                 | Frequency of vocal fold oscillation         |
 | Volume             |                 | Master volume                               |
 
 _TODO: tutorial, explanation, theory, docs, etc_
