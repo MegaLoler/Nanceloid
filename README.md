@@ -67,14 +67,17 @@ check `src/waveguide.h` and `src/waveguide.c` to see the waveguide simulation co
 
 see `src/test.c` for a simple example of manually creating a simple chain of nodes with a source on one end and drain on the other
 
-## Todo list
+## Immediate todo list
 
-### Jack frontend stuff
+### Frontend stuff
 - consider command line args
 - better alsa midi interfacing lol
+- simple gui
+- windows compatibility
 
 ### VST stuff
-- basic vst interface
+- expose nanceloid parameters as vst parameters!!!
+- basic gui
 
 ### Midi stuff
 - preset phoneme mapped notes
