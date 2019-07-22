@@ -32,7 +32,7 @@ all: $(TARGET_MAIN) $(TARGET_TEST) vst
 ### JACK CLIENT ###
 
 $(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o
-	$(CC) -lm -ljack \
+	$(CC) -lm -ljack -lasound \
 		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o \
 		-o $(TARGET_MAIN)
 

@@ -71,7 +71,7 @@ see `src/test.c` for a simple example of manually creating a simple chain of nod
 
 ### Jack frontend stuff
 - consider command line args
-- switch to ALSA for midi
+- better alsa midi interfacing lol
 
 ### VST stuff
 - use nanceloid.h/c and midi.h/c

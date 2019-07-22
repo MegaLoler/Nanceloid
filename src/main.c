@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <alsa/asoundlib.h>
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include <nanceloid.h>
@@ -102,6 +103,40 @@ int main (int argc, char **argv) {
                jack_connect (client, jack_port_name (audio_output_port_right), ports[1])) {
         fprintf (stderr, "Could not connect to system audio output ports.\n");
         exit (EXIT_FAILURE);
+    }
+
+    // setup alsa connection for midi input
+    snd_seq_t *seq_handle;
+    snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_INPUT, 0);
+    snd_seq_set_client_name(seq_handle, "Nanceloid");
+    snd_seq_create_simple_port(seq_handle, "Controller",
+            SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE, SND_SEQ_PORT_TYPE_APPLICATION);
+
+    // receive alsa midi events
+    while (1) {
+        snd_seq_event_t *event = NULL;
+        snd_seq_event_input (seq_handle, &event);
+
+        // idk a better way to get raw midi data to the midi processor
+        // TODO: find a better way!!!
+        // how to preserve midi channel too?
+        uint8_t buffer[3];
+        if ((event->type == SND_SEQ_EVENT_NOTEON)) {
+            buffer[0] = 0x90;
+            buffer[1] = event->data.note.note;
+            buffer[2] = event->data.note.velocity;
+        } else if ((event->type == SND_SEQ_EVENT_NOTEOFF)) {
+            buffer[0] = 0x80;
+            buffer[1] = event->data.note.note;
+            buffer[2] = event->data.note.velocity;
+        } else if ((event->type == SND_SEQ_EVENT_CONTROLLER)) {
+            buffer[0] = 0xb0;
+            buffer[1] = event->data.control.param;
+            buffer[2] = event->data.control.value;
+        } else {
+            continue;
+        }
+        process_midi (voice, buffer);
     }
 
     // wait until user exits
