@@ -1,122 +1,55 @@
-#ifndef WAVEGUIDE_H
-#define WAVEGUIDE_H
+#pragma once
 
-#include <list.h>
-#include <stdint.h>
+#include <segment.h>
 
-// defaults
-#define DAMPING 0.04
-#define TURBULENCE 0.1
+class Waveguide {
+    private:
+        // the segments
+        Segment *segments;
+        int length;
 
+        // physical parameters
+        double damping;
+        double turbulence;
 
+        // drain collectors for energy lost from left and right side
+        double drain_left = 0;
+        double drain_right = 0;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+        // impedance on the left and right openings
+        double left_opening_impedance;
+        double right_opening_impedance;
 
+        // calculate a reflection coefficient given source and target impedance
+        static double calculate_gamma (double source_impedance, double target_impedance);
 
+    public:
+        Waveguide (int length, double damping, double turbulence,
+                   double left_opening_impedance,
+                   double right_opening_impedance);
+        ~Waveguide ();
 
-//////// "HOT" DATA TYPES //////////
+        double get (int i);         // get sum energy at a given segment
+        double get_left (int i);    // get left going energy at a segment
+        double get_right (int i);   // get right going energy at a segment
+        double get_net ();          // get sum of energy in all segments
 
-typedef struct NN_Link NN_Link;
+        // collect the energy drain on left and right sides
+        double collect_drain_left ();   // get the loss from the left end
+        double collect_drain_right ();  // get the loss from the right end
 
-// represents a waveguide node
-typedef struct NN_Node {
-    double area;        // cross sectional area at node region (related to admittance and impedance)
-    List *links;        // list of links to other nodes from here
-} NN_Node;
+        // put energy into a segment
+        void put (int i, double left, double right);
 
-// create a new node of a given type and with a given area
-NN_Node *create_node (double area);
+        // calculate reflection coefficients
+        void prepare ();
 
-// destroy a node
-void destroy_node (NN_Node *node);
+        // make new changes active
+        void flush ();
 
-// return the total energy in all the links of a node
-double net_node_energy (NN_Node *node);
+        // run the waveguide for one frame
+        void run ();
 
-// get or set the impedance or admittance values of a node
-double get_impedance (NN_Node *node);
-double get_admittance (NN_Node *node);
-void set_impedance (NN_Node *node, double Z);
-void set_admittance (NN_Node *node, double Y);
-
-// represents a single link from a node to another node
-typedef struct NN_Link {
-    NN_Node *source;    // the linked source node
-    NN_Node *target;    // the linked target node
-    double energy;      // the amount of energy traveling in this direction
-    double queued;      // the amount of energy queued up for this node next simulation iteration
-} NN_Link;
-
-// creates a new link
-NN_Link *create_link (NN_Node *source, NN_Node *target);
-
-// destroys a link
-void destroy_link (NN_Link *link);
-
-// adds energy to a link (adds it to the queue)
-void add_energy (NN_Link *link, double energy);
-
-// represents a waveguide network
-typedef struct NN_Waveguide {
-    List *nodes;        // list of waveguide nodes
-    double damping;     // reflection loss coefficient 
-    double turbulence;  // turbulence amplitude coefficient
-    double drain;       // lost acoustic energy
-} NN_Waveguide;
-
-// create a new waveguide network object
-NN_Waveguide *create_waveguide ();
-
-// destroy a waveguide network object
-void destroy_waveguide (NN_Waveguide *waveguide);
-
-// run the waveguide simulation for a single time unit
-void run_waveguide (NN_Waveguide *waveguide);
-
-// distribute energy to all the links in a node
-void inject_energy (NN_Waveguide *waveguide, NN_Node *node, double energy);
-
-// return the total energy in the entire waveguide network
-double net_waveguide_energy (NN_Waveguide *waveguide);
-
-// return the drain and then clear it
-double collect_drain (NN_Waveguide *waveguide);
-
-// create a new node and add it to a waveguide automatically
-// uses a default area of 1
-NN_Node *spawn_node (NN_Waveguide *waveguide);
-
-// singly link source node to target node
-NN_Link *single_link_nodes (NN_Node *source, NN_Node *target);
-
-// mutually link source and target nodes
-NN_Link *double_link_nodes (NN_Node *source, NN_Node *target);
-
-// link a node with itself
-NN_Link *terminate_node (NN_Node *node);
-
-// produce a normalized random value between -1 and 1
-double noise ();
-
-
-//////// "COLD" DATA TYPES ////////////////
-
-// TODO: binary friendly versions of the above structs
-
-// serialize a waveguide into a binary format suitable for saving to disk
-uint8_t *serialize (NN_Waveguide *waveguide);
-
-// deserialize a previously serialized waveguide
-NN_Waveguide *deserialize (uint8_t *data);
-
-
-
-#ifdef __cplusplus
-}
-#endif
-
-
-
-#endif
+        // print the state of the waveguide for debugging
+        void debug ();
+};

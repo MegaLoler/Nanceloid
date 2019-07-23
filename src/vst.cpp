@@ -1,5 +1,5 @@
-#include <vst.h>
-#include <midi.h>
+#include <vst>
+#include <midi>
 #include <cstdio>
 
 AudioEffect *createEffectInstance (audioMasterCallback audio_master) {

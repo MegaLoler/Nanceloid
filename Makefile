@@ -6,7 +6,7 @@ SDK_PATH      ::= vstsdk2.4
 SDK_SRC_PATH  ::= $(SDK_PATH)/public.sdk/source/vst2.x
 
 # compilers
-COMP          ::= gcc
+COMP          ::= g++
 XCOMP32       ::= i686-w64-mingw32-g++
 XCOMP64       ::= x86_64-w64-mingw32-g++
 
@@ -31,83 +31,83 @@ all: $(TARGET_MAIN) $(TARGET_TEST) vst
 
 ### JACK CLIENT ###
 
-$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o
+$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
 	$(CC) -lm -ljack -lasound \
-		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o \
+		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
 		-o $(TARGET_MAIN)
 
-$(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.c
+$(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.cpp
 	$(CC) -c \
-		$(SRC_PATH)/main.c \
+		$(SRC_PATH)/main.cpp \
 		-o $(BUILD_PATH)/main.o
 
-$(BUILD_PATH)/nanceloid.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.c
+$(BUILD_PATH)/nanceloid.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.cpp
 	$(CC) -c \
-		$(SRC_PATH)/nanceloid.c \
+		$(SRC_PATH)/nanceloid.cpp \
 		-o $(BUILD_PATH)/nanceloid.o
 
-$(BUILD_PATH)/midi.o: $(BUILD_PATH) $(SRC_PATH)/midi.c
+$(BUILD_PATH)/midi.o: $(BUILD_PATH) $(SRC_PATH)/midi.h $(SRC_PATH)/midi.cpp
 	$(CC) -c \
-		$(SRC_PATH)/midi.c \
+		$(SRC_PATH)/midi.cpp \
 		-o $(BUILD_PATH)/midi.o
 
 
 
 ### TEST PROGRAM ###
 
-$(TARGET_TEST): $(BUILD_PATH)/test.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o
+$(TARGET_TEST): $(BUILD_PATH)/test.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
 	$(CC) -lm \
-		$(BUILD_PATH)/test.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/list.o \
+		$(BUILD_PATH)/test.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
 		-o $(TARGET_TEST)
 
-$(BUILD_PATH)/test.o: $(BUILD_PATH) $(SRC_PATH)/test.c
+$(BUILD_PATH)/test.o: $(BUILD_PATH) $(SRC_PATH)/test.cpp
 	$(CC) -c \
-		$(SRC_PATH)/test.c \
+		$(SRC_PATH)/test.cpp \
 		-o $(BUILD_PATH)/test.o
 
 
 
 ### COMMON ###
 
-$(BUILD_PATH)/waveguide.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.c
+$(BUILD_PATH)/waveguide.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.cpp
 	$(CC) -c \
-		$(SRC_PATH)/waveguide.c \
+		$(SRC_PATH)/waveguide.cpp \
 		-o $(BUILD_PATH)/waveguide.o
 
-$(BUILD_PATH)/list.o: $(BUILD_PATH) $(SRC_PATH)/list.h $(SRC_PATH)/list.c
+$(BUILD_PATH)/segment.o: $(BUILD_PATH) $(SRC_PATH)/segment.h $(SRC_PATH)/segment.cpp
 	$(CC) -c \
-		$(SRC_PATH)/list.c \
-		-o $(BUILD_PATH)/list.o
+		$(SRC_PATH)/segment.cpp \
+		-o $(BUILD_PATH)/segment.o
 
 
 
 ### 32-BIT VST ###
 
-$(TARGET_VST_32): $(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/midi_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/list_x32.o $(BUILD_PATH)/vst_x32.o $(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o
+$(TARGET_VST_32): $(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/midi_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o $(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o
 	$(XC32) -shared \
-		$(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/midi_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/list_x32.o $(BUILD_PATH)/vst_x32.o \
+		$(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/midi_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o \
 		$(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o \
 		-o $(TARGET_VST_32)
 
-$(BUILD_PATH)/nanceloid_x32.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.c
-	$(XC32) -fPIC -c -x c \
-		$(SRC_PATH)/nanceloid.c \
+$(BUILD_PATH)/nanceloid_x32.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.cpp
+	$(XC32) -fPIC -c \
+		$(SRC_PATH)/nanceloid.cpp \
 		-o $(BUILD_PATH)/nanceloid_x32.o
 
-$(BUILD_PATH)/midi_x32.o: $(BUILD_PATH) $(SRC_PATH)/midi.h $(SRC_PATH)/midi.c
-	$(XC32) -fPIC -c -x c \
-		$(SRC_PATH)/midi.c \
+$(BUILD_PATH)/midi_x32.o: $(BUILD_PATH) $(SRC_PATH)/midi.h $(SRC_PATH)/midi.cpp
+	$(XC32) -fPIC -c \
+		$(SRC_PATH)/midi.cpp \
 		-o $(BUILD_PATH)/midi_x32.o
 
-$(BUILD_PATH)/waveguide_x32.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.c
-	$(XC32) -fPIC -c -x c \
-		$(SRC_PATH)/waveguide.c \
+$(BUILD_PATH)/waveguide_x32.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.cpp
+	$(XC32) -fPIC -c \
+		$(SRC_PATH)/waveguide.cpp \
 		-o $(BUILD_PATH)/waveguide_x32.o
 
-$(BUILD_PATH)/list_x32.o: $(BUILD_PATH) $(SRC_PATH)/list.h $(SRC_PATH)/list.c
-	$(XC32) -fPIC -c -x c \
-		$(SRC_PATH)/list.c \
-		-o $(BUILD_PATH)/list_x32.o
+$(BUILD_PATH)/segment_x32.o: $(BUILD_PATH) $(SRC_PATH)/segment.h $(SRC_PATH)/segment.cpp
+	$(XC32) -fPIC -c \
+		$(SRC_PATH)/segment.cpp \
+		-o $(BUILD_PATH)/segment_x32.o
 
 $(BUILD_PATH)/vst_x32.o: $(BUILD_PATH) $(SRC_PATH)/vst.h $(SRC_PATH)/vst.cpp
 	$(XC32) -fPIC -c \
@@ -133,31 +133,31 @@ $(BUILD_PATH)/vstplugmain_x32.o: $(SDK_PATH) $(SDK_SRC_PATH)/vstplugmain.cpp
 
 ### 64-BIT VST ###
 
-$(TARGET_VST_64): $(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/midi_x64.o $(BUILD_PATH)/waveguide_x64.o $(BUILD_PATH)/list_x64.o $(BUILD_PATH)/vst_x64.o $(BUILD_PATH)/audioeffect_x64.o $(BUILD_PATH)/audioeffectx_x64.o $(BUILD_PATH)/vstplugmain_x64.o
+$(TARGET_VST_64): $(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/midi_x64.o $(BUILD_PATH)/waveguide_x64.o $(BUILD_PATH)/segment_x64.o $(BUILD_PATH)/vst_x64.o $(BUILD_PATH)/audioeffect_x64.o $(BUILD_PATH)/audioeffectx_x64.o $(BUILD_PATH)/vstplugmain_x64.o
 	$(XC64) -shared \
-		$(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/midi_x64.o $(BUILD_PATH)/waveguide_x64.o $(BUILD_PATH)/list_x64.o $(BUILD_PATH)/vst_x64.o \
+		$(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/midi_x64.o $(BUILD_PATH)/waveguide_x64.o $(BUILD_PATH)/segment_x64.o $(BUILD_PATH)/vst_x64.o \
 		$(BUILD_PATH)/audioeffect_x64.o $(BUILD_PATH)/audioeffectx_x64.o $(BUILD_PATH)/vstplugmain_x64.o \
 		-o $(TARGET_VST_64)
 
-$(BUILD_PATH)/nanceloid_x64.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.c
-	$(XC64) -fPIC -c -x c \
-		$(SRC_PATH)/nanceloid.c \
+$(BUILD_PATH)/nanceloid_x64.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.cpp
+	$(XC64) -fPIC -c \
+		$(SRC_PATH)/nanceloid.cpp \
 		-o $(BUILD_PATH)/nanceloid_x64.o
 
-$(BUILD_PATH)/midi_x64.o: $(BUILD_PATH) $(SRC_PATH)/midi.h $(SRC_PATH)/midi.c
-	$(XC64) -fPIC -c -x c \
-		$(SRC_PATH)/midi.c \
+$(BUILD_PATH)/midi_x64.o: $(BUILD_PATH) $(SRC_PATH)/midi.h $(SRC_PATH)/midi.cpp
+	$(XC64) -fPIC -c \
+		$(SRC_PATH)/midi.cpp \
 		-o $(BUILD_PATH)/midi_x64.o
 
-$(BUILD_PATH)/waveguide_x64.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.c
-	$(XC64) -fPIC -c -x c \
-		$(SRC_PATH)/waveguide.c \
+$(BUILD_PATH)/waveguide_x64.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.cpp
+	$(XC64) -fPIC -c \
+		$(SRC_PATH)/waveguide.cpp \
 		-o $(BUILD_PATH)/waveguide_x64.o
 
-$(BUILD_PATH)/list_x64.o: $(BUILD_PATH) $(SRC_PATH)/list.h $(SRC_PATH)/list.c
-	$(XC64) -fPIC -c -x c \
-		$(SRC_PATH)/list.c \
-		-o $(BUILD_PATH)/list_x64.o
+$(BUILD_PATH)/segment_x64.o: $(BUILD_PATH) $(SRC_PATH)/segment.h $(SRC_PATH)/segment.cpp
+	$(XC64) -fPIC -c \
+		$(SRC_PATH)/segment.cpp \
+		-o $(BUILD_PATH)/segment_x64.o
 
 $(BUILD_PATH)/vst_x64.o: $(BUILD_PATH) $(SRC_PATH)/vst.h $(SRC_PATH)/vst.cpp
 	$(XC64) -fPIC -c \

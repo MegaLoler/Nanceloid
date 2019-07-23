@@ -1,6 +1,6 @@
-#include <audioeffectx.h>
-#include <nanceloid.h>
-#include <math.h>
+#include <audioeffectx>
+#include <nanceloid>
+#include <cmath>
 
 class NN_VST : public AudioEffectX {
     public:
