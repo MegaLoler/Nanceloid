@@ -32,7 +32,7 @@ double Segment::get_right () {
 
 void Segment::put (double left, double right) {
     _left += left;
-    _right += right
+    _right += right;
 }
 
 void Segment::flush () {

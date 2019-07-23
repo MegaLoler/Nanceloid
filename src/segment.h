@@ -22,8 +22,8 @@ class Segment {
         // get or set the acoustic admittance or impedance
         double get_admittance ();
         double get_impedance ();
-        double set_admittance (double admittance);
-        double set_impedance (double impedance);
+        void set_admittance (double admittance);
+        void set_impedance (double impedance);
 
         double get ();          // get sum of the traveling waves
         double get_left ();     // get energy traveling left

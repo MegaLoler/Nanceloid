@@ -1,18 +1,19 @@
 #include <iostream>
+#include <cmath>
 #include <waveguide.h>
 
 using namespace std;
 
-static double Waveguide::calculate_gamma (double source_impedance, double target_impedance) {
+double Waveguide::calculate_gamma (double source_impedance, double target_impedance) {
     return (target_impedance - source_impedance) / (target_impedance + source_impedance);
 }
 
-Waveguid::Waveguide (int length, double damping = 0.04, double turbulence = 0.1,
+Waveguide::Waveguide (int length, double damping = 0.04, double turbulence = 0.1,
                      double left_opening_impedance = INFINITY,
                      double right_opening_impedance = 0.1)
     : length (length), damping (damping), turbulence (turbulence),
       left_opening_impedance (left_opening_impedance),
-      right_opening_impedance (right_opening_impedance);
+      right_opening_impedance (right_opening_impedance) {
 
     segments = new Segment[length];
 }
@@ -22,21 +23,21 @@ Waveguide::~Waveguide () {
 }
 
 double Waveguide::get (int i) {
-    segments[i].get ();
+    return segments[i].get ();
 }
 
 double Waveguide::get_left (int i) {
-    segments[i].get_left ();
+    return segments[i].get_left ();
 }
 
 double Waveguide::get_right (int i) {
-    segments[i].get_right ();
+    return segments[i].get_right ();
 }
 
 double Waveguide::get_net () {
     double net = 0;
     for (int i = 0; i < length; i++)
-        net += segments[i].get (i);
+        net += segments[i].get ();
     return net;
 }
 
@@ -61,8 +62,8 @@ void Waveguide::prepare () {
         
         // get the impedance for this place, left place, and right place
         double impedance       = segments[i].get_impedance ();
-        double left_impedance  = i == 0          ? left_opening_impedance  : segments[i - 1].get_impedance()
-        double right_impedance = i == length - 1 ? right_opening_impedance : segments[i + 1].get_impedance()
+        double left_impedance  = i == 0          ? left_opening_impedance  : segments[i - 1].get_impedance();
+        double right_impedance = i == length - 1 ? right_opening_impedance : segments[i + 1].get_impedance();
 
         // calculate the reflection coefficients from that
         double gamma_left  = calculate_gamma (impedance, left_impedance);
