@@ -23,10 +23,13 @@ class Waveguide {
         // calculate a reflection coefficient given source and target impedance
         static double calculate_gamma (double source_impedance, double target_impedance);
 
+        // generate normalized noise between -1 and 1
+        static double noise ();
+
     public:
-        Waveguide (int length, double damping, double turbulence,
-                   double left_opening_impedance,
-                   double right_opening_impedance);
+        Waveguide (int length, double damping = 0.04, double turbulence = 0.1,
+                     double left_opening_impedance = INFINITY,
+                     double right_opening_impedance = 0.1);
         ~Waveguide ();
 
         double get (int i);         // get sum energy at a given segment

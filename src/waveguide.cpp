@@ -4,13 +4,24 @@
 
 using namespace std;
 
-double Waveguide::calculate_gamma (double source_impedance, double target_impedance) {
-    return (target_impedance - source_impedance) / (target_impedance + source_impedance);
+double Waveguide::noise () {
+    return rand () / (RAND_MAX / 2.0) - 1;
 }
 
-Waveguide::Waveguide (int length, double damping = 0.04, double turbulence = 0.1,
-                     double left_opening_impedance = INFINITY,
-                     double right_opening_impedance = 0.1)
+double Waveguide::calculate_gamma (double source_impedance, double target_impedance) {
+    if (target_impedance == source_impedance)
+        return 0;
+    else if (target_impedance == 0 || source_impedance == INFINITY)
+        return -1;
+    else if (target_impedance == INFINITY || source_impedance == 0)
+        return 1;
+    else
+        return (target_impedance - source_impedance) / (target_impedance + source_impedance);
+}
+
+Waveguide::Waveguide (int length, double damping, double turbulence,
+                     double left_opening_impedance,
+                     double right_opening_impedance)
     : length (length), damping (damping), turbulence (turbulence),
       left_opening_impedance (left_opening_impedance),
       right_opening_impedance (right_opening_impedance) {
@@ -84,7 +95,7 @@ void Waveguide::run () {
     for (int i = 0; i < length; i++) {
 
         // this segment
-        Segment segment = segments[i];
+        Segment &segment = segments[i];
 
         // left and right moving energy
         double left = segment.get_left ();
@@ -102,8 +113,17 @@ void Waveguide::run () {
         double transmission_left = left - reflection_left;
         double transmission_right = right - reflection_right;
 
-        // put the reflections
-        segment.put (reflection_right, reflection_left);
+        // dampen the reflections
+        reflection_left *= 1 - damping;
+        reflection_right *= 1 - damping;
+
+        // add turbulence
+        // TODO: better turbulence
+        double turbulence_left = reflection_left * turbulence * noise ();
+        double turbulence_right = reflection_right * turbulence * noise ();
+
+        // put in the reflections with turbulence
+        segment.put (reflection_right + turbulence_right, reflection_left + turbulence_left);
 
         // put left transmission
         if (i == 0)
@@ -127,13 +147,24 @@ void Waveguide::debug () {
     cout << "DEBUG WAVEGUIDE:" << endl;
 
     for (int i = 0; i < length; i++) {
-        double left = get_left (i);
-        double right = get_right (i);
-        double total = get (i);
-        cout << "#" << i << "\tLEFT=" << left << " +\tRIGHT=" << right << " = " << total << endl;
+
+        Segment &segment    = segments[i];
+        double left        = segment.get_left ();
+        double right       = segment.get_right ();
+        double total       = segment.get ();
+        double impedance   = segment.get_impedance ();
+        double gamma_left  = segment.get_gamma_left ();
+        double gamma_right = segment.get_gamma_right ();
+
+        cout << "#" << i << "\tLEFT( " << left << " )"
+             << " + RIGHT( " << right << " ) = " << total
+             << "\tGAMMA: LEFT( " << gamma_left << " )"
+             << ", RIGHT( " << gamma_right << " )"
+             << "\t Z( " << impedance << " )" << endl;
     }
 
-    cout << "DRAIN\tLEFT=" << collect_drain_left () << "\tRIGHT=" << collect_drain_right () << endl;
-    cout << "NET=" << get_net () << endl;
+    cout << "DRAIN\tLEFT( " << collect_drain_left () << " )"
+         << "   RIGHT( " << collect_drain_right () << " )" << endl;
+    cout << "NET( " << get_net () << " )" << endl;
     cout << endl;
 }

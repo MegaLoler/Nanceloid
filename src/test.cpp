@@ -14,8 +14,8 @@ int main (int argc, char **argv) {
     // damping = 0
     // turbulence = 0
     // left impedance = inf
-    // right impedance = inf
-    Waveguide wg (10, 0, 0, INFINITY, INFINITY);
+    // right impedance = 0
+    Waveguide wg (10, 0, 0, INFINITY, 0);
 
     // prepare the waveguide for use
     // (calculate the reflection coefficients)
@@ -27,14 +27,15 @@ int main (int argc, char **argv) {
     // now run it for some amount of samples
     for (int i = 0; i < samples; i++) {
 
+        // debug print
+        cout << "Test iteration #" << i + 1 << endl;
+        wg.debug ();
+
         // run it for this iteration
         wg.run ();
 
         // apply continuous pressure
         //wg.put (0, 0, 1);
-
-        // debug print
-        wg.debug ();
 
     }
 
