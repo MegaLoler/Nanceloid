@@ -3,8 +3,11 @@
 A physically-modelled vocal synthesizer using digital waveguide networks!
 
 its a work in progress O_O
+most definitely not guaranteed to be in a usable/properly functioning state at any given time rn lol
 
 i'm also quite in over my head and trying to learn so much stuff as i go!!! so i'm probably doing a lot of things wrong, lol, feel free to lemme kno if you are interested and/or know about this stuff and wanna help!!
+
+i should like, learn c++ and just do the whole thing in that maybe
 
 _TODO: add screenshots (once there is a gui lol)_
 
@@ -115,7 +118,7 @@ The `src` directory contains the following:
 
 ### Waveguide stuff
 - honestly just rewrite the whole thing, im p sure its terribly inefficient
-- fix junction reflection...........
+- fix 3+ way junction reflection...........
 - fix destroying things dangit
 - more realistic turbulence
 
