@@ -32,10 +32,10 @@ struct Parameters {
     double laryngeal_height   = 0;    // vertical position of the larynx, extends tract (-1 to 1)
 
     // articulatory parameters
-    double lips_roundedness   = 0;    // closedness of the lips (0 to 1)
+    double lips_roundedness   = 0.9;    // closedness of the lips (0 to 1)
     double jaw_height         = 0.5;  // jaw openness/height (0 to 1)
-    double tongue_frontness   = 0.5;  // position of peak of tongue (0 to 1)
-    double tongue_height      = 0;    // how close to touching the roof of the mouth (0 to 1)
+    double tongue_frontness   = 0;    // position of peak of tongue (0 to 1)
+    double tongue_height      = 0.9;  // how close to touching the roof of the mouth (0 to 1)
     double tongue_flatness    = 0;    // distribution of the tongue curve (-1 to 1)
     double velic_closure      = 0;    // the closing off of the nasal cavity (0 to 1)
 
@@ -44,9 +44,9 @@ struct Parameters {
     double physical_damping   = 0.4;  // damping of tract reshaping (0 to 1)
     double enunciation        = 0.25; // strength of tract reshaping (0 to 1)
     double portamento         = 0.5;  // how quickly pitch and velocity change (0 to 1)
-    double frication          = 0.1;  // turbulence coefficient (0 to 1)
+    double frication          = 0.01; // turbulence coefficient (0 to 1)
     double surface_tension    = 0.5;  // tendency of constrictions to stick together (0 to 1)
-    double tract_length       = 11;   // length of vocal tract (cm)
+    double tract_length       = 24;   // length of vocal tract (cm)
     double ambient_admittance = 10;   // admittance of the drain
 
     // musical and audio parameters
@@ -59,7 +59,7 @@ struct Parameters {
 
 // the note that you want to play
 struct TargetNote {
-    uint8_t note    = 57;// midi note value
+    uint8_t note    = 40;// midi note value
     double detune   = 0; // offset in semitones
     double velocity = 1; // note velocity (0 to 1)
 };

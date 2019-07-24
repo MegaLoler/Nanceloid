@@ -109,6 +109,8 @@ void Nanceloid::reshape () {
     //// shape the velum TODO
     //double velum_admittance = (1 - voice->parameters.velic_closure) / NASAL_Z;
     //set_admittance (voice->nose[0], velum_admittance);
+
+    waveguide->prepare ();
 }
 
 void Nanceloid::init () {
@@ -123,7 +125,7 @@ void Nanceloid::init () {
 
     // create the new waveguide
     waveguide = new Waveguide (length, parameters.acoustic_damping, parameters.frication,
-            INFINITY, parameters.ambient_admittance);
+            INFINITY, 1 / parameters.ambient_admittance);
 
     // calculate the positions of various landmarks along the tract
     // TODO: calculate proportions based on overal tract length
