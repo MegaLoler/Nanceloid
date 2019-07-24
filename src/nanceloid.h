@@ -106,7 +106,7 @@ class Nanceloid {
 
         // update the shape of the tract according to parameters
         // if set is true it will instantly set the shape rather thna approach
-        void reshape (bool set = true);
+        void reshape (bool set = false);
 
         // debug print the state of the parameters
         void debug ();
