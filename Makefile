@@ -31,9 +31,9 @@ all: $(TARGET_MAIN) $(TARGET_TEST) vst
 
 ### STANDALONE SYNTH ###
 
-$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
+$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
 	$(CC) -lm -lsoundio \
-		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
+		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
 		-o $(TARGET_MAIN)
 
 $(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.cpp
@@ -46,10 +46,10 @@ $(BUILD_PATH)/nanceloid.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nan
 		$(SRC_PATH)/nanceloid.cpp \
 		-o $(BUILD_PATH)/nanceloid.o
 
-$(BUILD_PATH)/midi.o: $(BUILD_PATH) $(SRC_PATH)/midi.h $(SRC_PATH)/midi.cpp
+$(BUILD_PATH)/saw_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/saw_source.h $(SRC_PATH)/saw_source.cpp
 	$(CC) -c \
-		$(SRC_PATH)/midi.cpp \
-		-o $(BUILD_PATH)/midi.o
+		$(SRC_PATH)/saw_source.cpp \
+		-o $(BUILD_PATH)/saw_source.o
 
 
 
@@ -83,9 +83,9 @@ $(BUILD_PATH)/segment.o: $(BUILD_PATH) $(SRC_PATH)/segment.h $(SRC_PATH)/segment
 
 ### 32-BIT VST ###
 
-$(TARGET_VST_32): $(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/midi_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o $(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o
+$(TARGET_VST_32): $(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/saw_source_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o $(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o
 	$(XC32) -shared \
-		$(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/midi_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o \
+		$(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o \
 		$(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o \
 		-o $(TARGET_VST_32)
 
@@ -94,10 +94,10 @@ $(BUILD_PATH)/nanceloid_x32.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)
 		$(SRC_PATH)/nanceloid.cpp \
 		-o $(BUILD_PATH)/nanceloid_x32.o
 
-$(BUILD_PATH)/midi_x32.o: $(BUILD_PATH) $(SRC_PATH)/midi.h $(SRC_PATH)/midi.cpp
+$(BUILD_PATH)/saw_source_x32.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/saw_source.h $(SRC_PATH)/saw_source.cpp
 	$(XC32) -fPIC -c \
-		$(SRC_PATH)/midi.cpp \
-		-o $(BUILD_PATH)/midi_x32.o
+		$(SRC_PATH)/saw_source.cpp \
+		-o $(BUILD_PATH)/saw_source_x32.o
 
 $(BUILD_PATH)/waveguide_x32.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.cpp
 	$(XC32) -fPIC -c \
@@ -133,9 +133,9 @@ $(BUILD_PATH)/vstplugmain_x32.o: $(SDK_PATH) $(SDK_SRC_PATH)/vstplugmain.cpp
 
 ### 64-BIT VST ###
 
-$(TARGET_VST_64): $(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/midi_x64.o $(BUILD_PATH)/waveguide_x64.o $(BUILD_PATH)/segment_x64.o $(BUILD_PATH)/vst_x64.o $(BUILD_PATH)/audioeffect_x64.o $(BUILD_PATH)/audioeffectx_x64.o $(BUILD_PATH)/vstplugmain_x64.o
+$(TARGET_VST_64): $(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/saw_source_x64.o $(BUILD_PATH)/waveguide_x64.o $(BUILD_PATH)/segment_x64.o $(BUILD_PATH)/vst_x64.o $(BUILD_PATH)/audioeffect_x64.o $(BUILD_PATH)/audioeffectx_x64.o $(BUILD_PATH)/vstplugmain_x64.o
 	$(XC64) -shared \
-		$(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/midi_x64.o $(BUILD_PATH)/waveguide_x64.o $(BUILD_PATH)/segment_x64.o $(BUILD_PATH)/vst_x64.o \
+		$(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/saw_source_x64.o $(BUILD_PATH)/waveguide_x64.o $(BUILD_PATH)/segment_x64.o $(BUILD_PATH)/vst_x64.o \
 		$(BUILD_PATH)/audioeffect_x64.o $(BUILD_PATH)/audioeffectx_x64.o $(BUILD_PATH)/vstplugmain_x64.o \
 		-o $(TARGET_VST_64)
 
@@ -144,10 +144,10 @@ $(BUILD_PATH)/nanceloid_x64.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)
 		$(SRC_PATH)/nanceloid.cpp \
 		-o $(BUILD_PATH)/nanceloid_x64.o
 
-$(BUILD_PATH)/midi_x64.o: $(BUILD_PATH) $(SRC_PATH)/midi.h $(SRC_PATH)/midi.cpp
+$(BUILD_PATH)/saw_source_x64.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/saw_source.h $(SRC_PATH)/saw_source.cpp
 	$(XC64) -fPIC -c \
-		$(SRC_PATH)/midi.cpp \
-		-o $(BUILD_PATH)/midi_x64.o
+		$(SRC_PATH)/saw_source.cpp \
+		-o $(BUILD_PATH)/saw_source_x64.o
 
 $(BUILD_PATH)/waveguide_x64.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.cpp
 	$(XC64) -fPIC -c \

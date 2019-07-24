@@ -1,9 +1,23 @@
 #pragma once
 
+#include <cstdint>
 #include <waveguide.h>
 #include <segment.h>
 #include <glottal_source.h>
 
+class GlottalSource;
+
+// midi controller mappings
+const int controller_glottal_tension  = 0x15;
+const int controller_lips_roundedness = 0x16;
+const int controller_jaw_height       = 0x17;
+const int controller_tongue_frontness = 0x18;
+const int controller_tongue_height    = 0x19;
+const int controller_tongue_flatness  = 0x1a;
+const int controller_enunciation      = 0x1b;
+const int controller_tract_length     = 0x1c;
+
+// multipliers, mostly
 const double speed_of_sound = 34300; // cm/s
 const double portamento = 0.001;
 const double enunciation = 0.001;
@@ -51,7 +65,7 @@ struct TargetNote {
 };
 
 // represents a synth instance
-class Voice {
+class Nanceloid {
     private:
         Waveguide *waveguide;       // the waveguide network to simulate the tract
         
@@ -59,8 +73,8 @@ class Voice {
         int tongue_start;           // number of nodes in the tongue
         int lips_start;             // number of nodes in the lips
 
+        GlottalSource *source;       // how to model glottal source sound
         Parameters parameters;      // the synth parameters
-        GlottalSource source;       // how to model glottal source sound
         TargetNote note;            // what note to play
 
         int rate = 0;               // sample rate
@@ -71,12 +85,15 @@ class Voice {
         // return 12tet frequency given a midi note value
         static double get_frequency (double note);
 
+        // map a midi value to a given range
+        static double map_to_range (uint8_t value, double min, double max);
+
         // move the admittance of a segment toward a given value
         void approach_admittance (Segment &segment, double target);
 
     public:
-        Voice (GlottalSource source) : source (source) {}
-        ~Voice ();
+        Nanceloid (GlottalSource *source) : source (source) {}
+        ~Nanceloid ();
 
         // update the sample rate
         void set_rate (int rate);
@@ -93,4 +110,9 @@ class Voice {
         // debug print the state of the parameters
         void debug ();
 
+        // process a midi event
+        void midi (uint8_t *data);
+
+        friend class GlottalSource;
+        friend class SawSource;
 };

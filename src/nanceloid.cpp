@@ -2,11 +2,13 @@
 #include <cmath>
 #include <nanceloid.h>
 
+using namespace std;
+
 double Nanceloid::get_frequency (double note) {
     return 440.0 * pow (2.0, (note - 69) / 12);
 }
 
-void Nanceloid::~Nanceloid (Voice *voice) {
+Nanceloid::~Nanceloid () {
     // NOTE: is this necessary?
     if (waveguide != nullptr)
         delete waveguide;
@@ -41,8 +43,8 @@ void Nanceloid::debug () {
 }
 
 void Nanceloid::set_rate (int rate) {
-    if (rate != this.rate) {
-        this.rate = rate;
+    if (rate != this->rate) {
+        this->rate = rate;
         init ();
     }
 }
@@ -63,7 +65,7 @@ double Nanceloid::run () {
     waveguide->put (0, 0, parameters.lungs * opening);
 
     // vocal cord vibration
-    waveguide->put (0, 0, source.run (this));
+    waveguide->put (0, 0, source->run (this));
 
     // handle articulatory dynamics
     reshape ();
@@ -99,7 +101,7 @@ void Nanceloid::reshape () {
         // TODO: enhance this lol
         double unit_pos = i / (double) ((lips_start - tongue_start) - 1);
         double phase = unit_pos - parameters.tongue_frontness;
-        double value = cos (phase * M_PI / 2) * arameters.tongue_height;
+        double value = cos (phase * M_PI / 2) * parameters.tongue_height;
         double unit_area = 1 - value;
         approach_admittance (segment, unit_area / neutral_impedance);
     }
@@ -137,4 +139,83 @@ void Nanceloid::init () {
         // (and fills in gaps to avoid subtle clicks)
         delete old;
     }
+}
+
+double Nanceloid::map_to_range (uint8_t value, double min, double max) {
+    return value / 127.0 * (max - min) + min;
+}
+
+void Nanceloid::midi (uint8_t *data) {
+
+    // parse the data
+    uint8_t type = data[0] & 0xf0;
+    //uint8_t chan = data[0] & 0x0f;
+
+    if (type == 0xb0) {
+
+        // handle control events
+        uint8_t id = data[1];
+        uint8_t value = data[2];
+        cout << "Received midi controller event: 0x" << hex << id << " 0x" << hex << value;
+
+        switch (id) {
+            case controller_glottal_tension:
+                this->parameters.glottal_tension = map_to_range (value, -1, 1);
+                break;
+
+            case controller_lips_roundedness:
+                this->parameters.lips_roundedness = map_to_range (value, 0, 1);
+                break;
+
+            case controller_jaw_height:
+                this->parameters.jaw_height = map_to_range (value, 0, 1);
+                break;
+
+            case controller_tongue_frontness:
+                this->parameters.tongue_frontness = map_to_range (value, 0, 1);
+                break;
+
+            case controller_tongue_height:
+                this->parameters.tongue_height = map_to_range (value, 0, 1);
+                break;
+
+            case controller_tongue_flatness:
+                this->parameters.tongue_flatness = map_to_range (value, -1, 1);
+                break;
+
+            case controller_enunciation:
+                this->parameters.enunciation = map_to_range (value, 0, 1);
+                break;
+
+            case controller_tract_length:
+                this->parameters.tract_length = map_to_range (value, 8, 24);
+                init ();
+                break;
+
+            // TODO: standard midi controllers such as modulation wheel and pitch bend
+        }
+
+        debug ();
+
+    } else if (type == 0x80) {
+
+        // handle note off events
+        uint8_t note = data[1];
+        uint8_t velocity = data[2];
+
+        if (note == this->note.note)
+            this->note.velocity = map_to_range (velocity, 0, 1);
+
+    } else if (type == 0x90) {
+
+        // handle note on events
+        uint8_t note = data[1];
+        uint8_t velocity = data[2];
+
+        this->note.note = note;
+        this->note.velocity = map_to_range (velocity, 0, 1);
+
+    }
+
+    // TODO: handle phoneme mapped notes on channel 10 or w/e
 }

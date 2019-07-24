@@ -2,7 +2,6 @@
 #include <soundio/soundio.h>
 #include <nanceloid.h>
 #include <saw_source.h>
-//#include <midi.h>
 
 using namespace std;
 

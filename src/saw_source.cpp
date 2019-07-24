@@ -1,6 +1,6 @@
 #include <saw_source.h>
 
-void SawSource::run (Nanceloid *voice) {
+double SawSource::run (Nanceloid *voice) {
 
     // saw osc
     double saw = voice->osc_phase;
@@ -18,5 +18,4 @@ void SawSource::run (Nanceloid *voice) {
     voice->osc += delta * k;
 
     return sample * loudness;
-
 }

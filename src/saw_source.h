@@ -5,4 +5,4 @@
 class SawSource : public GlottalSource {
     public:
         double run (Nanceloid *voice);
-}
+};

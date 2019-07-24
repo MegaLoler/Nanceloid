@@ -82,8 +82,9 @@ _TODO: tutorial, explanation, theory, docs, etc_
 The `src` directory contains the following:
 - `main.c` contains the the standalone synth.
 - `vst.h` and `vst.cpp` contain the VST plugin.
-- `midi.h` and `midi.c` contain the MIDI event handler.
 - `nanceloid.h` and `nanceloid.c` contain the top-level synth.
+- `glottal_source.h` contains an abstract class for providing a glottal source sound.
+- `saw_source.h` and `saw_source.cpp` contain a simple saw wave based glottal source.
 - `waveguide.h` and `waveguide.c` contain the waveguide implementation.
 - `segment.h` and `segment.c` contain the waveguide segment class.
 - `test.c` contains a test program.

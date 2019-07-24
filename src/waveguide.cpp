@@ -38,7 +38,7 @@ int Waveguide::get_length () {
 }
 
 Segment &Waveguide::get_segment (int i) {
-    return &segments[i]
+    return segments[i];
 }
 
 double Waveguide::get (int i) {
