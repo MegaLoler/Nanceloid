@@ -28,8 +28,8 @@ class Waveguide {
 
     public:
         Waveguide (int length, double damping = 0.04, double turbulence = 0.1,
-                     double left_opening_impedance = INFINITY,
-                     double right_opening_impedance = 0.1);
+                   double left_opening_impedance = INFINITY,
+                   double right_opening_impedance = 0.1);
         ~Waveguide ();
 
         double get (int i);         // get sum energy at a given segment
@@ -55,4 +55,10 @@ class Waveguide {
 
         // print the state of the waveguide for debugging
         void debug ();
+
+        // get the number of segments
+        int get_length ();
+
+        // get a segment from the waveguide
+        Segment &get_segment (int i);
 };

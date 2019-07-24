@@ -1,129 +1,96 @@
-#ifndef NANCELOID_H
-#define NANCELOID_H
+#pragma once
 
 #include <waveguide.h>
+#include <segment.h>
+#include <glottal_source.h>
 
-#define SPEED_OF_SOUND 34300 // cm/s
-#define AMBIENT_ADMITTANCE 10
-#define MAX 128
-#define MAX_POLYPHONY 8
-#define LARYNX_Z 5
-#define NEUTRAL_Z 1
-#define NASAL_Z 5
-#define ENUNCIATION 0.001
-#define PORTAMENTO 0.001
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
+const double speed_of_sound = 34300; // cm/s
+const double portamento = 0.001;
+const double enunciation = 0.001;
+const double neutral_impedance = 1;
 
 // represents synth parameters
-typedef struct Parameters {
+struct Parameters {
 
     // phonation parameters
-    double lungs;              // continuous air pressure from the lungs (-1 to 1)
-    double glottal_tension;    // how tightly shut the glottis is (-1 to 1)
-    double laryngeal_height;   // vertical position of the larynx, extends tract (-1 to 1)
+    double lungs              = 0;    // continuous air pressure from the lungs (-1 to 1)
+    double glottal_tension    = 0;    // how tightly shut the glottis is (-1 to 1)
+    double laryngeal_height   = 0;    // vertical position of the larynx, extends tract (-1 to 1)
 
     // articulatory parameters
-    double lips_roundedness;   // closedness of the lips (0 to 1)
-    double jaw_height;         // jaw openness/height (0 to 1)
-    double tongue_frontness;   // position of peak of tongue (0 to 1)
-    double tongue_height;      // how close to touching the roof of the mouth (0 to 1)
-    double tongue_flatness;    // distribution of the tongue curve (-1 to 1)
-    double velic_closure;      // the closing off of the nasal cavity (0 to 1)
+    double lips_roundedness   = 0;    // closedness of the lips (0 to 1)
+    double jaw_height         = 0.5;  // jaw openness/height (0 to 1)
+    double tongue_frontness   = 0.5;  // position of peak of tongue (0 to 1)
+    double tongue_height      = 0;    // how close to touching the roof of the mouth (0 to 1)
+    double tongue_flatness    = 0;    // distribution of the tongue curve (-1 to 1)
+    double velic_closure      = 0;    // the closing off of the nasal cavity (0 to 1)
 
     // physical parameters
-    double acoustic_damping;   // sound absorbsion, loss of energy at reflections (0 to 1)
-    double physical_damping;   // damping of tract reshaping (0 to 1)
-    double enunciation;        // strength of tract reshaping (0 to 1)
-    double portamento;         // how quickly pitch and velocity change (0 to 1)
-    double frication;          // turbulence coefficient (0 to 1)
-    double surface_tension;    // tendency of constrictions to stick together (0 to 1)
-    double tract_length;       // length of vocal tract (cm)
-    double ambient_admittance; // admittance of the drain
+    double acoustic_damping   = 0.04; // sound absorbsion, loss of energy at reflections (0 to 1)
+    double physical_damping   = 0.4;  // damping of tract reshaping (0 to 1)
+    double enunciation        = 0.25; // strength of tract reshaping (0 to 1)
+    double portamento         = 0.5;  // how quickly pitch and velocity change (0 to 1)
+    double frication          = 0.1;  // turbulence coefficient (0 to 1)
+    double surface_tension    = 0.5;  // tendency of constrictions to stick together (0 to 1)
+    double tract_length       = 11;   // length of vocal tract (cm)
+    double ambient_admittance = 10;   // admittance of the drain
 
     // musical and audio parameters
-    double vibrato_rate;       // how quickly the singing vibrato should be (hz)
-    double vibrato_depth;      // how wide the vibrato peak should be (semitones)
-    double frequency;          // vocal fold oscillation frequency
-    double volume;             // overall volume (0 to 1)
+    double vibrato_rate       = 4;    // how quickly the singing vibrato should be (hz)
+    double vibrato_depth      = 0.25; // how wide the vibrato peak should be (semitones)
+    double frequency          = 0;    // vocal fold oscillation frequency
+    double volume             = 0.5;  // overall volume (0 to 1)
 
-} Parameters;
-
-// what model to use to generate glottal source
-typedef enum PhonationModel {
-    SAWTOOTH,
-    LF
-} PhonationModel;
+};
 
 // the note that you want to play
-typedef struct TargetNote {
-    uint8_t note;    // midi note value
-    double detune;   // offset in semitones
-    double velocity; // note velocity (0 to 1)
-} TargetNote;
+struct TargetNote {
+    uint8_t note    = 57;// midi note value
+    double detune   = 0; // offset in semitones
+    double velocity = 1; // note velocity (0 to 1)
+};
 
 // represents a synth instance
-typedef struct Voice {
+class Voice {
+    private:
+        Waveguide *waveguide;       // the waveguide network to simulate the tract
+        
+        int larynx_start;           // number of nodes in the larynx
+        int tongue_start;           // number of nodes in the tongue
+        int lips_start;             // number of nodes in the lips
 
-    NN_Waveguide *waveguide;    // the waveguide network to simulate the tract
-    NN_Link *source;            // the link to inject glottal source sound
-    
-    NN_Node *larynx[MAX];       // nodes of the larynx
-    NN_Node *tongue[MAX];       // nodes of the tongue
-    NN_Node *lips[MAX];         // nodes of the lips
-    NN_Node *nose[MAX];         // nodes of the nose
-    int larynx_length;          // number of nodes in the larynx
-    int tongue_length;          // number of nodes in the tongue
-    int lips_length;            // number of nodes in the lips
-    int nose_length;            // number of nodes in the nose
+        Parameters parameters;      // the synth parameters
+        GlottalSource source;       // how to model glottal source sound
+        TargetNote note;            // what note to play
 
-    Parameters parameters;      // the synth parameters
-    PhonationModel model;       // how to model glottal source sound
-    TargetNote note;            // what note to play
+        int rate = 0;               // sample rate
+        double osc = 0;             // last oscillator sample
+        double osc_phase = 0;       // glottal oscillator current phase
+        double vibrato_phase = 0;   // vibrato lfo current phase
 
-    int rate;                   // sample rate
-    double osc;                 // last oscillator sample
-    double osc_phase;           // glottal oscillator current phase
-    double vibrato_phase;       // vibrato lfo current phase
+        // return 12tet frequency given a midi note value
+        static double get_frequency (double note);
 
-} Voice;
+        // move the admittance of a segment toward a given value
+        void approach_admittance (Segment &segment, double target);
 
-// initialize a parameters struct
-void init_parameters (Parameters *p);
+    public:
+        Voice (GlottalSource source) : source (source) {}
+        ~Voice ();
 
-// initialize the waveguide of a synth
-void init_tract (Voice *voice);
+        // update the sample rate
+        void set_rate (int rate);
 
-// update the shape of the tract according to parameters
-void reshape_tract (Voice *voice);
+        // run the voice for one frame and return a sample
+        double run ();
 
-// update the size of the tract by regenerated a new one
-void resize_tract (Voice *voice);
+        // create and initialize the waveguide
+        void init ();
 
-// create and initialize a new synth instance
-Voice *create_voice (PhonationModel model, int rate);
+        // update the shape of the tract according to parameters
+        void reshape ();
 
-// destroy a synth instance
-void destroy_voice (Voice *voice);
+        // debug print the state of the parameters
+        void debug ();
 
-// run the simulation and return the next sample
-double step_voice (Voice *voice);
-
-// debug print the state of the parameters
-void debug_parameters (Parameters parameters);
-
-
-
-#ifdef __cplusplus
-}
-#endif
-
-
-
-#endif
+};

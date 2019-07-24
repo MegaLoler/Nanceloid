@@ -6,7 +6,7 @@
 using namespace std;
 
 // the vocal synth instance
-//Voice *voice;
+Nanceloid *synth;
 
 void exit_error (string message) {
     cerr << message << endl;
@@ -22,6 +22,8 @@ static void process (struct SoundIoOutStream *stream, int min_frames, int max_fr
     int frames_left = max_frames;
     int error;
 
+    synth->set_rate (sample_rate);
+
     while (frames_left > 0) {
 
         int frame_count = frames_left;
@@ -33,7 +35,7 @@ static void process (struct SoundIoOutStream *stream, int min_frames, int max_fr
             break;
 
         for (int frame = 0; frame < frame_count; frame++) {
-            float sample = 1; // step_voice (voice);
+            float sample = synth->run ();
 
             for (int channel = 0; channel < layout->channel_count; channel++) {
                 float *out = (float *) (areas[channel].ptr + areas[channel].step * frame);
@@ -51,6 +53,9 @@ static void process (struct SoundIoOutStream *stream, int min_frames, int max_fr
 int main (int argc, char **argv) {
 
     int error;
+
+    // setup the synth
+    synth = new Nanceloid;
     
     // initialize soundio
     struct SoundIo *soundio = soundio_create();

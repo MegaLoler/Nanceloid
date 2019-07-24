@@ -110,9 +110,10 @@ The `src` directory contains the following:
 - jaw control
 - surface tension
 - copy energy from one waveguide to another function
-- polyphony saw
 - lf source model
 - experimental source model
+- polyphony
+- move osc vars into glottal source class
 
 ### Waveguide stuff
 - more realistic turbulence

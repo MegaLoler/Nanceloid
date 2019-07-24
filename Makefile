@@ -31,14 +31,9 @@ all: $(TARGET_MAIN) $(TARGET_TEST) vst
 
 ### STANDALONE SYNTH ###
 
-#$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
-#	$(CC) -lm -lportaudio \
-#		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
-#		-o $(TARGET_MAIN)
-
-$(TARGET_MAIN): $(BUILD_PATH)/main.o
+$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
 	$(CC) -lm -lsoundio \
-		$(BUILD_PATH)/main.o \
+		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/midi.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
 		-o $(TARGET_MAIN)
 
 $(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.cpp
