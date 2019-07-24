@@ -7,8 +7,6 @@ most definitely not guaranteed to be in a usable/properly functioning state at a
 
 i'm also quite in over my head and trying to learn so much stuff as i go!!! so i'm probably doing a lot of things wrong, lol, feel free to lemme kno if you are interested and/or know about this stuff and wanna help!!
 
-i should like, learn c++ and just do the whole thing in that maybe
-
 _TODO: add screenshots (once there is a gui lol)_
 
 ## Dependencies
@@ -92,6 +90,7 @@ The `src` directory contains the following:
 ## Immediate todo list
 
 ### Frontend stuff
+- implement rtmidi interface
 - consider command line args
 - simple gui
 
