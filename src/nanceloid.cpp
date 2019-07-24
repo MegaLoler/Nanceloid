@@ -154,7 +154,7 @@ void Nanceloid::midi (uint8_t *data) {
     // parse the data
     uint8_t type = data[0] & 0xf0;
     //uint8_t chan = data[0] & 0x0f;
-
+    
     if (type == 0xb0) {
 
         // handle control events

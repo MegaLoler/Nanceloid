@@ -6,6 +6,8 @@
 
 using namespace std;
 
+const float latency = 15; // in ms
+
 // the vocal synth instance
 Nanceloid *synth;
 
@@ -117,6 +119,7 @@ void setup_audio () {
     if (!stream)
         exit_error ("Could not create audio output stream.");
     stream->format = SoundIoFormatFloat32NE;
+    stream->software_latency = latency / 1000.0;
     stream->write_callback = process_audio;
 
     // open the stream
