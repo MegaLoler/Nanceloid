@@ -89,7 +89,7 @@ class Nanceloid {
         static double map_to_range (uint8_t value, double min, double max);
 
         // move the admittance of a segment toward a given value
-        void approach_admittance (Segment &segment, double target);
+        void approach_admittance (Segment &segment, double target, double coefficient);
 
     public:
         Nanceloid (GlottalSource *source) : source (source) {}
@@ -105,7 +105,8 @@ class Nanceloid {
         void init ();
 
         // update the shape of the tract according to parameters
-        void reshape ();
+        // if set is true it will instantly set the shape rather thna approach
+        void reshape (bool set = true);
 
         // debug print the state of the parameters
         void debug ();

@@ -90,7 +90,6 @@ The `src` directory contains the following:
 ## Immediate todo list
 
 ### Frontend stuff
-- implement rtmidi interface
 - consider command line args
 - simple gui
 

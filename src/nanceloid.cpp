@@ -79,20 +79,22 @@ double Nanceloid::run () {
     return waveguide->collect_drain_right () * parameters.volume;
 }
 
-void Nanceloid::approach_admittance (Segment &segment, double target) {
+void Nanceloid::approach_admittance (Segment &segment, double target, double coefficient) {
     double current = segment.get_admittance ();
-    double delta = (target - current) * parameters.enunciation * enunciation;
+    double delta = (target - current) * coefficient;
     double new_admittance = current + delta;
     segment.set_admittance (new_admittance);
 }
 
-void Nanceloid::reshape () {
+void Nanceloid::reshape (bool set) {
+
+    double coefficient = set ? 1 : parameters.enunciation * enunciation;
 
     // shape the lips
     double lips_admittance = (1 - parameters.lips_roundedness) / neutral_impedance;
     for (int i = lips_start; i < waveguide->get_length (); i++) {
         Segment &segment = waveguide->get_segment (i);
-        approach_admittance (segment, lips_admittance);
+        approach_admittance (segment, lips_admittance, coefficient);
     }
 
     // shape the tongue
@@ -105,7 +107,7 @@ void Nanceloid::reshape () {
         double phase = unit_pos - parameters.tongue_frontness;
         double value = cos (phase * M_PI / 2) * parameters.tongue_height;
         double unit_area = 1 - value;
-        approach_admittance (segment, unit_area / neutral_impedance);
+        approach_admittance (segment, unit_area / neutral_impedance, coefficient);
     }
 
     //// shape the velum TODO
@@ -141,8 +143,12 @@ void Nanceloid::init () {
         // TODO: copy sound data
         // maybe make a waveguide method that copies sound in from old waveguide
         // (and fills in gaps to avoid subtle clicks)
-        delete old;
+
+        // TODO: why does this break lol
+        //delete old;
     }
+
+    reshape (true);
 }
 
 double Nanceloid::map_to_range (uint8_t value, double min, double max) {
@@ -160,7 +166,7 @@ void Nanceloid::midi (uint8_t *data) {
         // handle control events
         uint8_t id = data[1];
         uint8_t value = data[2];
-        cout << "Received midi controller event: 0x" << hex << id << " 0x" << hex << value;
+        cout << "Received midi controller event: 0x" << hex << id << " 0x" << hex << value << endl;
 
         switch (id) {
             case controller_glottal_tension:
