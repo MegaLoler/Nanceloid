@@ -1,6 +1,7 @@
 #include <iostream>
 #include <soundio/soundio.h>
-//#include <nanceloid.h>
+#include <nanceloid.h>
+#include <saw_source.h>
 //#include <midi.h>
 
 using namespace std;
@@ -55,7 +56,7 @@ int main (int argc, char **argv) {
     int error;
 
     // setup the synth
-    synth = new Nanceloid;
+    synth = new Nanceloid (new SawSource);
     
     // initialize soundio
     struct SoundIo *soundio = soundio_create();

@@ -4,5 +4,5 @@
 
 class GlottalSource {
     public:
-        virtual double run (Nanceloid nanceloid);
+        virtual double run (Nanceloid *voice);
 }
