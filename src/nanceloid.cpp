@@ -166,6 +166,7 @@ void Nanceloid::midi (uint8_t *data) {
         // handle control events
         uint8_t id = data[1];
         uint8_t value = data[2];
+        // TODO: fix this display lol
         cout << "Received midi controller event: 0x" << hex << id << " 0x" << hex << value << endl;
 
         switch (id) {

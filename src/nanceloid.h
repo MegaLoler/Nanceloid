@@ -32,7 +32,7 @@ struct Parameters {
     double laryngeal_height   = 0;    // vertical position of the larynx, extends tract (-1 to 1)
 
     // articulatory parameters
-    double lips_roundedness   = 0.9;    // closedness of the lips (0 to 1)
+    double lips_roundedness   = 0.9;  // closedness of the lips (0 to 1)
     double jaw_height         = 0.5;  // jaw openness/height (0 to 1)
     double tongue_frontness   = 0;    // position of peak of tongue (0 to 1)
     double tongue_height      = 0.9;  // how close to touching the roof of the mouth (0 to 1)
@@ -73,7 +73,7 @@ class Nanceloid {
         int tongue_start;           // number of nodes in the tongue
         int lips_start;             // number of nodes in the lips
 
-        GlottalSource *source;       // how to model glottal source sound
+        GlottalSource *source;      // how to model glottal source sound
         Parameters parameters;      // the synth parameters
         TargetNote note;            // what note to play
 
