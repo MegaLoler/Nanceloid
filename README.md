@@ -1,6 +1,6 @@
 # Nanceloid
 
-A physically-modelled vocal synthesizer using digital waveguide networks!
+A physically-modelled vocal synthesizer using digital waveguides!
 
 its a work in progress O_O
 most definitely not guaranteed to be in a usable/properly functioning state at any given time rn lol
@@ -13,7 +13,7 @@ _TODO: add screenshots (once there is a gui lol)_
 
 ## Dependencies
 
-In order to build and run the standalone synth you will need the [JACK audio connection kit](http://jackaudio.org/).
+In order to build and run the standalone synth you will need the [PortAudio](http://portaudio.com) and [PortMidi](http://portmedia.sourceforge.net/portmidi/).
 
 In order to build the VST plugins you will need the following:
 - `i686-w64-mingw32-g++`
@@ -30,10 +30,10 @@ artwork  bin  doc  index.html  pluginterfaces  public.sdk  vstgui.sf
 ## How to build
 
 Run `make` to produce the `build` directory containing the following:
-- `nanceloid` is the standalone JACK client.
+- `nanceloid` is the standalone synth.
 - `nanceloid32.dll` is the 32-bit version of the VST plugin.
 - `nanceloid64.dll` is the 64-bit version of the VST plugin.
-- `test` is a test program used for debugging the waveguide network engine.
+- `test` is a test program used for debugging the waveguide implementation.
 
 Run `make clean` to remove the `build` directory and its contents after it has been created.
 
@@ -43,7 +43,7 @@ Run `make run` to run the standalone synth.
 
 Load `build/nanceloid32.dll` or `build/nanceloid64.dll` into your DAW to use the VST plugin.
 
-Run `make test` to run the waveguide network engine test program.
+Run `make test` to run the waveguide test program.
 
 Run `make debug` to run the same thing in GDB.
 
@@ -80,21 +80,19 @@ _TODO: tutorial, explanation, theory, docs, etc_
 ## Files
 
 The `src` directory contains the following:
-- `main.c` contains the the standalone JACK client.
+- `main.c` contains the the standalone synth.
 - `vst.h` and `vst.cpp` contain the VST plugin.
 - `midi.h` and `midi.c` contain the MIDI event handler.
 - `nanceloid.h` and `nanceloid.c` contain the top-level synth.
-- `waveguide.h` and `waveguide.c` contain the waveguide network engine.
-- `list.h` and `list.c` contain a linked list implementation.
+- `waveguide.h` and `waveguide.c` contain the waveguide implementation.
+- `segment.h` and `segment.c` contain the waveguide segment class.
 - `test.c` contains a test program.
 
 ## Immediate todo list
 
 ### Frontend stuff
 - consider command line args
-- better alsa midi interfacing lol
 - simple gui
-- windows compatibility
 
 ### VST stuff
 - expose nanceloid parameters as vst parameters!!!
@@ -117,12 +115,8 @@ The `src` directory contains the following:
 - experimental source model
 
 ### Waveguide stuff
-- honestly just rewrite the whole thing, im p sure its terribly inefficient
-- fix 3+ way junction reflection...........
-- fix destroying things dangit
 - more realistic turbulence
 
 ### Miscellaneous stuff
 - fix broken makefile lol
 - optimize ? ? idk lol
-- consider other backends for the standalone (alsa? pulse? sdl? windows? rtmidi?)
