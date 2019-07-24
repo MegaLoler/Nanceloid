@@ -85,7 +85,7 @@ $(BUILD_PATH)/segment.o: $(BUILD_PATH) $(SRC_PATH)/segment.h $(SRC_PATH)/segment
 
 $(TARGET_VST_32): $(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/saw_source_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o $(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o
 	$(XC32) -shared \
-		$(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o \
+		$(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/saw_source_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o \
 		$(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o \
 		-o $(TARGET_VST_32)
 

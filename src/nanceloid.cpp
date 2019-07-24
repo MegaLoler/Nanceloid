@@ -155,8 +155,11 @@ void Nanceloid::midi (uint8_t *data) {
         // handle control events
         uint8_t id = data[1];
         uint8_t value = data[2];
+
+#ifdef DEBUG
         // TODO: fix this display lol
         cout << "Received midi controller event: 0x" << hex << id << " 0x" << hex << value << endl;
+#endif
 
         switch (id) {
             case controller_glottal_tension:
@@ -195,7 +198,9 @@ void Nanceloid::midi (uint8_t *data) {
             // TODO: standard midi controllers such as modulation wheel and pitch bend
         }
 
+#ifdef DEBUG
         debug ();
+#endif
 
     } else if (type == 0x80) {
 

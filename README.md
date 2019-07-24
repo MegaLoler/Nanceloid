@@ -101,7 +101,6 @@ The `src` directory contains the following:
 - asdr envelope
 - preset phoneme mapped notes
 - standard midi controllers; bend etc
-- note stack
 - separation of some stuff into "control rate"
 - nasal and lateral passages
 - velic closure
@@ -110,10 +109,10 @@ The `src` directory contains the following:
 - lips extrusion
 - jaw control
 - surface tension
-- copy energy from one waveguide to another function
 - lf source model
 - experimental source model
 - polyphony ?? like a choir manager or something
+- note stack (maybe part of choir manager)
 
 ### Waveguide stuff
 - more realistic turbulence

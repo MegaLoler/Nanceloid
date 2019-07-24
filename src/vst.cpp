@@ -2,10 +2,10 @@
 #include <cstdio>
 
 AudioEffect *createEffectInstance (audioMasterCallback audio_master) {
-    return new NN_VST (audio_master);
+    return new NanceloidVST (audio_master);
 }
 
-NN_VST::NN_VST (audioMasterCallback audio_master)
+NanceloidVST::NanceloidVST (audioMasterCallback audio_master)
     : AudioEffectX (audio_master, 0, PARAMETER_COUNT) {
 
     setNumInputs (0);
@@ -13,13 +13,16 @@ NN_VST::NN_VST (audioMasterCallback audio_master)
     setUniqueID ('nanc');
     canProcessReplacing ();
     isSynth ();
+
+    // create the synth
+    synth = new Nanceloid (new SawSource);
 }
 
-NN_VST::~NN_VST () {
-    destroy_voice (voice);
+NanceloidVST::~NanceloidVST () {
+    delete synth;
 }
 
-VstInt32 NN_VST::canDo (char *string) {
+VstInt32 NanceloidVST::canDo (char *string) {
     if (!strcmp (string, "receiveVstEvents"))
         return 1;
     if (!strcmp (string, "receiveVstMidiEvent"))
@@ -27,60 +30,57 @@ VstInt32 NN_VST::canDo (char *string) {
     return -1;
 }
 
-VstInt32 NN_VST::getNumMidiInputChannels () {
+VstInt32 NanceloidVST::getNumMidiInputChannels () {
     return 1;
 }
 
-VstInt32 NN_VST::getNumMidiOutputChannels () {
+VstInt32 NanceloidVST::getNumMidiOutputChannels () {
     return 0;
 }
 
-void NN_VST::setSampleRate (float rate) {
+void NanceloidVST::setSampleRate (float rate) {
     AudioEffectX::setSampleRate (rate);
 
-    // setup the voice synth
-    voice = create_voice (SAWTOOTH, rate);
-
-    // TODO: we need a set rate callback for the voice
-    // TODO: in the mean time we should free an existing voice before creating a new one lol
+    // set the rate
+    synth->set_rate (rate);
 }
 
-void NN_VST::processReplacing (float **inputs, float **outputs, VstInt32 frames) {
+void NanceloidVST::processReplacing (float **inputs, float **outputs, VstInt32 frames) {
     while (frames--)
-        *outputs[0]++ = *outputs[1] = step_voice (voice);
+        *outputs[0]++ = *outputs[1]++ = synth->run ();
 }
 
-VstInt32 NN_VST::processEvents (VstEvents *event) {
+VstInt32 NanceloidVST::processEvents (VstEvents *event) {
     for (VstInt32 i = 0; i < event->numEvents; i++) {
         if ((event->events[i])->type == kVstMidiType) {
             VstMidiEvent *midi_event = (VstMidiEvent *) event->events[i];
-            process_midi (voice, (uint8_t *) midi_event->midiData);
+            synth->midi ((uint8_t *) midi_event->midiData);
         }
     }
     return 1;
 }
 
 
-VstInt32 NN_VST::getVendorVersion () {
+VstInt32 NanceloidVST::getVendorVersion () {
     return 1000; // idk
 }
 
-bool NN_VST::getEffectName (char *name) {
+bool NanceloidVST::getEffectName (char *name) {
     vst_strncpy (name, "Nanceloid", kVstMaxEffectNameLen);
     return true;
 }
 
-bool NN_VST::getProductString (char *string) {
+bool NanceloidVST::getProductString (char *string) {
     vst_strncpy (string, "Nanceloid", kVstMaxProductStrLen);
     return true;
 }
 
-bool NN_VST::getVendorString (char *string) {
+bool NanceloidVST::getVendorString (char *string) {
     vst_strncpy (string, "Negative Nancy", kVstMaxVendorStrLen);
     return true;
 }
 
-void NN_VST::setParameter (VstInt32 index, float value) {
+void NanceloidVST::setParameter (VstInt32 index, float value) {
     switch (index) {
         case PLACEHOLDER:
             // placeholder
@@ -88,7 +88,7 @@ void NN_VST::setParameter (VstInt32 index, float value) {
     }
 }
 
-float NN_VST::getParameter (VstInt32 index, float value) {
+float NanceloidVST::getParameter (VstInt32 index, float value) {
     switch (index) {
         case PLACEHOLDER:
             return 0;
@@ -98,15 +98,15 @@ float NN_VST::getParameter (VstInt32 index, float value) {
     }
 }
 
-void NN_VST::getParameterName (VstInt32 index, char *name) {
+void NanceloidVST::getParameterName (VstInt32 index, char *name) {
     vst_strncpy (name, parameter_names[index], kVstMaxParamStrLen);
 }
 
-void NN_VST::getParameterLabel (VstInt32 index, char *label) {
+void NanceloidVST::getParameterLabel (VstInt32 index, char *label) {
     vst_strncpy (label, parameter_labels[index], kVstMaxParamStrLen);
 }
 
-void NN_VST::getParameterDisplay (VstInt32 index, char *string) {
+void NanceloidVST::getParameterDisplay (VstInt32 index, char *string) {
     switch (index) {
         case PLACEHOLDER:
             sprintf(string, "placeholder");

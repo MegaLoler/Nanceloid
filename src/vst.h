@@ -1,11 +1,12 @@
 #include <audioeffectx.h>
 #include <nanceloid.h>
+#include <saw_source.h>
 #include <cmath>
 
-class NN_VST : public AudioEffectX {
+class NanceloidVST : public AudioEffectX {
     public:
-        NN_VST (audioMasterCallback audio_master);
-        ~NN_VST ();
+        NanceloidVST (audioMasterCallback audio_master);
+        ~NanceloidVST ();
 
         virtual void processReplacing (float **inputs, float **outputs, VstInt32 frames);
         virtual VstInt32 processEvents (VstEvents *events);
@@ -27,7 +28,7 @@ class NN_VST : public AudioEffectX {
         virtual void getParameterDisplay (VstInt32 index, char *string);
 
     private:
-        Voice *voice;
+        Nanceloid *synth;
 };
 
 enum PARAMETER_TYPE {
