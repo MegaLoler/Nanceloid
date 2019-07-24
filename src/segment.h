@@ -39,4 +39,7 @@ class Segment {
         void set_gamma (double left, double right);
         double get_gamma_left ();
         double get_gamma_right ();
+
+        // copy acoustic energy only from another segment
+        void copy (Segment &source);
 };

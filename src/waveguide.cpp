@@ -156,7 +156,7 @@ void Waveguide::debug () {
 
     for (int i = 0; i < length; i++) {
 
-        Segment &segment    = segments[i];
+        Segment &segment   = segments[i];
         double left        = segment.get_left ();
         double right       = segment.get_right ();
         double total       = segment.get ();
@@ -175,4 +175,17 @@ void Waveguide::debug () {
          << "   RIGHT( " << collect_drain_right () << " )" << endl;
     cout << "NET( " << get_net () << " )" << endl;
     cout << endl;
+}
+
+void Waveguide::copy (Waveguide *source) {
+
+    // loop over the length of THIS waveguide
+    // and copy over corresponding segment data
+    // and repeat the final data
+    Segment copy;
+    for (int i = 0; i < length; i++) {
+        if (i < source->get_length ())
+            copy = source->get_segment (i);
+        segments[i].copy (copy);
+    }
 }

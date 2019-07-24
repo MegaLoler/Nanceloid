@@ -62,4 +62,7 @@ class Waveguide {
 
         // get a segment from the waveguide
         Segment &get_segment (int i);
+
+        // copy acoustic energy from another waveguide
+        void copy (Waveguide *source);
 };

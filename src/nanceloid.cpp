@@ -140,9 +140,7 @@ void Nanceloid::init () {
     // if there was a previous waveguide, then copy the old sound state to the new one
     // and of course delete the old one
     if (old != nullptr) {
-        // TODO: copy sound data
-        // maybe make a waveguide method that copies sound in from old waveguide
-        // (and fills in gaps to avoid subtle clicks)
+        waveguide->copy (old);
 
         // TODO: why does this break lol
         //delete old;

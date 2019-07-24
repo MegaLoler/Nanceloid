@@ -54,3 +54,10 @@ double Segment::get_gamma_left () {
 double Segment::get_gamma_right () {
     return gamma_right;
 }
+
+void Segment::copy (Segment &source) {
+    _left = source._left;
+    _right = source._right;
+    left = source.left;
+    right = source.right;
+}

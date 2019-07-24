@@ -117,6 +117,7 @@ The `src` directory contains the following:
 
 ### Waveguide stuff
 - more realistic turbulence
+- "double buffer" instead of "flushing"
 
 ### Miscellaneous stuff
 - fix broken makefile lol
