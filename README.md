@@ -91,11 +91,10 @@ The `src` directory contains the following:
 
 ### Frontend stuff
 - consider command line args
-- simple gui
+- gui
 
 ### VST stuff
-- expose nanceloid parameters as vst parameters!!!
-- basic gui
+- gui
 
 ### Nanceloid stuff
 - asdr envelope

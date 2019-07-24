@@ -62,7 +62,7 @@ struct Parameters {
 struct TargetNote {
     uint8_t note    = 40;// midi note value
     double detune   = 0; // offset in semitones
-    double velocity = 1; // note velocity (0 to 1)
+    double velocity = 0; // note velocity (0 to 1)
 };
 
 // represents a synth instance

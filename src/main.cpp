@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 #include <soundio/soundio.h>
 #include <RtMidi.h>
 #include <nanceloid.h>
@@ -11,6 +12,10 @@ const float latency = 15; // in ms
 // the vocal synth instance
 Nanceloid *synth;
 
+// the midi channel to listen on
+// -1 means all
+int midi_channel = -1;
+
 void exit_error (string message) {
     cerr << message << endl;
     exit (EXIT_FAILURE);
@@ -21,6 +26,15 @@ void process_midi (double dt, vector<unsigned char> *message, void *user_data) {
     int num_bytes = message->size ();
     uint8_t *data = new uint8_t[num_bytes];
     copy (message->begin (), message->end (), data);
+
+    // midi channel masking
+    if (midi_channel != -1) {
+        uint8_t channel = data[0] & 0x0f;
+        if (channel != midi_channel) {
+            delete data;
+            return;
+        }
+    }
 
     // send to the synth
     synth->midi (data);
@@ -158,6 +172,18 @@ void setup_audio () {
 }
 
 int main (int argc, char **argv) {
+
+    // parse cli args
+    int c;
+    while ((c = getopt (argc, argv, "c:")) != -1) {
+        switch (c) {
+            case 'c':
+                midi_channel = atoi (optarg);
+                break;
+            default:
+                exit (EXIT_FAILURE);
+        }
+    }
 
     // setup the synth
     synth = new Nanceloid (new SawSource);

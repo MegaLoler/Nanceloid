@@ -4,6 +4,7 @@ SRC_PATH      ::= src
 BUILD_PATH    ::= build
 SDK_PATH      ::= vstsdk2.4
 SDK_SRC_PATH  ::= $(SDK_PATH)/public.sdk/source/vst2.x
+INSTALL_PATH  ::= ~/bin #/usr/bin
 
 # compilers
 COMP          ::= g++
@@ -11,7 +12,7 @@ XCOMP32       ::= i686-w64-mingw32-g++
 XCOMP64       ::= x86_64-w64-mingw32-g++
 
 # compiler options
-OPT           ::= -I$(SRC_PATH) -Wall -g
+OPT           ::= -I$(SRC_PATH) -Wall -O3
 XOPT          ::= -I$(SDK_PATH) -I$(SDK_SRC_PATH) -Wno-multichar -Wno-narrowing -Wno-write-strings -static
 
 # compiler invocation
@@ -206,3 +207,7 @@ test: $(TARGET_TEST)
 .PHONY:
 debug: $(TARGET_TEST)
 	gdb $(TARGET_TEST)
+
+.PHONY:
+install: $(TARGET_MAIN)
+	cp $(TARGET_MAIN) $(INSTALL_PATH)
