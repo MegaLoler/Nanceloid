@@ -49,29 +49,29 @@ Run `make debug` to run the same thing in GDB.
 
 ### Synth parameters
 
-| Parameter          | Midi Controller | Description                                 |
-|--------------------|-----------------|---------------------------------------------|
-| Lungs              | Note velocity   | Continuous air pressure from the lungs      |
-| Glottis            | 0x15            | How tightly shut the vocal folds are        |
-| Larynx             | Note pitch      | Vertical positioning of the larynx          |
-| Lips               | 0x16            | Rounding and extrusion of the lips          |
-| Jaw                | 0x17            | Elevation of the jaw                        |
-| Frontness          | 0x18            | Tongue position                             |
-| Height             | 0x19            | Tongue height                               |
-| Flatness           | 0x1a            | Tongue spread                               |
-| Velum              |                 | Velic closure                               |
-| Acoustic damping   |                 | Sound absorbtion coefficient                |
-| Enunciation        | 0x1b            | Force used to reshape tract                 |
-| Portamento         |                 | How quickly pitch and velocity change       |
-| Frication          |                 | Turbulence coefficient                      |
-| Surface tension    |                 | "Stickiness"                                |
-| Tract length       | 0x1c            | Overal length of the vocal tract            |
-| Ambient admittance |                 | Acoustic ddmittance outside the vocal tract |
-| Vibrato rate       |                 | Speed of vibrato                            |
-| Vibrato depth      |                 | Intensity of vibrato                        |
-| Velocity weight    |                 | Incoming note velocity weight               |
-| Panning            |                 | Left and right balance                      |
-| Volume             |                 | Master volume                               |
+| Parameter          | VST Label | Midi Controller | Description                                 |
+|--------------------|-----------|-----------------|---------------------------------------------|
+| Lungs              | Lungs     | Note velocity   | Continuous air pressure from the lungs      |
+| Glottis            | Glottis   | 0x15            | How tightly shut the vocal folds are        |
+| Larynx             | Larynx    | Note pitch      | Vertical positioning of the larynx          |
+| Lips               | Lips      | 0x16            | Rounding and extrusion of the lips          |
+| Jaw                | Jaw       | 0x17            | Elevation of the jaw                        |
+| Frontness          | Position  | 0x18            | Tongue position                             |
+| Height             | Height    | 0x19            | Tongue height                               |
+| Flatness           | Flatness  | 0x1a            | Tongue spread                               |
+| Velum              | Velum     |                 | Velic closure                               |
+| Acoustic damping   | Damping   |                 | Sound absorbtion coefficient                |
+| Enunciation        | Enunc.    | 0x1b            | Force used to reshape tract                 |
+| Portamento         | Portam.   |                 | How quickly pitch and velocity change       |
+| Frication          | Friction  |                 | Turbulence coefficient                      |
+| Surface tension    | Tension   |                 | "Stickiness"                                |
+| Tract length       | Length    | 0x1c            | Overal length of the vocal tract            |
+| Ambient admittance | Amb. Y    |                 | Acoustic ddmittance outside the vocal tract |
+| Vibrato rate       | Vib Rate  |                 | Speed of vibrato                            |
+| Vibrato depth      | Vib Dep.  |                 | Intensity of vibrato                        |
+| Velocity weight    | Velocity  |                 | Incoming note velocity weight               |
+| Panning            | Panning   |                 | Left and right balance                      |
+| Volume             | Volume    |                 | Master volume                               |
 
 _TODO: tutorial, explanation, theory, docs, etc_
 
