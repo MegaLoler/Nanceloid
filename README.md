@@ -98,9 +98,9 @@ The `src` directory contains the following:
 - basic gui
 
 ### Nanceloid stuff
+- standard midi controllers; bend etc
 - asdr envelope
 - preset phoneme mapped notes
-- standard midi controllers; bend etc
 - separation of some stuff into "control rate"
 - nasal and lateral passages
 - velic closure

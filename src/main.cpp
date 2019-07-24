@@ -33,7 +33,7 @@ void process_midi (double dt, vector<unsigned char> *message, void *user_data) {
 
 void process_audio (struct SoundIoOutStream *stream, int min_frames, int max_frames) {
 
-    const struct SoundIoChannelLayout *layout = &stream->layout;
+    //const struct SoundIoChannelLayout *layout = &stream->layout;
     float sample_rate = stream->sample_rate;
     struct SoundIoChannelArea *areas;
 
@@ -55,10 +55,22 @@ void process_audio (struct SoundIoOutStream *stream, int min_frames, int max_fra
         for (int frame = 0; frame < frame_count; frame++) {
             float sample = synth->run ();
 
-            for (int channel = 0; channel < layout->channel_count; channel++) {
-                float *out = (float *) (areas[channel].ptr + areas[channel].step * frame);
-                *out = sample;
-            }
+            // TODO: optimize? clean?
+            Parameters p = synth->get_parameters ();
+            float pan = p.panning;
+            float normal = (pan + 1) / 2;
+            float left_pan = cos (normal * M_PI / 2);
+            float right_pan = cos ((1 - normal) * M_PI / 2);
+            float left = sample * left_pan;
+            float right = sample * right_pan;
+
+            *((float *) (areas[0].ptr + areas[0].step * frame)) = left;
+            *((float *) (areas[1].ptr + areas[1].step * frame)) = right;
+
+//            for (int channel = 0; channel < layout->channel_count; channel++) {
+//                float *out = (float *) (areas[channel].ptr + areas[channel].step * frame);
+//                *out = sample;
+//            }
         }
 
         if ((error = soundio_outstream_end_write (stream)))

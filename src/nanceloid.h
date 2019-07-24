@@ -52,6 +52,7 @@ struct Parameters {
     double vibrato_rate       = 4;    // how quickly the singing vibrato should be (hz)
     double vibrato_depth      = 0.25; // how wide the vibrato peak should be (semitones)
     double velocity           = 0.5;  // how much incoming note velocity has any effect
+    double panning            = 0;    // left right panning (-1 to 1)
     double volume             = 0.5;  // overall volume (0 to 1)
 
 };
@@ -109,6 +110,9 @@ class Nanceloid {
 
         // process a midi event
         void midi (uint8_t *data);
+
+        // get the the parameters
+        Parameters &get_parameters ();
 
         friend class GlottalSource;
         friend class SawSource;

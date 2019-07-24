@@ -222,3 +222,7 @@ void Nanceloid::midi (uint8_t *data) {
 
     // TODO: handle phoneme mapped notes on channel 10 or w/e
 }
+
+Parameters &Nanceloid::get_parameters () {
+    return parameters;
+}
