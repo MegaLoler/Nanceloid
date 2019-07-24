@@ -4,8 +4,6 @@
 #include <nanceloid.h>
 #include <saw_source.h>
 
-#define DEBUG
-
 using namespace std;
 
 const float latency = 15; // in ms

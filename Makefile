@@ -42,7 +42,7 @@ $(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.cpp
 		-o $(BUILD_PATH)/main.o
 
 $(BUILD_PATH)/nanceloid.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.cpp
-	$(CC) -c \
+	$(CC) -D DEBUG -c \
 		$(SRC_PATH)/nanceloid.cpp \
 		-o $(BUILD_PATH)/nanceloid.o
 

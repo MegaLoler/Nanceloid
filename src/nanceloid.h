@@ -8,6 +8,7 @@
 class GlottalSource;
 
 // midi controller mappings
+const int controller_vibrato          = 0x01;
 const int controller_glottal_tension  = 0x15;
 const int controller_lips_roundedness = 0x16;
 const int controller_jaw_height       = 0x17;

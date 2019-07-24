@@ -148,8 +148,12 @@ void Nanceloid::midi (uint8_t *data) {
 
     // parse the data
     uint8_t type = data[0] & 0xf0;
-    //uint8_t chan = data[0] & 0x0f;
+    uint8_t chan = data[0] & 0x0f;
     
+#ifdef DEBUG
+    cout << "Received midi event: 0x" << hex << (int) type << " channel: 0x" << hex << (int) chan << endl;
+#endif
+
     if (type == 0xb0) {
 
         // handle control events
@@ -157,11 +161,14 @@ void Nanceloid::midi (uint8_t *data) {
         uint8_t value = data[2];
 
 #ifdef DEBUG
-        // TODO: fix this display lol
-        cout << "Received midi controller event: 0x" << hex << id << " 0x" << hex << value << endl;
+        cout << "Received midi controller event: 0x" << hex << (int) id << " 0x" << hex << (int) value << endl;
 #endif
 
         switch (id) {
+            case controller_vibrato:
+                this->parameters.vibrato_depth = map_to_range (value, 0, 1);
+                break;
+
             case controller_glottal_tension:
                 this->parameters.glottal_tension = map_to_range (value, -1, 1);
                 break;
@@ -194,8 +201,6 @@ void Nanceloid::midi (uint8_t *data) {
                 this->parameters.tract_length = map_to_range (value, 8, 24);
                 init ();
                 break;
-
-            // TODO: standard midi controllers such as modulation wheel and pitch bend
         }
 
 #ifdef DEBUG
@@ -217,6 +222,21 @@ void Nanceloid::midi (uint8_t *data) {
 
         this->note.note = note;
         this->note.velocity = map_velocity (velocity);
+
+    } else if (type == 0xe0) {
+
+        // handle pitch bends
+        
+        // get the least and most significant bits
+        //uint8_t lsb = data[1];
+        uint8_t msb = data[2];
+        //int value = (lsb + msb) << 7;
+
+#ifdef DEBUG
+        cout << "Received pitch bend: 0x" << hex << (int) msb << endl;
+#endif
+
+        this->note.detune = map_to_range (msb, -2, 2);
 
     }
 
