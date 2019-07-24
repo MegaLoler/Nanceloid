@@ -1,5 +1,5 @@
-#include <audioeffectx>
-#include <nanceloid>
+#include <audioeffectx.h>
+#include <nanceloid.h>
 #include <cmath>
 
 class NN_VST : public AudioEffectX {

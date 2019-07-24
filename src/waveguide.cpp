@@ -182,10 +182,13 @@ void Waveguide::copy (Waveguide *source) {
     // loop over the length of THIS waveguide
     // and copy over corresponding segment data
     // and repeat the final data
+    // TODO: figure out how to make this smoother and avoid random clicks
     Segment copy;
     for (int i = 0; i < length; i++) {
         if (i < source->get_length ())
             copy = source->get_segment (i);
         segments[i].copy (copy);
     }
+    source->drain_left = drain_left;
+    source->drain_right = drain_right;
 }

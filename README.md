@@ -97,10 +97,12 @@ The `src` directory contains the following:
 - expose nanceloid parameters as vst parameters!!!
 - basic gui
 
-### Midi stuff
-- preset phoneme mapped notes
-
 ### Nanceloid stuff
+- polyphony
+- asdr envelope
+- preset phoneme mapped notes
+- standard midi controllers; bend etc
+- note stack
 - separation of some stuff into "control rate"
 - nasal and lateral passages
 - velic closure
@@ -112,8 +114,6 @@ The `src` directory contains the following:
 - copy energy from one waveguide to another function
 - lf source model
 - experimental source model
-- polyphony
-- move osc vars into glottal source class
 
 ### Waveguide stuff
 - more realistic turbulence

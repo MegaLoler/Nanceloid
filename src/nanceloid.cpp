@@ -4,10 +4,6 @@
 
 using namespace std;
 
-double Nanceloid::get_frequency (double note) {
-    return 440.0 * pow (2.0, (note - 69) / 12);
-}
-
 Nanceloid::~Nanceloid () {
     // NOTE: is this necessary?
     if (waveguide != nullptr)
@@ -28,7 +24,6 @@ void Nanceloid::debug () {
     cout << "tongue_flatness    " << p.tongue_flatness << endl;
     cout << "velic_closure      " << p.velic_closure << endl;
     cout << "acoustic_damping   " << p.acoustic_damping << endl;
-    cout << "physical_damping   " << p.physical_damping << endl;
     cout << "enunciation        " << p.enunciation << endl;
     cout << "portamento         " << p.portamento << endl;
     cout << "frication          " << p.frication << endl;
@@ -37,7 +32,7 @@ void Nanceloid::debug () {
     cout << "ambient_admittance " << p.ambient_admittance << endl;
     cout << "vibrato_rate       " << p.vibrato_rate << endl;
     cout << "vibrato_depth      " << p.vibrato_depth << endl;
-    cout << "frequency          " << p.frequency << endl;
+    cout << "velocity           " << p.velocity << endl;
     cout << "volume             " << p.volume << endl;;
     cout << endl;
 }
@@ -51,17 +46,8 @@ void Nanceloid::set_rate (int rate) {
 
 double Nanceloid::run () {
 
-    // musical dynamics
-    // TODO: make vibrato control rate
-    double vibrato = sin (vibrato_phase * 2 * M_PI) * parameters.vibrato_depth;
-    vibrato_phase += parameters.vibrato_rate / rate;
-
-    double frequency = get_frequency (note.note + note.detune + vibrato);
-    parameters.frequency += (frequency - parameters.frequency) * parameters.portamento * portamento;
-
-    parameters.lungs += (note.velocity - parameters.lungs) * parameters.portamento * portamento;
-
     // air pressure from lungs
+    parameters.lungs += (note.velocity - parameters.lungs) * parameters.portamento * portamento;
     double opening = fmax (-parameters.glottal_tension, 0);
     waveguide->put (0, 0, parameters.lungs * opening);
 
@@ -153,6 +139,11 @@ double Nanceloid::map_to_range (uint8_t value, double min, double max) {
     return value / 127.0 * (max - min) + min;
 }
 
+double Nanceloid::map_velocity (uint8_t value) {
+    double normal = map_to_range (value, 0, 1);
+    return (1 - parameters.velocity) + parameters.velocity * normal;
+}
+
 void Nanceloid::midi (uint8_t *data) {
 
     // parse the data
@@ -210,10 +201,8 @@ void Nanceloid::midi (uint8_t *data) {
 
         // handle note off events
         uint8_t note = data[1];
-        uint8_t velocity = data[2];
-
         if (note == this->note.note)
-            this->note.velocity = map_to_range (velocity, 0, 1);
+            this->note.velocity = 0;
 
     } else if (type == 0x90) {
 
@@ -222,7 +211,7 @@ void Nanceloid::midi (uint8_t *data) {
         uint8_t velocity = data[2];
 
         this->note.note = note;
-        this->note.velocity = map_to_range (velocity, 0, 1);
+        this->note.velocity = map_velocity (velocity);
 
     }
 

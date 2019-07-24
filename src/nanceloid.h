@@ -28,11 +28,11 @@ struct Parameters {
 
     // phonation parameters
     double lungs              = 0;    // continuous air pressure from the lungs (-1 to 1)
-    double glottal_tension    = 0;    // how tightly shut the glottis is (-1 to 1)
+    double glottal_tension    = 0.5;  // how tightly shut the glottis is (-1 to 1)
     double laryngeal_height   = 0;    // vertical position of the larynx, extends tract (-1 to 1)
 
     // articulatory parameters
-    double lips_roundedness   = 0.9;  // closedness of the lips (0 to 1)
+    double lips_roundedness   = 0;    // closedness of the lips (0 to 1)
     double jaw_height         = 0.5;  // jaw openness/height (0 to 1)
     double tongue_frontness   = 0;    // position of peak of tongue (0 to 1)
     double tongue_height      = 0.9;  // how close to touching the roof of the mouth (0 to 1)
@@ -41,9 +41,8 @@ struct Parameters {
 
     // physical parameters
     double acoustic_damping   = 0.04; // sound absorbsion, loss of energy at reflections (0 to 1)
-    double physical_damping   = 0.4;  // damping of tract reshaping (0 to 1)
     double enunciation        = 0.25; // strength of tract reshaping (0 to 1)
-    double portamento         = 0.5;  // how quickly pitch and velocity change (0 to 1)
+    double portamento         = 0.65; // how quickly pitch and velocity change (0 to 1)
     double frication          = 0.01; // turbulence coefficient (0 to 1)
     double surface_tension    = 0.5;  // tendency of constrictions to stick together (0 to 1)
     double tract_length       = 24;   // length of vocal tract (cm)
@@ -52,7 +51,7 @@ struct Parameters {
     // musical and audio parameters
     double vibrato_rate       = 4;    // how quickly the singing vibrato should be (hz)
     double vibrato_depth      = 0.25; // how wide the vibrato peak should be (semitones)
-    double frequency          = 0;    // vocal fold oscillation frequency
+    double velocity           = 0.5;  // how much incoming note velocity has any effect
     double volume             = 0.5;  // overall volume (0 to 1)
 
 };
@@ -78,15 +77,12 @@ class Nanceloid {
         TargetNote note;            // what note to play
 
         int rate = 0;               // sample rate
-        double osc = 0;             // last oscillator sample
-        double osc_phase = 0;       // glottal oscillator current phase
-        double vibrato_phase = 0;   // vibrato lfo current phase
-
-        // return 12tet frequency given a midi note value
-        static double get_frequency (double note);
 
         // map a midi value to a given range
         static double map_to_range (uint8_t value, double min, double max);
+
+        // map incoming note velocity to appropriate normalized value
+        double map_velocity (uint8_t value);
 
         // move the admittance of a segment toward a given value
         void approach_admittance (Segment &segment, double target, double coefficient);
