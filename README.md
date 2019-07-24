@@ -98,7 +98,6 @@ The `src` directory contains the following:
 - basic gui
 
 ### Nanceloid stuff
-- polyphony
 - asdr envelope
 - preset phoneme mapped notes
 - standard midi controllers; bend etc
@@ -114,6 +113,7 @@ The `src` directory contains the following:
 - copy energy from one waveguide to another function
 - lf source model
 - experimental source model
+- polyphony ?? like a choir manager or something
 
 ### Waveguide stuff
 - more realistic turbulence

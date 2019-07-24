@@ -7,11 +7,9 @@
 using namespace std;
 
 const float latency = 15; // in ms
-const int polyphony = 4;
 
-// the vocal synth instances
-// (one for each voice)
-Nanceloid **synths;
+// the vocal synth instance
+Nanceloid *synth;
 
 void exit_error (string message) {
     cerr << message << endl;
@@ -25,7 +23,7 @@ void process_midi (double dt, vector<unsigned char> *message, void *user_data) {
     copy (message->begin (), message->end (), data);
 
     // send to the synth
-    synths[0]->midi (data);
+    synth->midi (data);
 
     // done with the data
     delete data;
@@ -40,7 +38,7 @@ void process_audio (struct SoundIoOutStream *stream, int min_frames, int max_fra
     int frames_left = max_frames;
     int error;
 
-    synths[0]->set_rate (sample_rate);
+    synth->set_rate (sample_rate);
 
     while (frames_left > 0) {
 
@@ -53,7 +51,7 @@ void process_audio (struct SoundIoOutStream *stream, int min_frames, int max_fra
             break;
 
         for (int frame = 0; frame < frame_count; frame++) {
-            float sample = synths[0]->run ();
+            float sample = synth->run ();
 
             for (int channel = 0; channel < layout->channel_count; channel++) {
                 float *out = (float *) (areas[channel].ptr + areas[channel].step * frame);
@@ -149,23 +147,14 @@ void setup_audio () {
 
 int main (int argc, char **argv) {
 
-    // setup the synths
-    synths = new Nanceloid *[polyphony];
-    for (int i = 0; i < polyphony; i++) {
-        synths[i] = new Nanceloid (new SawSource);
-    }
+    // setup the synth
+    synth = new Nanceloid (new SawSource);
 
     // setup midi
     setup_midi ();
 
     // setup audio
     setup_audio ();
-    
-    // bye bye synths
-    for (int i = 0; i < polyphony; i++) {
-        delete synths[i];
-    }
-    delete synths;
     
     return 0;
 }
