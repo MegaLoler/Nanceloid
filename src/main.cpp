@@ -1,5 +1,6 @@
 #include <iostream>
 #include <soundio/soundio.h>
+#include <RtMidi.h>
 #include <nanceloid.h>
 #include <saw_source.h>
 
@@ -13,7 +14,20 @@ void exit_error (string message) {
     exit (EXIT_FAILURE);
 }
 
-static void process (struct SoundIoOutStream *stream, int min_frames, int max_frames) {
+void process_midi (double dt, vector<unsigned char> *message, void *user_data) {
+    // convert this vector to an array
+    int num_bytes = message->size ();
+    uint8_t *data = new uint8_t[num_bytes];
+    copy (message->begin (), message->end (), data);
+
+    // send to the synth
+    synth->midi (data);
+
+    // done with the data
+    delete data;
+}
+
+void process_audio (struct SoundIoOutStream *stream, int min_frames, int max_frames) {
 
     const struct SoundIoChannelLayout *layout = &stream->layout;
     float sample_rate = stream->sample_rate;
@@ -50,13 +64,31 @@ static void process (struct SoundIoOutStream *stream, int min_frames, int max_fr
     }
 }
 
-int main (int argc, char **argv) {
+void setup_midi () {
+
+    // setup midi input
+    RtMidiIn *midi_in = new RtMidiIn ();
+    vector<unsigned char> message;
+
+    // check midi in ports
+    unsigned int num_ports = midi_in->getPortCount ();
+    if (num_ports == 0)
+        exit_error ("Could not find MIDI input ports.");
+
+    // open the first available port
+    midi_in->openPort (0);
+
+    // don't ignore messages
+    midi_in->ignoreTypes (false, false, false);
+
+    // set midi callback
+    midi_in->setCallback (&process_midi);
+}
+
+void setup_audio () {
 
     int error;
 
-    // setup the synth
-    synth = new Nanceloid (new SawSource);
-    
     // initialize soundio
     struct SoundIo *soundio = soundio_create();
     if (!soundio)
@@ -85,7 +117,7 @@ int main (int argc, char **argv) {
     if (!stream)
         exit_error ("Could not create audio output stream.");
     stream->format = SoundIoFormatFloat32NE;
-    stream->write_callback = process;
+    stream->write_callback = process_audio;
 
     // open the stream
     if ((error = soundio_outstream_open (stream)))
@@ -99,7 +131,7 @@ int main (int argc, char **argv) {
     if ((error = soundio_outstream_start (stream)))
         exit_error ("Could not start audio output stream: " + string (soundio_strerror (error)));
 
-    // process all the events
+    // process audio events
     while (1)
         soundio_wait_events (soundio);
 
@@ -108,5 +140,18 @@ int main (int argc, char **argv) {
     soundio_device_unref (device);
     soundio_destroy (soundio);
 
+}
+
+int main (int argc, char **argv) {
+
+    // setup the synth
+    synth = new Nanceloid (new SawSource);
+
+    // setup midi
+    setup_midi ();
+
+    // setup audio
+    setup_audio ();
+    
     return 0;
 }

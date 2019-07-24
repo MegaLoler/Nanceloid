@@ -32,7 +32,7 @@ all: $(TARGET_MAIN) $(TARGET_TEST) vst
 ### STANDALONE SYNTH ###
 
 $(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
-	$(CC) -lm -lsoundio \
+	$(CC) -lm -lsoundio -lrtmidi \
 		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
 		-o $(TARGET_MAIN)
 
