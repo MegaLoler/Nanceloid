@@ -102,6 +102,7 @@ The `src` directory contains the following:
 - preset phoneme mapped notes
 
 ### Nanceloid stuff
+- separation of some stuff into "control rate"
 - nasal and lateral passages
 - velic closure
 - laryngeal extension

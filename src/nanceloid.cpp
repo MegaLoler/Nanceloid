@@ -52,6 +52,7 @@ void Nanceloid::set_rate (int rate) {
 double Nanceloid::run () {
 
     // musical dynamics
+    // TODO: make vibrato control rate
     double vibrato = sin (vibrato_phase * 2 * M_PI) * parameters.vibrato_depth;
     vibrato_phase += parameters.vibrato_rate / rate;
 
@@ -68,6 +69,7 @@ double Nanceloid::run () {
     waveguide->put (0, 0, source->run (this));
 
     // handle articulatory dynamics
+    // TODO: make this control rate
     reshape ();
 
     // simulate acoustics
