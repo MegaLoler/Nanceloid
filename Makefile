@@ -37,7 +37,7 @@ all: $(TARGET_MAIN) $(TARGET_TEST) vst
 #		-o $(TARGET_MAIN)
 
 $(TARGET_MAIN): $(BUILD_PATH)/main.o
-	$(CC) -lm -lportaudio \
+	$(CC) -lm -lsoundio \
 		$(BUILD_PATH)/main.o \
 		-o $(TARGET_MAIN)
 

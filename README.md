@@ -13,7 +13,7 @@ _TODO: add screenshots (once there is a gui lol)_
 
 ## Dependencies
 
-In order to build and run the standalone synth you will need the [PortAudio](http://portaudio.com) and [PortMidi](http://portmedia.sourceforge.net/portmidi/).
+In order to build and run the standalone synth you will need the [libsoundio](http://libsound.io/) and [RtMidi](https://github.com/thestk/rtmidi).
 
 In order to build the VST plugins you will need the following:
 - `i686-w64-mingw32-g++`
