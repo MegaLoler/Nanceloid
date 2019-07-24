@@ -52,7 +52,7 @@ struct Parameters {
     // musical and audio parameters
     double vibrato_rate       = 4;    // how quickly the singing vibrato should be (hz)
     double vibrato_depth      = 0.25; // how wide the vibrato peak should be (semitones)
-    double velocity           = 0.5;  // how much incoming note velocity has any effect
+    double velocity           = 0.5;  // how much incoming note velocity has any effect (0 to 1)
     double panning            = 0;    // left right panning (-1 to 1)
     double volume             = 0.5;  // overall volume (0 to 1)
 
@@ -117,4 +117,5 @@ class Nanceloid {
 
         friend class GlottalSource;
         friend class SawSource;
+        friend class NanceloidVST;
 };

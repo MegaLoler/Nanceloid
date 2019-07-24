@@ -61,7 +61,6 @@ Run `make debug` to run the same thing in GDB.
 | Flatness           | 0x1a            | Tongue spread                               |
 | Velum              |                 | Velic closure                               |
 | Acoustic damping   |                 | Sound absorbtion coefficient                |
-| Physical damping   |                 | Damping of tract shape dynamics             |
 | Enunciation        | 0x1b            | Force used to reshape tract                 |
 | Portamento         |                 | How quickly pitch and velocity change       |
 | Frication          |                 | Turbulence coefficient                      |
@@ -70,7 +69,8 @@ Run `make debug` to run the same thing in GDB.
 | Ambient admittance |                 | Acoustic ddmittance outside the vocal tract |
 | Vibrato rate       |                 | Speed of vibrato                            |
 | Vibrato depth      |                 | Intensity of vibrato                        |
-| Frequency          |                 | Frequency of vocal fold oscillation         |
+| Velocity weight    |                 | Incoming note velocity weight               |
+| Panning            |                 | Left and right balance                      |
 | Volume             |                 | Master volume                               |
 
 _TODO: tutorial, explanation, theory, docs, etc_

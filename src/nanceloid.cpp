@@ -33,6 +33,7 @@ void Nanceloid::debug () {
     cout << "vibrato_rate       " << p.vibrato_rate << endl;
     cout << "vibrato_depth      " << p.vibrato_depth << endl;
     cout << "velocity           " << p.velocity << endl;
+    cout << "panning            " << p.panning << endl;;
     cout << "volume             " << p.volume << endl;;
     cout << endl;
 }
