@@ -210,6 +210,13 @@ void Nanceloid::init () {
         segment.set_admittance (0.2);
     }
 
+    // shape the nasal cavity
+    for (int i = 0; i < length - nose_start; i++) {
+        Segment &segment = nose->get_segment (i);
+        double normal = i / (length - nose_start - 1);
+        segment.set_admittance (sin (normal * M_PI) + 1);
+    }
+
     // if there was a previous waveguide, then copy the old sound state to the new one
     // and of course delete the old one
     if (old_throat != nullptr) {

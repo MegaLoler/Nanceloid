@@ -58,8 +58,8 @@ Run `make debug` to run the same thing in GDB.
 | Jaw                | Jaw       | 0x17            | Elevation of the jaw                        |
 | Frontness          | Position  | 0x18            | Tongue position                             |
 | Height             | Height    | 0x19            | Tongue height                               |
-| Flatness           | Flatness  | 0x1a            | Tongue spread                               |
-| Velum              | Velum     |                 | Velic closure                               |
+| Flatness           | Flatness  |                 | Tongue spread                               |
+| Velum              | Velum     | 0x1a            | Velic closure                               |
 | Acoustic damping   | Damping   |                 | Sound absorbtion coefficient                |
 | Enunciation        | Enunc.    | 0x1b            | Force used to reshape tract                 |
 | Portamento         | Portam.   |                 | How quickly pitch and velocity change       |
@@ -100,8 +100,7 @@ The `src` directory contains the following:
 - asdr envelope
 - preset phoneme mapped notes
 - separation of some stuff into "control rate"
-- nasal and lateral passages
-- velic closure
+- lateral passages
 - laryngeal extension
 - dynamic larynx proportions
 - lips extrusion
