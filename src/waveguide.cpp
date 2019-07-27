@@ -192,3 +192,11 @@ void Waveguide::copy (Waveguide *source) {
     source->drain_left = drain_left;
     source->drain_right = drain_right;
 }
+
+void Waveguide::set_left_opening_impedance (double impedance) {
+    left_opening_impedance = impedance;
+}
+
+void Waveguide::set_right_opening_impedance (double impedance) {
+    right_opening_impedance = impedance;
+}

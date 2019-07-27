@@ -10,6 +10,7 @@ INSTALL_PATH  ::= ~/bin #/usr/bin
 COMP          ::= g++
 XCOMP32       ::= i686-w64-mingw32-g++
 XCOMP64       ::= x86_64-w64-mingw32-g++
+DEBUGGER      ::= gdb
 
 # compiler options
 OPT           ::= -I$(SRC_PATH) -Wall -O3
@@ -206,7 +207,7 @@ test: $(TARGET_TEST)
 
 .PHONY:
 debug: $(TARGET_TEST)
-	gdb $(TARGET_TEST)
+	$(DEBUGGER) $(TARGET_TEST)
 
 .PHONY:
 install: $(TARGET_MAIN)

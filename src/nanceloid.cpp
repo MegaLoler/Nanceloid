@@ -55,15 +55,36 @@ double Nanceloid::run () {
     // vocal cord vibration
     waveguide->put (0, 0, source->run (this));
 
+    // bridge the main waveguide with the nasal cavity one
+    // TODO: i dont actually know how to do this lol
+    //{
+    //    Segment &junction = waveguide->get_segment (nasal_start);
+    //    Segment &mouth = waveguide->get_segment (nasal_start + 1);
+    //    Segment &throat = waveguide->get_segment (nasal_start - 1);
+    //    Segment &nose = nasal_cavity->get_segment (0);
+
+    //    // out of nose
+    //    double out_of_nose = nasal_cavity->collect_drain_left ();
+    //    double gamma = Waveguide::calculate_gamma (junction.get_impedance (), nose.get_impedance ());
+    //    double energy = junction.get_right () * 0.3;
+    //    double reflection = energy * gamma;
+    //    double into_nose = energy - reflection;
+    //    mouth.put (0, -into_nose);
+    //    junction.put (out_of_nose + reflection, 0);
+    //    nose.put (0, into_nose);
+    //}
+
     // handle articulatory dynamics
     // TODO: make this control rate
     reshape ();
 
     // simulate acoustics
     waveguide->run ();
+    nasal_cavity->run ();
 
     // return the drain output
-    return waveguide->collect_drain_right () * parameters.volume;
+    double drain = waveguide->collect_drain_right () + nasal_cavity->collect_drain_right ();
+    return drain * parameters.volume;
 }
 
 void Nanceloid::approach_admittance (Segment &segment, double target, double coefficient) {
@@ -94,19 +115,25 @@ void Nanceloid::reshape (bool set) {
         double phase = unit_pos - parameters.tongue_frontness;
         double value = cos (phase * M_PI / 2) * parameters.tongue_height;
         double unit_area = 1 - value;
-        approach_admittance (segment, unit_area / neutral_impedance, coefficient);
+        approach_admittance (segment, unit_area / neutral_impedance * 2, coefficient);
     }
 
-    //// shape the velum TODO
-    //double velum_admittance = (1 - voice->parameters.velic_closure) / NASAL_Z;
-    //set_admittance (voice->nose[0], velum_admittance);
+    // shape the velum
+    double velum_admittance = (1 - parameters.velic_closure) / neutral_impedance;
+    approach_admittance (nasal_cavity->get_segment (0), velum_admittance, coefficient);
+
+    // set the output impedance of the nasal cavity
+    double junction_impedance = waveguide->get_segment (nasal_start).get_impedance ();
+    nasal_cavity->set_left_opening_impedance(junction_impedance);
 
     waveguide->prepare ();
+    nasal_cavity->prepare ();
 }
 
 void Nanceloid::init () {
 
     Waveguide *old = waveguide;
+    //Waveguide *old_nasal_cavity = waveguide;
 
     // calculate the physical length of a single segment (cm)
     double unit = speed_of_sound / rate;
@@ -122,7 +149,19 @@ void Nanceloid::init () {
     // TODO: calculate proportions based on overal tract length
     larynx_start = floor (length * 0);
     tongue_start = floor (length * 0.2);
-    lips_start   = floor (length * 0.9);
+    nasal_start  = floor (length * 0.3);
+    lips_start   = floor (length * 0.95);
+
+    // create the waveguide for the nasal cavity
+    nasal_cavity = new Waveguide (length - nasal_start, parameters.acoustic_damping,
+            parameters.frication, 0, 1 / parameters.ambient_admittance);
+
+
+    // shape the larynx
+    for (int i = 0; i < larynx_start; i++) {
+        Segment &segment = waveguide->get_segment (i);
+        segment.set_admittance (0.2);
+    }
 
     // if there was a previous waveguide, then copy the old sound state to the new one
     // and of course delete the old one
@@ -131,6 +170,7 @@ void Nanceloid::init () {
 
         // TODO: why does this break lol
         //delete old;
+        //delete old_nasal_cavity;
     }
 
     reshape (true);
@@ -190,8 +230,8 @@ void Nanceloid::midi (uint8_t *data) {
                 this->parameters.tongue_height = map_to_range (value, 0, 1);
                 break;
 
-            case controller_tongue_flatness:
-                this->parameters.tongue_flatness = map_to_range (value, -1, 1);
+            case controller_velum:
+                this->parameters.velic_closure = map_to_range (value, 0, 1);
                 break;
 
             case controller_enunciation:

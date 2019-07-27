@@ -21,9 +21,6 @@ class Waveguide {
         double left_opening_impedance;
         double right_opening_impedance;
 
-        // calculate a reflection coefficient given source and target impedance
-        static double calculate_gamma (double source_impedance, double target_impedance);
-
         // generate normalized noise between -1 and 1
         static double noise ();
 
@@ -32,6 +29,9 @@ class Waveguide {
                    double left_opening_impedance = INFINITY,
                    double right_opening_impedance = 0.1);
         ~Waveguide ();
+
+        // calculate a reflection coefficient given source and target impedance
+        static double calculate_gamma (double source_impedance, double target_impedance);
 
         double get (int i);         // get sum energy at a given segment
         double get_left (int i);    // get left going energy at a segment
@@ -65,4 +65,10 @@ class Waveguide {
 
         // copy acoustic energy from another waveguide
         void copy (Waveguide *source);
+
+        // set the left opening impedance
+        void set_left_opening_impedance (double impedance);
+
+        // set the right opening impedance
+        void set_right_opening_impedance (double impedance);
 };

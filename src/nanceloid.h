@@ -14,7 +14,7 @@ const int controller_lips_roundedness = 0x16;
 const int controller_jaw_height       = 0x17;
 const int controller_tongue_frontness = 0x18;
 const int controller_tongue_height    = 0x19;
-const int controller_tongue_flatness  = 0x1a;
+const int controller_velum            = 0x1a;
 const int controller_enunciation      = 0x1b;
 const int controller_tract_length     = 0x1c;
 
@@ -36,7 +36,7 @@ struct Parameters {
     double lips_roundedness   = 0;    // closedness of the lips (0 to 1)
     double jaw_height         = 0.5;  // jaw openness/height (0 to 1)
     double tongue_frontness   = 0;    // position of peak of tongue (0 to 1)
-    double tongue_height      = 0.9;  // how close to touching the roof of the mouth (0 to 1)
+    double tongue_height      = 0;    // how close to touching the roof of the mouth (0 to 1)
     double tongue_flatness    = 0;    // distribution of the tongue curve (-1 to 1)
     double velic_closure      = 0;    // the closing off of the nasal cavity (0 to 1)
 
@@ -44,7 +44,7 @@ struct Parameters {
     double acoustic_damping   = 0.04; // sound absorbsion, loss of energy at reflections (0 to 1)
     double enunciation        = 0.25; // strength of tract reshaping (0 to 1)
     double portamento         = 0.65; // how quickly pitch and velocity change (0 to 1)
-    double frication          = 0.01; // turbulence coefficient (0 to 1)
+    double frication          = 0.1;  // turbulence coefficient (0 to 1)
     double surface_tension    = 0.5;  // tendency of constrictions to stick together (0 to 1)
     double tract_length       = 24;   // length of vocal tract (cm)
     double ambient_admittance = 10;   // admittance of the drain
@@ -62,17 +62,19 @@ struct Parameters {
 struct TargetNote {
     uint8_t note    = 40;// midi note value
     double detune   = 0; // offset in semitones
-    double velocity = 0; // note velocity (0 to 1)
+    double velocity = 1; // note velocity (0 to 1)
 };
 
 // represents a synth instance
 class Nanceloid {
     private:
         Waveguide *waveguide;       // the waveguide network to simulate the tract
+        Waveguide *nasal_cavity;    // the waveguide to simulate the nasal tract
         
-        int larynx_start;           // number of nodes in the larynx
-        int tongue_start;           // number of nodes in the tongue
-        int lips_start;             // number of nodes in the lips
+        int larynx_start;           // start node number of the larynx
+        int tongue_start;           // start node number of the tongue
+        int nasal_start;            // start node number of the nasal junction
+        int lips_start;             // start node number of the lips
 
         GlottalSource *source;      // how to model glottal source sound
         Parameters parameters;      // the synth parameters
