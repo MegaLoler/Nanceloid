@@ -304,6 +304,14 @@ void Nanceloid::midi (uint8_t *data) {
                 this->parameters.tract_length = map_to_range (value, 8, 24);
                 init ();
                 break;
+
+            case controller_panning:
+                this->parameters.panning = map_to_range (value, -1, 1);
+                break;
+
+            case controller_volume:
+                this->parameters.volume = map_to_range (value, 0, 0.5);
+                break;
         }
 
 #ifdef DEBUG

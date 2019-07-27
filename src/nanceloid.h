@@ -17,11 +17,13 @@ const int controller_tongue_height    = 0x19;
 const int controller_velum            = 0x1a;
 const int controller_enunciation      = 0x1b;
 const int controller_tract_length     = 0x1c;
+const int controller_panning          = 0x0a;
+const int controller_volume           = 0x07;
 
 // multipliers, mostly
 const double speed_of_sound = 34300; // cm/s
 const double portamento = 0.001;
-const double enunciation = 0.001;
+const double enunciation = 0.01;
 const double neutral_impedance = 1;
 
 // represents synth parameters
@@ -36,7 +38,7 @@ struct Parameters {
     double lips_roundedness   = 0;    // closedness of the lips (0 to 1)
     double jaw_height         = 0.5;  // jaw openness/height (0 to 1)
     double tongue_frontness   = 0;    // position of peak of tongue (0 to 1)
-    double tongue_height      = 0;    // how close to touching the roof of the mouth (0 to 1)
+    double tongue_height      = 0.9;  // how close to touching the roof of the mouth (0 to 1)
     double tongue_flatness    = 0;    // distribution of the tongue curve (-1 to 1)
     double velic_closure      = 1;    // the closing off of the nasal cavity (0 to 1)
 
@@ -46,7 +48,7 @@ struct Parameters {
     double portamento         = 0.65; // how quickly pitch and velocity change (0 to 1)
     double frication          = 0.1;  // turbulence coefficient (0 to 1)
     double surface_tension    = 0.5;  // tendency of constrictions to stick together (0 to 1)
-    double tract_length       = 24;   // length of vocal tract (cm)
+    double tract_length       = 11;   // length of vocal tract (cm)
     double ambient_admittance = 10;   // admittance of the drain
 
     // musical and audio parameters
@@ -54,7 +56,7 @@ struct Parameters {
     double vibrato_depth      = 0.25; // how wide the vibrato peak should be (semitones)
     double velocity           = 0.5;  // how much incoming note velocity has any effect (0 to 1)
     double panning            = 0;    // left right panning (-1 to 1)
-    double volume             = 0.5;  // overall volume (0 to 1)
+    double volume             = 0.5; // overall volume (0 to 1)
 
 };
 

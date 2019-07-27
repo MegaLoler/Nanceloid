@@ -7,6 +7,8 @@ most definitely not guaranteed to be in a usable/properly functioning state at a
 
 i'm also quite in over my head and trying to learn so much stuff as i go!!! so i'm probably doing a lot of things wrong, lol, feel free to lemme kno if you are interested and/or know about this stuff and wanna help!!
 
+SEE `margot.mp4` for..... a demo.....!
+
 _TODO: add screenshots (once there is a gui lol)_
 
 ## Dependencies
