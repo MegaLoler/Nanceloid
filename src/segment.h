@@ -32,6 +32,9 @@ class Segment {
         // add left and right going acoustic energy
         void put (double left, double right);
 
+        // add left and right going acoustic energy bypassng the need to flush
+        void put_direct (double left, double right);
+
         // put the pending changes in energy into action!!!!!!!!!
         void flush ();
 

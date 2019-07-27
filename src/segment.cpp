@@ -35,6 +35,11 @@ void Segment::put (double left, double right) {
     _right += right;
 }
 
+void Segment::put_direct (double left, double right) {
+    this->left += left;
+    this->right += right;
+}
+
 void Segment::flush () {
     left = _left;
     right = _right;

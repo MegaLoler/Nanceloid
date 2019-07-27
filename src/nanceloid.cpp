@@ -5,9 +5,12 @@
 using namespace std;
 
 Nanceloid::~Nanceloid () {
-    // NOTE: is this necessary?
-    if (waveguide != nullptr)
-        delete waveguide;
+    if (throat != nullptr)
+        delete throat;
+    if (mouth != nullptr)
+        delete mouth;
+    if (nose != nullptr)
+        delete nose;
 }
 
 void Nanceloid::debug () {
@@ -50,40 +53,58 @@ double Nanceloid::run () {
     // air pressure from lungs
     parameters.lungs += (note.velocity - parameters.lungs) * parameters.portamento * portamento;
     double opening = fmax (-parameters.glottal_tension, 0);
-    waveguide->put (0, 0, parameters.lungs * opening);
+    throat->put (0, 0, parameters.lungs * opening);
 
     // vocal cord vibration
-    waveguide->put (0, 0, source->run (this));
+    throat->put (0, 0, source->run (this));
 
-    // bridge the main waveguide with the nasal cavity one
-    // TODO: i dont actually know how to do this lol
-    //{
-    //    Segment &junction = waveguide->get_segment (nasal_start);
-    //    Segment &mouth = waveguide->get_segment (nasal_start + 1);
-    //    Segment &throat = waveguide->get_segment (nasal_start - 1);
-    //    Segment &nose = nasal_cavity->get_segment (0);
-
-    //    // out of nose
-    //    double out_of_nose = nasal_cavity->collect_drain_left ();
-    //    double gamma = Waveguide::calculate_gamma (junction.get_impedance (), nose.get_impedance ());
-    //    double energy = junction.get_right () * 0.3;
-    //    double reflection = energy * gamma;
-    //    double into_nose = energy - reflection;
-    //    mouth.put (0, -into_nose);
-    //    junction.put (out_of_nose + reflection, 0);
-    //    nose.put (0, into_nose);
-    //}
+    // DEBUG:
+    //throat->put (0, 0, 1);
 
     // handle articulatory dynamics
     // TODO: make this control rate
     reshape ();
 
     // simulate acoustics
-    waveguide->run ();
-    nasal_cavity->run ();
+    throat->run ();
+    mouth->run ();
+    nose->run ();
+
+    // handle the throat-mouth-nose junction
+    double throat_drain = throat->collect_drain_right ();
+    double mouth_drain = mouth->collect_drain_left ();
+    double nose_drain = nose->collect_drain_left ();
+
+    Segment &junction_throat = throat->get_segment (nose_start - 1);
+    Segment &junction_mouth = mouth->get_segment (0);
+    Segment &junction_nose = nose->get_segment (0);
+
+    double throat_admittance = junction_throat.get_admittance ();
+    double mouth_admittance = junction_mouth.get_admittance ();
+    double nose_admittance = junction_nose.get_admittance ();
+
+    double throat_mouth_admittance = throat_admittance + mouth_admittance;
+    double throat_nose_admittance = throat_admittance + nose_admittance;
+    double mouth_nose_admittance = mouth_admittance + nose_admittance;
+    
+    double throat_to_mouth_weight = mouth_admittance / mouth_nose_admittance;
+    double throat_to_nose_weight = nose_admittance / mouth_nose_admittance;
+    double mouth_to_throat_weight = throat_admittance / throat_nose_admittance;
+    double mouth_to_nose_weight = nose_admittance / throat_nose_admittance;
+    double nose_to_throat_weight = throat_admittance / throat_mouth_admittance;
+    double nose_to_mouth_weight = mouth_admittance / throat_mouth_admittance;
+
+    junction_throat.put_direct (mouth_drain * mouth_to_throat_weight, 0);
+    junction_throat.put_direct (nose_drain * nose_to_throat_weight, 0);
+    junction_mouth.put_direct (0, throat_drain * throat_to_mouth_weight);
+    junction_mouth.put_direct (0, nose_drain * nose_to_mouth_weight);
+    junction_nose.put_direct (0, throat_drain * throat_to_nose_weight);
+    junction_nose.put_direct (0, mouth_drain * mouth_to_nose_weight);
+    //junction_throat.put_direct (mouth_drain, 0);
+    //junction_mouth.put_direct (0, throat_drain);
 
     // return the drain output
-    double drain = waveguide->collect_drain_right () + nasal_cavity->collect_drain_right ();
+    double drain = mouth->collect_drain_right () + nose->collect_drain_right ();
     return drain * parameters.volume;
 }
 
@@ -100,14 +121,14 @@ void Nanceloid::reshape (bool set) {
 
     // shape the lips
     double lips_admittance = (1 - parameters.lips_roundedness) / neutral_impedance;
-    for (int i = lips_start; i < waveguide->get_length (); i++) {
-        Segment &segment = waveguide->get_segment (i);
+    for (int i = lips_start; i < length; i++) {
+        Segment &segment = get_throat_mouth_segment (i);
         approach_admittance (segment, lips_admittance, coefficient);
     }
 
     // shape the tongue
     for (int i = tongue_start; i < lips_start; i++) {
-        Segment &segment = waveguide->get_segment (i);
+        Segment &segment = get_throat_mouth_segment (i);
 
         // TEMP
         // TODO: enhance this lol
@@ -115,62 +136,96 @@ void Nanceloid::reshape (bool set) {
         double phase = unit_pos - parameters.tongue_frontness;
         double value = cos (phase * M_PI / 2) * parameters.tongue_height;
         double unit_area = 1 - value;
-        approach_admittance (segment, unit_area / neutral_impedance * 2, coefficient);
+        //approach_admittance (segment, unit_area / neutral_impedance * 2, coefficient);
+        approach_admittance (segment, unit_area / neutral_impedance, coefficient);
     }
 
     // shape the velum
     double velum_admittance = (1 - parameters.velic_closure) / neutral_impedance;
-    approach_admittance (nasal_cavity->get_segment (0), velum_admittance, coefficient);
+    approach_admittance (nose->get_segment (0), velum_admittance, coefficient);
 
-    // set the output impedance of the nasal cavity
-    double junction_impedance = waveguide->get_segment (nasal_start).get_impedance ();
-    nasal_cavity->set_left_opening_impedance(junction_impedance);
+    // set junction output impedances
+    Segment &junction_throat = throat->get_segment (nose_start - 1);
+    Segment &junction_mouth = mouth->get_segment (0);
+    Segment &junction_nose = nose->get_segment (0);
+    double throat_admittance = junction_throat.get_admittance ();
+    double mouth_admittance = junction_mouth.get_admittance ();
+    double nose_admittance = junction_nose.get_admittance ();
+    double throat_mouth_admittance = throat_admittance + mouth_admittance;
+    double throat_nose_admittance = throat_admittance + nose_admittance;
+    double mouth_nose_admittance = mouth_admittance + nose_admittance;
+    throat->set_right_opening_impedance(1 / mouth_nose_admittance);
+    mouth->set_left_opening_impedance(1 / throat_nose_admittance);
+    nose->set_left_opening_impedance(1 / throat_mouth_admittance);
+    throat->set_right_opening_impedance(1 / mouth_admittance);
+    mouth->set_left_opening_impedance(1 / throat_admittance);
 
-    waveguide->prepare ();
-    nasal_cavity->prepare ();
+    // precalculate reflection coefficients
+    throat->prepare ();
+    mouth->prepare ();
+    nose->prepare ();
+}
+
+Segment &Nanceloid::get_throat_mouth_segment (int i) {
+    if (i < nose_start)
+        return throat->get_segment (i);
+    else
+        return mouth->get_segment (i - nose_start);
 }
 
 void Nanceloid::init () {
 
-    Waveguide *old = waveguide;
-    //Waveguide *old_nasal_cavity = waveguide;
+    Waveguide *old_throat = throat;
+    Waveguide *old_mouth = mouth;
+    Waveguide *old_nose = nose;
 
     // calculate the physical length of a single segment (cm)
     double unit = speed_of_sound / rate;
 
     // generate enough segments to meet the desired length
-    int length = ceil (parameters.tract_length / unit);
-
-    // create the new waveguide
-    waveguide = new Waveguide (length, parameters.acoustic_damping, parameters.frication,
-            INFINITY, 1 / parameters.ambient_admittance);
+    length = ceil (parameters.tract_length / unit);
 
     // calculate the positions of various landmarks along the tract
     // TODO: calculate proportions based on overal tract length
     larynx_start = floor (length * 0);
     tongue_start = floor (length * 0.2);
-    nasal_start  = floor (length * 0.3);
+    nose_start   = floor (length * 0.3);
     lips_start   = floor (length * 0.95);
 
-    // create the waveguide for the nasal cavity
-    nasal_cavity = new Waveguide (length - nasal_start, parameters.acoustic_damping,
+    // create the throat
+    throat = new Waveguide (nose_start, parameters.acoustic_damping, parameters.frication,
+            INFINITY, 0);
+
+    // create the mouth
+    mouth = new Waveguide (length - nose_start, parameters.acoustic_damping, parameters.frication,
+            0, 1 / parameters.ambient_admittance);
+
+    // create the nose
+    nose = new Waveguide (length - nose_start, parameters.acoustic_damping,
             parameters.frication, 0, 1 / parameters.ambient_admittance);
 
-
     // shape the larynx
-    for (int i = 0; i < larynx_start; i++) {
-        Segment &segment = waveguide->get_segment (i);
+    for (int i = 0; i < tongue_start; i++) {
+        Segment &segment = get_throat_mouth_segment (i);
         segment.set_admittance (0.2);
     }
 
     // if there was a previous waveguide, then copy the old sound state to the new one
     // and of course delete the old one
-    if (old != nullptr) {
-        waveguide->copy (old);
-
+    if (old_throat != nullptr) {
+        throat->copy (old_throat);
         // TODO: why does this break lol
-        //delete old;
-        //delete old_nasal_cavity;
+        // delete old_throat
+    }
+    if (old_mouth != nullptr) {
+        mouth->copy (old_mouth);
+        // TODO: why does this break lol
+        // delete old_mouth
+    }
+    if (old_nose != nullptr) {
+        nose->copy (old_nose);
+        // TODO: why does this break lol
+        // delete old_nose
     }
 
     reshape (true);

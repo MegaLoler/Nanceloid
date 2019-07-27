@@ -38,7 +38,7 @@ struct Parameters {
     double tongue_frontness   = 0;    // position of peak of tongue (0 to 1)
     double tongue_height      = 0;    // how close to touching the roof of the mouth (0 to 1)
     double tongue_flatness    = 0;    // distribution of the tongue curve (-1 to 1)
-    double velic_closure      = 0;    // the closing off of the nasal cavity (0 to 1)
+    double velic_closure      = 1;    // the closing off of the nasal cavity (0 to 1)
 
     // physical parameters
     double acoustic_damping   = 0.04; // sound absorbsion, loss of energy at reflections (0 to 1)
@@ -62,19 +62,21 @@ struct Parameters {
 struct TargetNote {
     uint8_t note    = 40;// midi note value
     double detune   = 0; // offset in semitones
-    double velocity = 1; // note velocity (0 to 1)
+    double velocity = 0; // note velocity (0 to 1)
 };
 
 // represents a synth instance
 class Nanceloid {
     private:
-        Waveguide *waveguide;       // the waveguide network to simulate the tract
-        Waveguide *nasal_cavity;    // the waveguide to simulate the nasal tract
+        Waveguide *throat;          // the waveguide to simulate the throat
+        Waveguide *mouth;           // the waveguide to simulate the mouth
+        Waveguide *nose;            // the waveguide to simulate the nose
         
-        int larynx_start;           // start node number of the larynx
-        int tongue_start;           // start node number of the tongue
-        int nasal_start;            // start node number of the nasal junction
-        int lips_start;             // start node number of the lips
+        int length;                 // total length
+        int larynx_start;           // start segment number of the larynx
+        int tongue_start;           // start segment number of the tongue
+        int nose_start;             // start segment number of the nasal junction
+        int lips_start;             // start segment number of the lips
 
         GlottalSource *source;      // how to model glottal source sound
         Parameters parameters;      // the synth parameters
@@ -90,6 +92,9 @@ class Nanceloid {
 
         // move the admittance of a segment toward a given value
         void approach_admittance (Segment &segment, double target, double coefficient);
+
+        // get a segment along the tract of the throat and mouth
+        Segment &get_throat_mouth_segment (int i);
 
     public:
         Nanceloid (GlottalSource *source) : source (source) {}
