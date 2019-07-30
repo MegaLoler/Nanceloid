@@ -126,5 +126,6 @@ class Nanceloid {
 
         friend class GlottalSource;
         friend class SawSource;
+        friend class LFSource;
         friend class NanceloidVST;
 };

@@ -4,6 +4,7 @@
 #include <RtMidi.h>
 #include <nanceloid.h>
 #include <saw_source.h>
+#include <lf_source.h>
 
 using namespace std;
 
@@ -186,7 +187,7 @@ int main (int argc, char **argv) {
     }
 
     // setup the synth
-    synth = new Nanceloid (new SawSource);
+    synth = new Nanceloid (new LFSource);
 
     // setup midi
     setup_midi ();

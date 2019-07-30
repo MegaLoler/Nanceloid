@@ -112,6 +112,7 @@ The `src` directory contains the following:
 - experimental source model
 - polyphony ?? like a choir manager or something
 - note stack (maybe part of choir manager)
+- try a different way of shaping the tract: weighted idealized phonemes
 
 ### Waveguide stuff
 - more realistic turbulence
