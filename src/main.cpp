@@ -5,6 +5,7 @@
 #include <nanceloid.h>
 #include <saw_source.h>
 #include <lf_source.h>
+#include <single_mass_source.h>
 
 using namespace std;
 
@@ -187,7 +188,7 @@ int main (int argc, char **argv) {
     }
 
     // setup the synth
-    synth = new Nanceloid (new LFSource);
+    synth = new Nanceloid (new SingleMassSource);
 
     // setup midi
     setup_midi ();

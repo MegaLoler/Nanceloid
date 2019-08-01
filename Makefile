@@ -33,9 +33,9 @@ all: $(TARGET_MAIN) $(TARGET_TEST) vst
 
 ### STANDALONE SYNTH ###
 
-$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/lf_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
+$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/lf_source.o $(BUILD_PATH)/single_mass_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
 	$(CC) -lm -lsoundio -lrtmidi \
-		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/lf_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
+		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/lf_source.o $(BUILD_PATH)/single_mass_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
 		-o $(TARGET_MAIN)
 
 $(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.cpp
@@ -57,6 +57,11 @@ $(BUILD_PATH)/lf_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH
 	$(CC) -c \
 		$(SRC_PATH)/lf_source.cpp \
 		-o $(BUILD_PATH)/lf_source.o
+
+$(BUILD_PATH)/lf_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/single_mass_source.h $(SRC_PATH)/single_mass_source.cpp
+	$(CC) -c \
+		$(SRC_PATH)/single_mass_source.cpp \
+		-o $(BUILD_PATH)/single_mass_source.o
 
 
 

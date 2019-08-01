@@ -52,8 +52,8 @@ double Nanceloid::run () {
 
     // air pressure from lungs
     parameters.lungs += (note.velocity - parameters.lungs) * parameters.portamento * portamento;
-    double opening = fmax (-parameters.glottal_tension, 0);
-    throat->put (0, 0, parameters.lungs * opening);
+    //double opening = fmax (-parameters.glottal_tension, 0);
+    //throat->put (0, 0, parameters.lungs * opening);
 
     // vocal cord vibration
     throat->put (0, 0, source->run (this));

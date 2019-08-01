@@ -46,7 +46,7 @@ struct Parameters {
     double acoustic_damping   = 0.04; // sound absorbsion, loss of energy at reflections (0 to 1)
     double enunciation        = 0.25; // strength of tract reshaping (0 to 1)
     double portamento         = 0.65; // how quickly pitch and velocity change (0 to 1)
-    double frication          = 0.1;  // turbulence coefficient (0 to 1)
+    double frication          = 0.0;  // turbulence coefficient (0 to 1)
     double surface_tension    = 0.5;  // tendency of constrictions to stick together (0 to 1)
     double tract_length       = 11;   // length of vocal tract (cm)
     double ambient_admittance = 10;   // admittance of the drain
@@ -54,9 +54,9 @@ struct Parameters {
     // musical and audio parameters
     double vibrato_rate       = 4;    // how quickly the singing vibrato should be (hz)
     double vibrato_depth      = 0.25; // how wide the vibrato peak should be (semitones)
-    double velocity           = 0.5;  // how much incoming note velocity has any effect (0 to 1)
+    double velocity           = 1;    // how much incoming note velocity has any effect (0 to 1)
     double panning            = 0;    // left right panning (-1 to 1)
-    double volume             = 0.5; // overall volume (0 to 1)
+    double volume             = 0.5;  // overall volume (0 to 1)
 
 };
 
@@ -124,8 +124,9 @@ class Nanceloid {
         // get the the parameters
         Parameters &get_parameters ();
 
+        friend class NanceloidVST;
         friend class GlottalSource;
         friend class SawSource;
         friend class LFSource;
-        friend class NanceloidVST;
+        friend class SingleMassSource;
 };
