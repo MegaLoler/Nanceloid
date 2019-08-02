@@ -16,15 +16,15 @@ double SingleMassSource::run (Nanceloid *voice) {
 
     if (e > 0) {
         double f = frequency - error;
-        k += error * 0.000000000000001 * f * f * f;
+        k += error * 0.0000000000000003 * f * f * f;
         //k = frequency * frequency * frequency / 20000000000;
     }
-    k = fmax        (0.00000000000001, k);
+    k = fmax        (0.000000000000001, k);
 
     double coupling = voice->throat->get_left (0);
     //double a = -k * x * x * x + b * v * e - b * v * v * v + e + d * d * c;
     double a = -k * x - k * B * x * x * x - b * v + e * E + e * (1 - v * v / 3.0) * v + d * d * c;
-    v += a * dt + coupling / 16.0;
+    v += a * dt + coupling / 32.0;
     x += v * dt;
 
     // keep it sane y'all
