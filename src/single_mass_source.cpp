@@ -11,32 +11,30 @@ double SingleMassSource::run (Nanceloid *voice) {
     //double frequency = get_frequency (voice->note.note + voice->note.detune);
 
     double dt = voice->rate / 1000000.0;
-    double d = fmax (0, 0-x);
-    double e = voice->parameters.lungs - 0.1;
+    double e = voice->parameters.lungs;
+    double d = fmax (0, -x);
 
     if (e > 0) {
         double f = frequency - error;
-        //k += error * 0.0000000000001 * f * f * f;
-        k = frequency * frequency * frequency / 200000000;
+        k += error * 0.000000000000001 * f * f * f;
+        //k = frequency * frequency * frequency / 20000000000;
     }
-    k = fmax (0.0001, k);
+    k = fmax        (0.00000000000001, k);
 
     double coupling = voice->throat->get_left (0);
-    double a = -k * x * x * x + b * v * e - b * v * v * v + e + d * d * c;
-    v += a * dt + coupling / 2;
+    //double a = -k * x * x * x + b * v * e - b * v * v * v + e + d * d * c;
+    double a = -k * x - k * B * x * x * x - b * v + e * E + e * (1 - v * v / 3.0) * v + d * d * c;
+    v += a * dt + coupling / 16.0;
     x += v * dt;
 
+    // keep it sane y'all
     x = fmin (8, fmax (-8, x));
     v = fmin (8, fmax (-8, v));
 
-    // high pass filter
     double out = x;
-    double y = px_;
-    px_ = out;
-    out = (rc / (rc + dt)) * (px + out - y);
 
     // pitch detection
-    if (e > 0 && out < 0.1 && px > 0.10001) {
+    if (e > 0 && out < 0.0 && px > 0.00001) {
         double detected_frequency = 1.0 / (t - pt) * voice->rate;
         pt = t;
         error = frequency - detected_frequency;
@@ -44,8 +42,8 @@ double SingleMassSource::run (Nanceloid *voice) {
         error = 0;
     }
 
-    px = out;
+    px = x;
     t += 1;
 
-    return out * e / 4;
+    return out / 4 * e;
 }
