@@ -41,6 +41,11 @@ double SingleMassSource::run (Nanceloid *voice) {
     } else if (!(e > 0)) {
         error = 0;
     }
+    // maybe if e has been > 0 for a while only
+    //if (e > 0 && t - pt > voice->rate / 2) {
+    //    // got stuck, reset!
+    //    k = 1;
+    //}
 
     px = x;
     t += 1;

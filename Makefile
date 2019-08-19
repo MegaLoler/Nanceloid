@@ -13,7 +13,8 @@ XCOMP64       ::= x86_64-w64-mingw32-g++
 DEBUGGER      ::= gdb
 
 # compiler options
-OPT           ::= -I$(SRC_PATH) -Wall -O3
+OPT           ::= -I$(SRC_PATH) -Wall -Og -g
+#OPT           ::= -I$(SRC_PATH) -Wall -O3
 XOPT          ::= -I$(SDK_PATH) -I$(SDK_SRC_PATH) -Wno-multichar -Wno-narrowing -Wno-write-strings -static
 
 # compiler invocation
@@ -23,19 +24,18 @@ XC64          ::= $(XCOMP64) $(OPT) $(XOPT)
 
 # targets
 TARGET_MAIN   ::= $(BUILD_PATH)/nanceloid
-TARGET_TEST   ::= $(BUILD_PATH)/test
 TARGET_VST_32 ::= $(BUILD_PATH)/nanceloid32.dll
 TARGET_VST_64 ::= $(BUILD_PATH)/nanceloid64.dll
 
-all: $(TARGET_MAIN) $(TARGET_TEST) vst
+all: synth vst
 
 
 
 ### STANDALONE SYNTH ###
 
-$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/lf_source.o $(BUILD_PATH)/single_mass_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
+$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/lf_source.o $(BUILD_PATH)/single_mass_source.o $(BUILD_PATH)/brass_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
 	$(CC) -lm -lsoundio -lrtmidi \
-		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/lf_source.o $(BUILD_PATH)/single_mass_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
+		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/lf_source.o $(BUILD_PATH)/single_mass_source.o $(BUILD_PATH)/brass_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
 		-o $(TARGET_MAIN)
 
 $(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.cpp
@@ -58,10 +58,15 @@ $(BUILD_PATH)/lf_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH
 		$(SRC_PATH)/lf_source.cpp \
 		-o $(BUILD_PATH)/lf_source.o
 
-$(BUILD_PATH)/lf_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/single_mass_source.h $(SRC_PATH)/single_mass_source.cpp
+$(BUILD_PATH)/single_mass_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/single_mass_source.h $(SRC_PATH)/single_mass_source.cpp
 	$(CC) -c \
 		$(SRC_PATH)/single_mass_source.cpp \
 		-o $(BUILD_PATH)/single_mass_source.o
+
+$(BUILD_PATH)/brass_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/brass_source.h $(SRC_PATH)/brass_source.cpp
+	$(CC) -c \
+		$(SRC_PATH)/brass_source.cpp \
+		-o $(BUILD_PATH)/brass_source.o
 
 
 
@@ -196,6 +201,7 @@ $(BUILD_PATH)/vstplugmain_x64.o: $(SDK_PATH) $(SDK_SRC_PATH)/vstplugmain.cpp
 ### COMMON ###
 
 vst: $(TARGET_VST_32) $(TARGET_VST_64)
+synth: $(TARGET_MAIN)
 
 $(SDK_PATH):
 	$(error Please illegitimately obtain the VST SDK 2.4 and place the contents in "$(CUR_PATH)$(SDK_PATH)")
@@ -212,11 +218,7 @@ run: $(TARGET_MAIN)
 	$(TARGET_MAIN)
 
 .PHONY:
-test: $(TARGET_TEST)
-	$(TARGET_TEST)
-
-.PHONY:
-debug: $(TARGET_TEST)
+debug: $(TARGET_MAIN)
 	$(DEBUGGER) $(TARGET_TEST)
 
 .PHONY:

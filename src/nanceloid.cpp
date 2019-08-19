@@ -4,43 +4,6 @@
 
 using namespace std;
 
-Nanceloid::~Nanceloid () {
-    if (throat != nullptr)
-        delete throat;
-    if (mouth != nullptr)
-        delete mouth;
-    if (nose != nullptr)
-        delete nose;
-}
-
-void Nanceloid::debug () {
-    Parameters &p = parameters;
-
-    cout << "[DEBUG PARAMETERS] " << endl;
-    cout << "lungs              " << p.lungs << endl;
-    cout << "glottal_tension    " << p.glottal_tension << endl;
-    cout << "laryngeal_height   " << p.laryngeal_height << endl;
-    cout << "lips_roundedness   " << p.lips_roundedness << endl;
-    cout << "jaw_height         " << p.jaw_height << endl;
-    cout << "tongue_frontness   " << p.tongue_frontness << endl;
-    cout << "tongue_height      " << p.tongue_height << endl;
-    cout << "tongue_flatness    " << p.tongue_flatness << endl;
-    cout << "velic_closure      " << p.velic_closure << endl;
-    cout << "acoustic_damping   " << p.acoustic_damping << endl;
-    cout << "enunciation        " << p.enunciation << endl;
-    cout << "portamento         " << p.portamento << endl;
-    cout << "frication          " << p.frication << endl;
-    cout << "surface_tension    " << p.surface_tension << endl;
-    cout << "tract_length       " << p.tract_length << endl;
-    cout << "ambient_admittance " << p.ambient_admittance << endl;
-    cout << "vibrato_rate       " << p.vibrato_rate << endl;
-    cout << "vibrato_depth      " << p.vibrato_depth << endl;
-    cout << "velocity           " << p.velocity << endl;
-    cout << "panning            " << p.panning << endl;;
-    cout << "volume             " << p.volume << endl;;
-    cout << endl;
-}
-
 void Nanceloid::set_rate (int rate) {
     if (rate != this->rate) {
         this->rate = rate;
@@ -102,6 +65,15 @@ double Nanceloid::run () {
     junction_nose.put_direct (0, mouth_drain * mouth_to_nose_weight);
     //junction_throat.put_direct (mouth_drain, 0);
     //junction_mouth.put_direct (0, throat_drain);
+
+            // TODO: optimize? clean?
+            Parameters &p = synth.parameters;
+            float pan = p.panning.value;
+            float normal = (pan + 1) / 2;
+            float left_pan = cos (normal * M_PI / 2);
+            float right_pan = cos ((1 - normal) * M_PI / 2);
+            float left = sample * left_pan;
+            float right = sample * right_pan;
 
     // return the drain output
     double drain = mouth->collect_drain_right () + nose->collect_drain_right ();

@@ -3,19 +3,14 @@
 #include <soundio/soundio.h>
 #include <RtMidi.h>
 #include <nanceloid.h>
-#include <saw_source.h>
-#include <lf_source.h>
-#include <single_mass_source.h>
 
 using namespace std;
-
-const float latency = 15; // in ms
 
 // the vocal synth instance
 Nanceloid *synth;
 
 // the midi channel to listen on
-// -1 means all
+// -1 means omni listen
 int midi_channel = -1;
 
 void exit_error (string message) {
@@ -23,7 +18,7 @@ void exit_error (string message) {
     exit (EXIT_FAILURE);
 }
 
-void process_midi (double dt, vector<unsigned char> *message, void *user_data) {
+void process_midi (float dt, vector<unsigned char> *message, void *user_data) {
     // convert this vector to an array
     int num_bytes = message->size ();
     uint8_t *data = new uint8_t[num_bytes];
@@ -54,7 +49,7 @@ void process_audio (struct SoundIoOutStream *stream, int min_frames, int max_fra
     int frames_left = max_frames;
     int error;
 
-    synth->set_rate (sample_rate);
+    synth->set_sample_rate (sample_rate);
 
     while (frames_left > 0) {
 
@@ -67,24 +62,9 @@ void process_audio (struct SoundIoOutStream *stream, int min_frames, int max_fra
             break;
 
         for (int frame = 0; frame < frame_count; frame++) {
-            float sample = synth->run ();
-
-            // TODO: optimize? clean?
-            Parameters p = synth->get_parameters ();
-            float pan = p.panning;
-            float normal = (pan + 1) / 2;
-            float left_pan = cos (normal * M_PI / 2);
-            float right_pan = cos ((1 - normal) * M_PI / 2);
-            float left = sample * left_pan;
-            float right = sample * right_pan;
-
-            *((float *) (areas[0].ptr + areas[0].step * frame)) = left;
-            *((float *) (areas[1].ptr + areas[1].step * frame)) = right;
-
-//            for (int channel = 0; channel < layout->channel_count; channel++) {
-//                float *out = (float *) (areas[channel].ptr + areas[channel].step * frame);
-//                *out = sample;
-//            }
+            float *samples = synth->run ();
+            *((float *) (areas[0].ptr + areas[0].step * frame)) = samples[0];
+            *((float *) (areas[1].ptr + areas[1].step * frame)) = samples[1];
         }
 
         if ((error = soundio_outstream_end_write (stream)))
@@ -115,7 +95,7 @@ void setup_midi () {
     midi_in->setCallback (&process_midi);
 }
 
-void setup_audio () {
+void setup_audio (float latency) {
 
     int error;
 
@@ -173,7 +153,17 @@ void setup_audio () {
 
 }
 
+void print_usage_and_exit (char *command) {
+    cerr << "Usage: " << command << " [-c channel] [-l latency]\n\n";
+    cerr << "-c channel\n\tSpecify the midi channel to listen on.\n\tIf left unspecified it will listen on all channels.\n\n";
+    cerr << "-l latency\n\tSpecify the audio buffering latency in milliseconds.\n\tIf left unspecified it is 15.\n\n" << flush;
+    exit (EXIT_FAILURE);
+}
+
 int main (int argc, char **argv) {
+
+    // default cli args
+    float latency = 15;
 
     // parse cli args
     int c;
@@ -182,19 +172,22 @@ int main (int argc, char **argv) {
             case 'c':
                 midi_channel = atoi (optarg);
                 break;
+            case 'l':
+                latency = atoi (optarg);
+                break;
             default:
-                exit (EXIT_FAILURE);
+                print_usage_and_exit (argv);
         }
     }
 
     // setup the synth
-    synth = new Nanceloid (new SingleMassSource);
+    synth = new Nanceloid ();
 
     // setup midi
     setup_midi ();
 
     // setup audio
-    setup_audio ();
+    setup_audio (latency);
     
     return 0;
 }
