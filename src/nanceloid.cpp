@@ -27,6 +27,7 @@ void Nanceloid::set_rate (double rate) {
     if (rate != this->rate) {
         this->rate = rate * super_sampling;
         control_rate = this->rate / control_rate_divider;
+        dt = 1 / this->rate;
         init ();
     }
 }
@@ -44,14 +45,20 @@ void Nanceloid::run (float *out) {
         double weight = 1 / (pressure_smoothing + 1);
         pressure = (target_pressure * weight + pressure) / (1 + weight);
 
-        // TEMP: osc for testing
-        //double osc = sin (osc_phase * M_PI * 2) * pressure;
-        double osc = (fmod (osc_phase, 1) * 2 - 1) * pressure;
-        osc_phase += frequency / rate;
+        // glottal source
+        // mass spring damper system
+        double k = w * w;
+        double a = -x * k - 1000 * x * x * x * k - v * x * x * w / 100;
+        v += a * dt + pressure * 200 - l[0];
+        x += v * dt;
+        double target_osc = pressure * x * x * w / 200;
+        filter = (filter + target_osc - osc) / 1.001;
+        osc = target_osc;
+        cout << filter << endl;
 
         // update ends of waveguide
         int end = waveguide_length - 1;
-        r_[0]   = l[0]   * l_junction[0] + osc;
+        r_[0]   = l[0]   * l_junction[0] + filter;
         l_[end] = r[end] * r_junction[end];
 
         // update inner of waveguide
@@ -124,6 +131,9 @@ void Nanceloid::run_control () {
     // update target frequency
     double semitones = note.note + note.detune + vibrato_osc;
     frequency = 440 * pow (2.0, (semitones - 69) / 12);
+
+    // pitch correction
+    w = frequency;
 
     // update shape
     // TODO: approach target shape

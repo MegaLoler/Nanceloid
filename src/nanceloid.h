@@ -62,10 +62,12 @@ class Nanceloid {
         double rate = 0;            // audio sampling rate
         double control_rate = 0;    // low frequency control rate
         int clock = 0;              // sample clock
+        double dt = 0;              // delta time
 
         // state
+        double osc = 0;             // last oscillator sample
+        double filter = 0;          // filtered oscillator sample
         double sample = 0;          // last sample
-        double osc_phase = 0;       // current phase of the primary oscillator
         double tremolo_phase = 0;   // current phase of tremolo lfo
         double vibrato_phase = 0;   // current phase of vibrato lfo
         double tremolo_osc = 0;     // output of tremolo lfo
@@ -73,6 +75,11 @@ class Nanceloid {
         double frequency = 0;       // current intended playing frequency
         double target_pressure = 0; // unfiltered current input pressure
         double pressure = 0;        // current input pressure
+
+        // mass spring damper system
+        double x = 0;               // mass displacment
+        double v = 0;               // mass velocity
+        double w = 0;               // angular velocity
 
         // hardcoded parameters
         const double speed_of_sound = 34300;    // cm/s
