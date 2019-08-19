@@ -33,9 +33,9 @@ all: synth vst
 
 ### STANDALONE SYNTH ###
 
-$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/lf_source.o $(BUILD_PATH)/single_mass_source.o $(BUILD_PATH)/brass_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
+$(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o
 	$(CC) -lm -lsoundio -lrtmidi \
-		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o $(BUILD_PATH)/saw_source.o $(BUILD_PATH)/lf_source.o $(BUILD_PATH)/single_mass_source.o $(BUILD_PATH)/brass_source.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
+		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o \
 		-o $(TARGET_MAIN)
 
 $(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.cpp
@@ -43,88 +43,25 @@ $(BUILD_PATH)/main.o: $(BUILD_PATH) $(SRC_PATH)/main.cpp
 		$(SRC_PATH)/main.cpp \
 		-o $(BUILD_PATH)/main.o
 
-$(BUILD_PATH)/nanceloid.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.cpp
+$(BUILD_PATH)/nanceloid.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.cpp $(SRC_PATH)/parameters.h
 	$(CC) -D DEBUG -c \
 		$(SRC_PATH)/nanceloid.cpp \
 		-o $(BUILD_PATH)/nanceloid.o
-
-$(BUILD_PATH)/saw_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/saw_source.h $(SRC_PATH)/saw_source.cpp
-	$(CC) -c \
-		$(SRC_PATH)/saw_source.cpp \
-		-o $(BUILD_PATH)/saw_source.o
-
-$(BUILD_PATH)/lf_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/lf_source.h $(SRC_PATH)/lf_source.cpp
-	$(CC) -c \
-		$(SRC_PATH)/lf_source.cpp \
-		-o $(BUILD_PATH)/lf_source.o
-
-$(BUILD_PATH)/single_mass_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/single_mass_source.h $(SRC_PATH)/single_mass_source.cpp
-	$(CC) -c \
-		$(SRC_PATH)/single_mass_source.cpp \
-		-o $(BUILD_PATH)/single_mass_source.o
-
-$(BUILD_PATH)/brass_source.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/brass_source.h $(SRC_PATH)/brass_source.cpp
-	$(CC) -c \
-		$(SRC_PATH)/brass_source.cpp \
-		-o $(BUILD_PATH)/brass_source.o
-
-
-
-### TEST PROGRAM ###
-
-$(TARGET_TEST): $(BUILD_PATH)/test.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o
-	$(CC) -lm \
-		$(BUILD_PATH)/test.o $(BUILD_PATH)/waveguide.o $(BUILD_PATH)/segment.o \
-		-o $(TARGET_TEST)
-
-$(BUILD_PATH)/test.o: $(BUILD_PATH) $(SRC_PATH)/test.cpp
-	$(CC) -c \
-		$(SRC_PATH)/test.cpp \
-		-o $(BUILD_PATH)/test.o
-
-
-
-### COMMON ###
-
-$(BUILD_PATH)/waveguide.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.cpp
-	$(CC) -c \
-		$(SRC_PATH)/waveguide.cpp \
-		-o $(BUILD_PATH)/waveguide.o
-
-$(BUILD_PATH)/segment.o: $(BUILD_PATH) $(SRC_PATH)/segment.h $(SRC_PATH)/segment.cpp
-	$(CC) -c \
-		$(SRC_PATH)/segment.cpp \
-		-o $(BUILD_PATH)/segment.o
 
 
 
 ### 32-BIT VST ###
 
-$(TARGET_VST_32): $(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/saw_source_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o $(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o
+$(TARGET_VST_32): $(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/vst_x32.o $(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o
 	$(XC32) -shared \
-		$(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/saw_source_x32.o $(BUILD_PATH)/waveguide_x32.o $(BUILD_PATH)/segment_x32.o $(BUILD_PATH)/vst_x32.o \
+		$(BUILD_PATH)/nanceloid_x32.o $(BUILD_PATH)/vst_x32.o \
 		$(BUILD_PATH)/audioeffect_x32.o $(BUILD_PATH)/audioeffectx_x32.o $(BUILD_PATH)/vstplugmain_x32.o \
 		-o $(TARGET_VST_32)
 
-$(BUILD_PATH)/nanceloid_x32.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.cpp
+$(BUILD_PATH)/nanceloid_x32.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.cpp $(SRC_PATH)/parameters.h
 	$(XC32) -fPIC -c \
 		$(SRC_PATH)/nanceloid.cpp \
 		-o $(BUILD_PATH)/nanceloid_x32.o
-
-$(BUILD_PATH)/saw_source_x32.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/saw_source.h $(SRC_PATH)/saw_source.cpp
-	$(XC32) -fPIC -c \
-		$(SRC_PATH)/saw_source.cpp \
-		-o $(BUILD_PATH)/saw_source_x32.o
-
-$(BUILD_PATH)/waveguide_x32.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.cpp
-	$(XC32) -fPIC -c \
-		$(SRC_PATH)/waveguide.cpp \
-		-o $(BUILD_PATH)/waveguide_x32.o
-
-$(BUILD_PATH)/segment_x32.o: $(BUILD_PATH) $(SRC_PATH)/segment.h $(SRC_PATH)/segment.cpp
-	$(XC32) -fPIC -c \
-		$(SRC_PATH)/segment.cpp \
-		-o $(BUILD_PATH)/segment_x32.o
 
 $(BUILD_PATH)/vst_x32.o: $(BUILD_PATH) $(SRC_PATH)/vst.h $(SRC_PATH)/vst.cpp
 	$(XC32) -fPIC -c \
@@ -150,31 +87,16 @@ $(BUILD_PATH)/vstplugmain_x32.o: $(SDK_PATH) $(SDK_SRC_PATH)/vstplugmain.cpp
 
 ### 64-BIT VST ###
 
-$(TARGET_VST_64): $(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/saw_source_x64.o $(BUILD_PATH)/waveguide_x64.o $(BUILD_PATH)/segment_x64.o $(BUILD_PATH)/vst_x64.o $(BUILD_PATH)/audioeffect_x64.o $(BUILD_PATH)/audioeffectx_x64.o $(BUILD_PATH)/vstplugmain_x64.o
+$(TARGET_VST_64): $(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/vst_x64.o $(BUILD_PATH)/audioeffect_x64.o $(BUILD_PATH)/audioeffectx_x64.o $(BUILD_PATH)/vstplugmain_x64.o
 	$(XC64) -shared \
-		$(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/saw_source_x64.o $(BUILD_PATH)/waveguide_x64.o $(BUILD_PATH)/segment_x64.o $(BUILD_PATH)/vst_x64.o \
+		$(BUILD_PATH)/nanceloid_x64.o $(BUILD_PATH)/vst_x64.o \
 		$(BUILD_PATH)/audioeffect_x64.o $(BUILD_PATH)/audioeffectx_x64.o $(BUILD_PATH)/vstplugmain_x64.o \
 		-o $(TARGET_VST_64)
 
-$(BUILD_PATH)/nanceloid_x64.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.cpp
+$(BUILD_PATH)/nanceloid_x64.o: $(BUILD_PATH) $(SRC_PATH)/nanceloid.h $(SRC_PATH)/nanceloid.cpp $(SRC_PATH)/parameters.h
 	$(XC64) -fPIC -c \
 		$(SRC_PATH)/nanceloid.cpp \
 		-o $(BUILD_PATH)/nanceloid_x64.o
-
-$(BUILD_PATH)/saw_source_x64.o: $(BUILD_PATH) $(SRC_PATH)/glottal_source.h $(SRC_PATH)/saw_source.h $(SRC_PATH)/saw_source.cpp
-	$(XC64) -fPIC -c \
-		$(SRC_PATH)/saw_source.cpp \
-		-o $(BUILD_PATH)/saw_source_x64.o
-
-$(BUILD_PATH)/waveguide_x64.o: $(BUILD_PATH) $(SRC_PATH)/waveguide.h $(SRC_PATH)/waveguide.cpp
-	$(XC64) -fPIC -c \
-		$(SRC_PATH)/waveguide.cpp \
-		-o $(BUILD_PATH)/waveguide_x64.o
-
-$(BUILD_PATH)/segment_x64.o: $(BUILD_PATH) $(SRC_PATH)/segment.h $(SRC_PATH)/segment.cpp
-	$(XC64) -fPIC -c \
-		$(SRC_PATH)/segment.cpp \
-		-o $(BUILD_PATH)/segment_x64.o
 
 $(BUILD_PATH)/vst_x64.o: $(BUILD_PATH) $(SRC_PATH)/vst.h $(SRC_PATH)/vst.cpp
 	$(XC64) -fPIC -c \
@@ -219,7 +141,7 @@ run: $(TARGET_MAIN)
 
 .PHONY:
 debug: $(TARGET_MAIN)
-	$(DEBUGGER) $(TARGET_TEST)
+	$(DEBUGGER) $(TARGET_MAIN)
 
 .PHONY:
 install: $(TARGET_MAIN)

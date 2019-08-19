@@ -13,12 +13,15 @@ Nanceloid *synth;
 // -1 means omni listen
 int midi_channel = -1;
 
+// output sample buffer
+float samples[2];
+
 void exit_error (string message) {
     cerr << message << endl;
     exit (EXIT_FAILURE);
 }
 
-void process_midi (float dt, vector<unsigned char> *message, void *user_data) {
+void process_midi (double dt, vector<unsigned char> *message, void *user_data) {
     // convert this vector to an array
     int num_bytes = message->size ();
     uint8_t *data = new uint8_t[num_bytes];
@@ -49,7 +52,7 @@ void process_audio (struct SoundIoOutStream *stream, int min_frames, int max_fra
     int frames_left = max_frames;
     int error;
 
-    synth->set_sample_rate (sample_rate);
+    synth->set_rate (sample_rate);
 
     while (frames_left > 0) {
 
@@ -62,7 +65,7 @@ void process_audio (struct SoundIoOutStream *stream, int min_frames, int max_fra
             break;
 
         for (int frame = 0; frame < frame_count; frame++) {
-            float *samples = synth->run ();
+            synth->run (samples);
             *((float *) (areas[0].ptr + areas[0].step * frame)) = samples[0];
             *((float *) (areas[1].ptr + areas[1].step * frame)) = samples[1];
         }
@@ -176,7 +179,7 @@ int main (int argc, char **argv) {
                 latency = atoi (optarg);
                 break;
             default:
-                print_usage_and_exit (argv);
+                print_usage_and_exit (argv[0]);
         }
     }
 
