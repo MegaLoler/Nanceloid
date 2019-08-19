@@ -4,7 +4,7 @@ a vocal synth using digital waveguides n stuff lol
 
 ## Dependencies
 
-In order to build and run the standalone synth you will need the [libsoundio](http://libsound.io/) and [RtMidi](https://github.com/thestk/rtmidi).
+In order to build and run the standalone synth you will need [SFML](sfml-dev.org) and [RtMidi](https://github.com/thestk/rtmidi).
 
 In order to build the VST plugins you will need the following:
 - `i686-w64-mingw32-g++`
@@ -41,11 +41,11 @@ _TODO: explain n stuff lol_
 
 ## Immediate todo list
 
-- create a brass style source
-- simplify waveguide code
-- redo turbulence
-- add intermittance sources
 - gui for drawing shapes
+- patch presets
+- turbulence
+- create a brass style source
+- add intermittance sources
 - get vst working again
 - built in reverb maybe ?
 - junction resolution parameter to optimize for very long waveguides
