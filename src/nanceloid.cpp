@@ -4,6 +4,25 @@
 
 using namespace std;
 
+Nanceloid::~Nanceloid () {
+    free ();
+}
+
+void Nanceloid::free () {
+    if (r != nullptr)
+        delete r;
+    if (l != nullptr)
+        delete l;
+    if (r_ != nullptr)
+        delete r_;
+    if (l_ != nullptr)
+        delete l_;
+    if (r_junction != nullptr)
+        delete r_junction;
+    if (l_junction != nullptr)
+        delete l_junction;
+}
+
 void Nanceloid::set_rate (double rate) {
     if (rate != this->rate) {
         this->rate = rate * super_sampling;
@@ -14,7 +33,8 @@ void Nanceloid::set_rate (double rate) {
 
 void Nanceloid::run (float *out) {
     // run super samples
-    double osc = 0;
+    // TODO: fix super samples whe its > 1 ????
+    double output = 0;
     for (int i = 0; i < super_sampling; i++) {
         // run control rate operations
         if (clock++ % control_rate_divider == 0)
@@ -24,15 +44,42 @@ void Nanceloid::run (float *out) {
         double weight = 1 / (pressure_smoothing + 1);
         pressure = (target_pressure * weight + pressure) / (1 + weight);
 
-        // TEMP: sine osc for testing
-        osc = sin (osc_phase * M_PI * 2) * pressure;
+        // TEMP: osc for testing
+        //double osc = sin (osc_phase * M_PI * 2) * pressure;
+        double osc = (fmod (osc_phase, 1) * 2 - 1) * pressure;
         osc_phase += frequency / rate;
+
+        // update ends of waveguide
+        int end = waveguide_length - 1;
+        r_[0]   = l[0]   * l_junction[0] + osc;
+        l_[end] = r[end] * r_junction[end];
+
+        // update inner of waveguide
+        for (int j = 0; j < waveguide_length; j++) {
+            int j0 = j;
+            int j1 = j + 1;
+            double r_refl = r[j0] * r_junction[j0];
+            double l_refl = l[j1] * l_junction[j1];
+            r_[j1] = r[j0] - r_refl + l_refl;
+            l_[j0] = l[j1] - l_refl + r_refl;
+        }
+
+        // swap buffers
+        double *r__ = r;
+        double *l__ = l;
+        r = r_;
+        l = l_;
+        r_ = r__;
+        l_ = l__;
+
+        // accumulate sound output from right end of waveguide
+        output += r[waveguide_length - 1];
     }
 
     // mix and return the samples
-    double target_sample = osc * params.volume.value;           // output volume
-    double pan = params.panning.get_normalized_value () / 2;    // panning
-    sample = (target_sample + sample) / 2;                      // cheap filter
+    double target_sample = output / super_sampling * params.volume.value;   // output volume
+    double pan = params.panning.get_normalized_value () / 2;                // panning
+    sample = (target_sample + sample) / 2;                                  // cheap filter
     out[0] = cos (pan * M_PI) * sample;
     out[1] = sin (pan * M_PI) * sample;
 }
@@ -54,31 +101,78 @@ void Nanceloid::run_control () {
     sustain *= tremolo_osc;
       
     target_pressure = 0;
-    if (note.velocity) {
-        // note is on
-        if (delta_time < params.adsr_attack.value)
-            // attack
-            target_pressure = delta_time / params.adsr_attack.value;
-        else if (delta_time < params.adsr_attack.value + params.adsr_decay.value)
-            // decay
-            target_pressure = 1 - (1 - sustain) * (delta_time - params.adsr_attack.value) / params.adsr_decay.value;
-        else
-            // sustain
-            target_pressure = sustain;
-    } else {
-        // note is off
-        if (delta_time < params.adsr_attack.value)
-            // release
-            target_pressure = sustain - sustain * delta_time / params.adsr_release.value;
+    if (note.note) {
+        if (note.velocity) {
+            // note is on
+            if (delta_time < params.adsr_attack.value)
+                // attack
+                target_pressure = delta_time / params.adsr_attack.value;
+            else if (delta_time < params.adsr_attack.value + params.adsr_decay.value)
+                // decay
+                target_pressure = 1 - (1 - sustain) * (delta_time - params.adsr_attack.value) / params.adsr_decay.value;
+            else
+                // sustain
+                target_pressure = sustain;
+        } else {
+            // note is off
+            if (delta_time < params.adsr_attack.value)
+                // release
+                target_pressure = sustain - sustain * delta_time / params.adsr_release.value;
+        }
     }
 
     // update target frequency
     double semitones = note.note + note.detune + vibrato_osc;
     frequency = 440 * pow (2.0, (semitones - 69) / 12);
+
+    // update shape
+    // TODO: approach target shape
+    update_reflections ();
 }
 
 void Nanceloid::init () {
+    // free old waveguide
+    free ();
 
+    // calculate number of segments based on desired length
+    waveguide_length = (int) floor (params.tract_length.value * rate / speed_of_sound);
+
+    // create the new arrays
+    r = new double[waveguide_length];
+    l = new double[waveguide_length];
+    r_ = new double[waveguide_length];
+    l_ = new double[waveguide_length];
+    r_junction = new double[waveguide_length];
+    l_junction = new double[waveguide_length];
+
+    // precalculate reflection coefficients
+    update_reflections ();
+}
+
+void Nanceloid::update_reflections () {
+    // calculate the segment impedances
+    double impedance[waveguide_length];
+    for (int i = 0; i < waveguide_length; i++) {
+        double n = i / (waveguide_length - 1);
+        double diameter = shape.sample (n);
+        double area = diameter * 2; // works ig lol
+        impedance[i] = 1 / area;
+    }
+    // calculate right going coefficients
+    for (int i = 0; i < waveguide_length - 1; i++) {
+        double z0 = impedance[i];
+        double z1 = impedance[i + 1];
+        r_junction[i] = (z1 - z0) / (z1 + z0);
+    }
+    // calculate left going coefficients
+    for (int i = 1; i < waveguide_length; i++) {
+        double z0 = impedance[i];
+        double z1 = impedance[i - 1];
+        l_junction[i] = (z1 - z0) / (z1 + z0);
+    }
+    // update end reflections
+    r_junction[waveguide_length - 1] = params.refl_right.value;
+    l_junction[0] = params.refl_left.value;
 }
 
 void Nanceloid::midi (uint8_t *data) {

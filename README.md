@@ -41,15 +41,11 @@ _TODO: explain n stuff lol_
 
 ## Immediate todo list
 
-- strip lots of stuff out
 - create a brass style source
-- adsr input
 - simplify waveguide code
-- rethink parameters
 - redo turbulence
 - add intermittance sources
-- monolithic-ify for simplicity
 - gui for drawing shapes
 - get vst working again
-- use control rates for things
 - built in reverb maybe ?
+- junction resolution parameter to optimize for very long waveguides
