@@ -1,7 +1,9 @@
 #include <iostream>
+#include <vector>
 #include <unistd.h>
-#include <soundio/soundio.h>
 #include <RtMidi.h>
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <nanceloid.h>
 
 using namespace std;
@@ -13,8 +15,8 @@ Nanceloid *synth;
 // -1 means omni listen
 int midi_channel = -1;
 
-// output sample buffer
-float samples[2];
+const float default_buffer_size = 256;
+const float default_sample_rate = 44100;
 
 void exit_error (string message) {
     cerr << message << endl;
@@ -43,42 +45,7 @@ void process_midi (double dt, vector<unsigned char> *message, void *user_data) {
     delete data;
 }
 
-void process_audio (struct SoundIoOutStream *stream, int min_frames, int max_frames) {
-
-    //const struct SoundIoChannelLayout *layout = &stream->layout;
-    float sample_rate = stream->sample_rate;
-    struct SoundIoChannelArea *areas;
-
-    int frames_left = max_frames;
-    int error;
-
-    synth->set_rate (sample_rate);
-
-    while (frames_left > 0) {
-
-        int frame_count = frames_left;
-
-        if ((error = soundio_outstream_begin_write (stream, &areas, &frame_count)))
-            exit_error ("Error: " + string (soundio_strerror (error)));
-
-        if (!frame_count)
-            break;
-
-        for (int frame = 0; frame < frame_count; frame++) {
-            synth->run (samples);
-            *((float *) (areas[0].ptr + areas[0].step * frame)) = samples[0];
-            *((float *) (areas[1].ptr + areas[1].step * frame)) = samples[1];
-        }
-
-        if ((error = soundio_outstream_end_write (stream)))
-            exit_error ("Error: " + string (soundio_strerror (error)));
-
-        frames_left -= frame_count;
-    }
-}
-
 void setup_midi () {
-
     // setup midi input
     RtMidiIn *midi_in = new RtMidiIn ();
     vector<unsigned char> message;
@@ -98,75 +65,51 @@ void setup_midi () {
     midi_in->setCallback (&process_midi);
 }
 
-void setup_audio (float latency) {
-
-    int error;
-
-    // initialize soundio
-    struct SoundIo *soundio = soundio_create();
-    if (!soundio)
-        exit_error ("Could not create SoundIo instance.");
-
-    // connect soundio
-    if ((error = soundio_connect (soundio)))
-        exit_error ("Could not connect: " + string (soundio_strerror (error)));
-
-    // flush events
-    soundio_flush_events (soundio);
-
-    // get index of default sound output device
-    int default_out_device_index = soundio_default_output_device_index (soundio);
-    if (default_out_device_index < 0)
-        exit_error ("Could not find audio output device.");
-
-    // get the device
-    struct SoundIoDevice *device = soundio_get_output_device (soundio, default_out_device_index);
-    if (!device)
-        exit_error ("Could not get audio output device.");
-    cout << "Using audio output device: " << device->name << endl;
-
-    // create the audio output stream
-    struct SoundIoOutStream *stream = soundio_outstream_create (device);
-    if (!stream)
-        exit_error ("Could not create audio output stream.");
-    stream->format = SoundIoFormatFloat32NE;
-    stream->software_latency = latency / 1000.0;
-    stream->write_callback = process_audio;
-
-    // open the stream
-    if ((error = soundio_outstream_open (stream)))
-        exit_error ("Could not open audio output stream: " + string (soundio_strerror (error)));
-
-    // make sure the layout is correct
-    if (stream->layout_error)
-        exit_error ("Could not set channel layout: " + string (soundio_strerror (stream->layout_error)));
-
-    // start the stream
-    if ((error = soundio_outstream_start (stream)))
-        exit_error ("Could not start audio output stream: " + string (soundio_strerror (error)));
-
-    // process audio events
-    while (1)
-        soundio_wait_events (soundio);
-
-    // clean up
-    soundio_outstream_destroy (stream);
-    soundio_device_unref (device);
-    soundio_destroy (soundio);
-
-}
-
 void print_usage_and_exit (char *command) {
-    cerr << "Usage: " << command << " [-c channel] [-l latency]\n\n";
+    cerr << "Usage: " << command << " [-c channel] [-b buffer size] [-s sample rate]\n\n";
     cerr << "-c channel\n\tSpecify the midi channel to listen on.\n\tIf left unspecified it will listen on all channels.\n\n";
-    cerr << "-l latency\n\tSpecify the audio buffering latency in milliseconds.\n\tIf left unspecified it is 15.\n\n" << flush;
+    cerr << "-b buffer size\n\tSpecify the size of the audio buffer in number of samples.\n\tIf left unspecified it is " << default_buffer_size << ".\n\n" << flush;
+    cerr << "-s sample rate\n\tSpecify the audio sampling rate in samples per second.\n\tIf left unspecified it is " << default_sample_rate << ".\n\n" << flush;
     exit (EXIT_FAILURE);
 }
 
-int main (int argc, char **argv) {
+class SoundStream : public sf::SoundStream {
+    private:
+        Nanceloid *synth;
+        std::vector<sf::Int16> m_samples;
+        int buffer_size;
 
+    public:
+        SoundStream (Nanceloid *synth, int buffer_size, int rate)
+            : synth (synth), buffer_size (buffer_size)
+        {
+            initialize (2, rate);
+            synth->set_rate (rate);
+            m_samples.assign (buffer_size, 0);
+        }
+
+        virtual bool onGetData (Chunk &data) {
+            data.samples = &m_samples[0];
+            data.sampleCount = buffer_size;
+
+            // fill the buffer for sfml
+            float samples[2];
+            for (int i = 0; i < buffer_size; i += 2) {
+                synth->run (samples);
+                m_samples.at (i)     = samples[0];
+                m_samples.at (i + 1) = samples[1];
+            }
+
+            return true;
+        }
+        
+        virtual void onSeek (sf::Time timeOffset) {}
+};
+
+int main (int argc, char **argv) {
     // default cli args
-    float latency = 20;
+    float buffer_size = default_buffer_size;
+    float sample_rate = default_sample_rate;
 
     // parse cli args
     int c;
@@ -175,8 +118,11 @@ int main (int argc, char **argv) {
             case 'c':
                 midi_channel = atoi (optarg);
                 break;
-            case 'l':
-                latency = atoi (optarg);
+            case 'b':
+                buffer_size = atoi (optarg);
+                break;
+            case 's':
+                sample_rate = atoi (optarg);
                 break;
             default:
                 print_usage_and_exit (argv[0]);
@@ -189,8 +135,28 @@ int main (int argc, char **argv) {
     // setup midi
     setup_midi ();
 
-    // setup audio
-    setup_audio (latency);
+    // setup sfml
+    sf::RenderWindow window (sf::VideoMode(640, 480), "Nanceloid", sf::Style::Default);
+    SoundStream stream (synth, buffer_size, sample_rate);
     
+    // start playing the audio stream
+    stream.play ();
+
+    // event loop
+    while (window.isOpen ())
+    {
+        sf::Event event;
+        while (window.pollEvent (event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close ();
+        }
+
+        window.clear();
+        window.display();
+    }
+
+    // cleanup and done
+    delete synth;
     return 0;
 }

@@ -34,7 +34,7 @@ all: synth vst
 ### STANDALONE SYNTH ###
 
 $(TARGET_MAIN): $(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o
-	$(CC) -lm -lsoundio -lrtmidi \
+	$(CC) -lm -lsfml-graphics -lsfml-system -lsfml-window -lsfml-audio -lrtmidi \
 		$(BUILD_PATH)/main.o $(BUILD_PATH)/nanceloid.o \
 		-o $(TARGET_MAIN)
 
