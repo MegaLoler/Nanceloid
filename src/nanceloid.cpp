@@ -4,63 +4,77 @@
 
 using namespace std;
 
-void Nanceloid::set_rate (int rate) {
+void Nanceloid::set_rate (double rate) {
     if (rate != this->rate) {
-        this->rate = rate;
+        this->rate = rate * super_sampling;
+        control_rate = this->rate / control_rate_divider;
         init ();
     }
 }
 
 void Nanceloid::run (float *out) {
-    // run control rate operations
-    if (clock++ % control_rate_divider == 0)
-        run_control ();
+    // run super samples
+    double osc = 0;
+    for (int i = 0; i < super_sampling; i++) {
+        // run control rate operations
+        if (clock++ % control_rate_divider == 0)
+            run_control ();
 
-    // TEMP: sine osc for testing
-    float osc = sin (osc_phase * M_PI * 2) * pressure;
-    osc_phase += frequency / rate;
+        // cheap filter to smooth pops
+        double weight = 1 / (pressure_smoothing + 1);
+        pressure = (target_pressure * weight + pressure) / (1 + weight);
+
+        // TEMP: sine osc for testing
+        osc = sin (osc_phase * M_PI * 2) * pressure;
+        osc_phase += frequency / rate;
+    }
 
     // mix and return the samples
-    float sample = osc * params.volume.value;                   // output volume
-    float pan = params.panning.get_normalized_value () / 2;     // panning
+    double target_sample = osc * params.volume.value;           // output volume
+    double pan = params.panning.get_normalized_value () / 2;    // panning
+    sample = (target_sample + sample) / 2;                      // cheap filter
     out[0] = cos (pan * M_PI) * sample;
     out[1] = sin (pan * M_PI) * sample;
 }
 
 void Nanceloid::run_control () {
     // run tremolo lfo
-    tremolo_osc = sin (tremolo_phase * M_PI * 2) * params.tremolo_depth.value;
-    tremolo_phase += params.tremolo_rate.value / rate;
+    tremolo_osc = 1 - (sin (tremolo_phase * M_PI * 2) + 1) / 2 * params.tremolo_depth.value;
+    tremolo_phase += params.tremolo_rate.value / control_rate;
 
     // run vibrato lfo
     vibrato_osc = sin (vibrato_phase * M_PI * 2) * params.vibrato_depth.value;
-    vibrato_phase += params.vibrato_rate.value / rate;
+    vibrato_phase += params.vibrato_rate.value / control_rate;
 
     // run adsr envelope to get current input pressure
-    float delta_clock = clock - note.start_time;  // samples since note event
-    float delta_time = delta_clock / rate;        // seconds since note event
-    float sustain = params.adsr_sustain.value * note.velocity
+    double delta_clock = clock - note.start_time;  // samples since note event
+    double delta_time = delta_clock / rate;        // seconds since note event
+    double sustain = params.adsr_sustain.value * note.velocity
         * (1 - params.min_velocity.value) + params.min_velocity.value;  // effective sustain level
+    sustain *= tremolo_osc;
+      
+    target_pressure = 0;
     if (note.velocity) {
         // note is on
         if (delta_time < params.adsr_attack.value)
             // attack
-            pressure = delta_time / params.adsr_attack.value;
+            target_pressure = delta_time / params.adsr_attack.value;
         else if (delta_time < params.adsr_attack.value + params.adsr_decay.value)
             // decay
-            pressure = 1 - (delta_time - params.adsr_attack.value) / params.adsr_decay.value;
+            target_pressure = 1 - (1 - sustain) * (delta_time - params.adsr_attack.value) / params.adsr_decay.value;
         else
             // sustain
-            pressure = sustain;
+            target_pressure = sustain;
     } else {
         // note is off
         if (delta_time < params.adsr_attack.value)
             // release
-            pressure = sustain - sustain * delta_time / params.adsr_release.value;
-        else
-            // post-release
-            pressure = 0;
+            target_pressure = sustain - sustain * delta_time / params.adsr_release.value;
     }
+
+    // update target frequency
+    double semitones = note.note + note.detune + vibrato_osc;
+    frequency = 440 * pow (2.0, (semitones - 69) / 12);
 }
 
 void Nanceloid::init () {

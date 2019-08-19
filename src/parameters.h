@@ -63,12 +63,12 @@ struct Parameters {
 
     // musical and audio parameters
     Parameter tremolo_rate  = Parameter ("Tremolo Rate",     "Trm.Rate", "hz",    1, 16,   1,   16,   5);
-    Parameter tremolo_depth = Parameter ("Tremolo Depth",    "Trm.Dept", "cents", 0, 2,    0,   200,  0.25);
+    Parameter tremolo_depth = Parameter ("Tremolo Depth",    "Trm.Dept", "%",     0, 1,    0,   100,  0.25);
     Parameter vibrato_rate  = Parameter ("Vibrato Rate",     "Vib.Rate", "hz",    1, 16,   1,   16,   5);
     Parameter vibrato_depth = Parameter ("Vibrato Depth",    "Vib.Dept", "cents", 0, 2,    0,   200,  0.25);
     Parameter adsr_attack   = Parameter ("ADSR Attack",      "Attack",   "ms",    0, 1,    0,   1000, 0.1);
     Parameter adsr_decay    = Parameter ("ADSR Decay",       "Decay",    "ms",    0, 1,    0,   1000, 0.1);
-    Parameter adsr_sustain  = Parameter ("ADSR Sustain",     "Sustain",  "%",     0, 1,    0,   100,  1);
+    Parameter adsr_sustain  = Parameter ("ADSR Sustain",     "Sustain",  "%",     0, 1,    0,   100,  0.5);
     Parameter adsr_release  = Parameter ("ADSR Release",     "Release",  "ms",    0, 2,    0,   2000, 0.1);
     Parameter min_velocity  = Parameter ("Minimum Velocity", "Min. Vel", "%",     0, 1,    0,   100,  0.5);
     Parameter panning       = Parameter ("Panning",          "Panning",  "%",    -1, 1,   -100, 100,  0);

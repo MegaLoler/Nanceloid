@@ -7,35 +7,40 @@
 class Nanceloid {
     private:
         struct {
-            float note     = 40;    // midi note value
-            float detune   = 0;     // offset in semitones
-            float velocity = 0;     // note velocity (0 to 1)
+            double note     = 0;    // midi note value
+            double detune   = 0;    // offset in semitones
+            double velocity = 0;    // note velocity (0 to 1)
             int start_time = 0;     // sample clock time of note event
         } note;                     // info about the current note to play
 
         // sampling parameters and timing
-        int rate = 0;                       // audio sampling rate
-        int clock = 0;                      // sample clock
-        int control_rate_divider = 1000;    // sample clock divider for low frequency rate
+        double rate = 0;            // audio sampling rate
+        double control_rate = 0;    // low frequency control rate
+        int clock = 0;              // sample clock
 
         // state
-        float osc_phase = 0;        // current phase of the primary oscillator
-        float tremolo_phase = 0;    // current phase of tremolo lfo
-        float vibrato_phase = 0;    // current phase of vibrato lfo
-        float tremolo_osc = 0;      // output of tremolo lfo
-        float vibrato_osc = 0;      // output of vibrato lfo
-        float frequency = 0;        // current intended playing frequency
-        float pressure = 0;         // current input pressure
+        double sample = 0;          // last sample
+        double osc_phase = 0;       // current phase of the primary oscillator
+        double tremolo_phase = 0;   // current phase of tremolo lfo
+        double vibrato_phase = 0;   // current phase of vibrato lfo
+        double tremolo_osc = 0;     // output of tremolo lfo
+        double vibrato_osc = 0;     // output of vibrato lfo
+        double frequency = 0;       // current intended playing frequency
+        double target_pressure = 0; // unfiltered current input pressure
+        double pressure = 0;        // current input pressure
 
         // hardcoded parameters
-        const float speed_of_sound = 34300; // cm/s
+        const double speed_of_sound = 34300;    // cm/s
+        const int super_sampling = 2;
+        const double pressure_smoothing = 100;
+        const int control_rate_divider = 1000;  // sample clock divider for low frequency rate
 
     public:
         Nanceloid () {};
         ~Nanceloid () {};
 
         // update the sample rate
-        void set_rate (int rate);
+        void set_rate (double rate);
 
         // create and initialize the waveguide
         void init ();

@@ -166,7 +166,7 @@ void print_usage_and_exit (char *command) {
 int main (int argc, char **argv) {
 
     // default cli args
-    float latency = 15;
+    float latency = 20;
 
     // parse cli args
     int c;
