@@ -45,6 +45,10 @@ class TractShape {
 // represents a synth instance
 class Nanceloid {
     private:
+        // saved tract shapes for each midi patch number
+        TractShape shapes[128];
+        int shape_i = 0;
+
         // waveguide stuff
         int waveguide_length = 0;
         double reflection_damping = 0.04;
@@ -113,7 +117,9 @@ class Nanceloid {
         // process a midi event
         void midi (uint8_t *data);
 
+        // get the current shape
+        TractShape &get_shape ();
+
         // public members
         Parameters params;      // the live synth parameters
-        TractShape shape;       // the shape of the tract
 };

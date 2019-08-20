@@ -151,12 +151,16 @@ void Nanceloid::init () {
     update_reflections ();
 }
 
+TractShape &Nanceloid::get_shape () {
+    return shapes[shape_i];
+}
+
 void Nanceloid::update_reflections () {
     // calculate the segment impedances
     double impedance[waveguide_length];
     for (int i = 0; i < waveguide_length; i++) {
         double n = (double) i / (waveguide_length - 1);
-        double diameter = shape.sample (n);
+        double diameter = get_shape ().sample (n);
         double area = diameter * 2; // works ig lol
         impedance[i] = 1 / (area + 0.0001);
     }
@@ -244,12 +248,20 @@ void Nanceloid::midi (uint8_t *data) {
         uint8_t msb = data[2];
 
 #ifdef DEBUG
-        cout << "Received pitch bend: 0x" << hex << (int) msb << endl;
+        cout << "Received pitch bend event: 0x" << hex << (int) msb << endl;
 #endif
 
         this->note.detune = msb / 127.0 * 4 - 2;
 
-    }
+    } else if (type == 0xc0) {
 
-    // TODO: handle phoneme mapped notes on channel 10 or w/e
+        // handle program changes
+        uint8_t id = data[1];
+
+#ifdef DEBUG
+        cout << "Received program change event: 0x" << hex << (int) id << endl;
+#endif
+
+        shape_i = id;
+    }
 }
