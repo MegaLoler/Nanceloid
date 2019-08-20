@@ -128,7 +128,7 @@ void Nanceloid::run_control () {
     // TODO
 
     // update shape
-    // TODO: approach target shape
+    shape.crossfade (get_shape (), params.crossfade.value);
     update_reflections ();
 }
 
@@ -160,7 +160,7 @@ void Nanceloid::update_reflections () {
     double impedance[waveguide_length];
     for (int i = 0; i < waveguide_length; i++) {
         double n = (double) i / (waveguide_length - 1);
-        double diameter = get_shape ().sample (n);
+        double diameter = shape.sample (n);
         double area = diameter * 2; // works ig lol
         impedance[i] = 1 / (area + 0.0001);
     }

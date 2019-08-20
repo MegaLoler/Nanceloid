@@ -40,6 +40,15 @@ class TractShape {
             int i = floor (n * length + 0.5);
             diameter[i] = sample;
         }
+
+        // approach a given shape
+        void crossfade (TractShape &target, double strength) {
+            for (int i = 0; i < length; i++) {
+                double position = (double) i / (length - 1);
+                double target_sample = target.sample (position);
+                diameter[i] += (target_sample - diameter[i]) * strength;
+            }
+        }
 };
 
 // represents a synth instance
@@ -122,4 +131,5 @@ class Nanceloid {
 
         // public members
         Parameters params;      // the live synth parameters
+        TractShape shape;       // the current instantaneous shape (not the preset)
 };

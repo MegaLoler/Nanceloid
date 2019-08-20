@@ -65,6 +65,7 @@ struct Parameters {
     Parameter tract_length  = Parameter ("Tract Length",     "TractLen", "cm",    8,    24,   8,   24,    17.5);
     Parameter refl_left     = Parameter ("Left Reflection",  "Left Rfl", "%",     0,    1,    0,   100,   0.75);
     Parameter refl_right    = Parameter ("Right Reflection", "RightRfl", "%",     0.5, -1,    0,  -100,  -0.9);
+    Parameter crossfade     = Parameter ("Crossfade Tract",  "Crossfad", "%",     0,    1,    0,   100,   0.2);
 
     // musical and audio parameters
     Parameter tremolo_rate  = Parameter ("Tremolo Rate",     "Trm.Rate", "hz",    1,    16,   1,   16,    5);
@@ -77,7 +78,7 @@ struct Parameters {
     Parameter adsr_release  = Parameter ("ADSR Release",     "Release",  "ms",    0,    2,    0,   2000,  0.1);
     Parameter min_velocity  = Parameter ("Minimum Velocity", "Min. Vel", "%",     0,    1,    0,   100,   0.5);
     Parameter panning       = Parameter ("Panning",          "Panning",  "%",    -1,    1,   -100, 100,   0);
-    Parameter volume        = Parameter ("Volume",           "Volume",   "%",     0,    1,    0,   100,   0.5);
+    Parameter volume        = Parameter ("Volume",           "Volume",   "%",     0,    1,    0,   100,   0.25);
 
     // return an array of the parameters
     Parameter *as_array () {

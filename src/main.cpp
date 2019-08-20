@@ -170,7 +170,7 @@ int main (int argc, char **argv) {
         sf::VertexArray lines2 (sf::LinesStrip, res);
         for (int j = 0; j < res; j++) {
             double n = (double) j / (res - 1);
-            double sample = synth->get_shape ().sample (n);
+            double sample = synth->shape.sample (n);
             lines[j].position = sf::Vector2f (n * 2 - 1, sample);
             lines2[j].position = sf::Vector2f (n * 2 - 1, -sample);
         }

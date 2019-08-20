@@ -41,11 +41,11 @@ _TODO: explain n stuff lol_
 
 ## Immediate todo list
 
-- gui for drawing shapes
-- patch presets
+- patch saving
+- cross fading
 - turbulence
-- create a brass style source
-- add intermittance sources
+- brass source
+- add intermittant sources
 - get vst working again
-- built in reverb maybe ?
-- junction resolution parameter to optimize for very long waveguides
+- reverb
+- junction resolution parameter to optimize for very long waveguides ?? maybe
