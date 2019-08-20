@@ -15,7 +15,7 @@ Nanceloid *synth;
 // -1 means omni listen
 int midi_channel = -1;
 
-const float default_buffer_size = 256;
+const float default_buffer_size = 2048;
 const float default_sample_rate = 44100;
 
 void exit_error (string message) {
@@ -76,7 +76,7 @@ void print_usage_and_exit (char *command) {
 class SoundStream : public sf::SoundStream {
     private:
         Nanceloid *synth;
-        std::vector<sf::Int16> m_samples;
+        sf::Int16 *m_samples;
         int buffer_size;
 
     public:
@@ -85,19 +85,24 @@ class SoundStream : public sf::SoundStream {
         {
             initialize (2, rate);
             synth->set_rate (rate);
-            m_samples.assign (buffer_size, 0);
+            m_samples = new sf::Int16[buffer_size];
+        }
+
+        ~SoundStream () {
+            delete m_samples;
         }
 
         virtual bool onGetData (Chunk &data) {
-            data.samples = &m_samples[0];
+            data.samples = m_samples;
             data.sampleCount = buffer_size;
 
             // fill the buffer for sfml
             float samples[2];
+            const int max = 32767;
             for (int i = 0; i < buffer_size; i += 2) {
                 synth->run (samples);
-                m_samples.at (i)     = samples[0];
-                m_samples.at (i + 1) = samples[1];
+                m_samples[i]     = (sf::Int16) (samples[0] * max);
+                m_samples[i + 1] = (sf::Int16) (samples[1] * max);
             }
 
             return true;
@@ -137,6 +142,7 @@ int main (int argc, char **argv) {
 
     // setup sfml
     sf::RenderWindow window (sf::VideoMode(640, 480), "Nanceloid", sf::Style::Default);
+    window.setFramerateLimit (60);
     SoundStream stream (synth, buffer_size, sample_rate);
     
     // start playing the audio stream
