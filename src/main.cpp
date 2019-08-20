@@ -141,25 +141,63 @@ int main (int argc, char **argv) {
     setup_midi ();
 
     // setup sfml
-    sf::RenderWindow window (sf::VideoMode(640, 480), "Nanceloid", sf::Style::Default);
+    const int screen_width = 600;
+    const int screen_height = 200;
+    sf::RenderWindow window (sf::VideoMode(screen_width, screen_height), "Nanceloid", sf::Style::Default);
+    auto desktop = sf::VideoMode::getDesktopMode ();
+    sf::Vector2i desktop_size (desktop.width, desktop.height);
+    window.setPosition ((desktop_size - (sf::Vector2i) window.getSize ()) / 2);
     window.setFramerateLimit (60);
-    SoundStream stream (synth, buffer_size, sample_rate);
+
+    sf::View view (sf::FloatRect(-1, -1, 2, 2));
+    window.setView (view);
     
-    // start playing the audio stream
+    // create and start playing the audio stream
+    SoundStream stream (synth, buffer_size, sample_rate);
     stream.play ();
 
     // event loop
+    bool mouse_down = false;
+    double mouse_x = 0;
+    double mouse_y = 0;
     while (window.isOpen ())
     {
+        window.clear();
+
+        // draw tract shape
+        const int res = 64;
+        sf::VertexArray lines (sf::LinesStrip, res);
+        sf::VertexArray lines2 (sf::LinesStrip, res);
+        for (int j = 0; j < res; j++) {
+            double n = (double) j / (res - 1);
+            double sample = synth->shape.sample (n);
+            lines[j].position = sf::Vector2f (n * 2 - 1, sample);
+            lines2[j].position = sf::Vector2f (n * 2 - 1, -sample);
+        }
+        window.draw(lines);
+        window.draw(lines2);
+
+        window.display();
+
         sf::Event event;
         while (window.pollEvent (event))
         {
             if (event.type == sf::Event::Closed)
                 window.close ();
+            else if (event.type == sf::Event::MouseButtonPressed)
+                mouse_down = true;
+            else if (event.type == sf::Event::MouseButtonReleased)
+                mouse_down = false;
+            else if (event.type == sf::Event::MouseMoved) {
+                mouse_x = (double) event.mouseMove.x / screen_width * 2 - 1;
+                mouse_y = (double) event.mouseMove.y / screen_height * 2 - 1;
+            }
+            if (mouse_down) {
+                double sample = abs (mouse_y);
+                double n = (mouse_x + 1) / 2;
+                synth->shape.set_sample (n, sample);
+            }
         }
-
-        window.clear();
-        window.display();
     }
 
     // cleanup and done

@@ -59,8 +59,8 @@ void Nanceloid::run (float *out) {
             int j1 = j + 1;
             double r_refl = r[j0] * r_junction[j0];
             double l_refl = l[j1] * l_junction[j1];
-            r_[j1] = r[j0] - r_refl + l_refl;
-            l_[j0] = l[j1] - l_refl + r_refl;
+            r_[j1] = r[j0] - r_refl + l_refl * (1 - reflection_damping);
+            l_[j0] = l[j1] - l_refl + r_refl * (1 - reflection_damping);
         }
 
         // swap buffers
@@ -95,8 +95,7 @@ void Nanceloid::run_control () {
     // run adsr envelope to get current input pressure
     double delta_clock = clock - note.start_time;  // samples since note event
     double delta_time = delta_clock / rate;        // seconds since note event
-    double sustain = params.adsr_sustain.value * note.velocity
-        * (1 - params.min_velocity.value) + params.min_velocity.value;  // effective sustain level
+    double sustain = params.adsr_sustain.value;    // effective sustain level
     sustain *= tremolo_osc;
       
     target_pressure = 0;
@@ -119,6 +118,7 @@ void Nanceloid::run_control () {
                 target_pressure = sustain - sustain * delta_time / params.adsr_release.value;
         }
     }
+    target_pressure *= note.velocity * (1 - params.min_velocity.value) + params.min_velocity.value;
 
     // update target frequency
     double semitones = note.note + note.detune + vibrato_osc;
@@ -155,10 +155,10 @@ void Nanceloid::update_reflections () {
     // calculate the segment impedances
     double impedance[waveguide_length];
     for (int i = 0; i < waveguide_length; i++) {
-        double n = i / (waveguide_length - 1);
+        double n = (double) i / (waveguide_length - 1);
         double diameter = shape.sample (n);
         double area = diameter * 2; // works ig lol
-        impedance[i] = 1 / area;
+        impedance[i] = 1 / (area + 0.0001);
     }
     // calculate right going coefficients
     for (int i = 0; i < waveguide_length - 1; i++) {

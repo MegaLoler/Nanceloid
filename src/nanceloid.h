@@ -11,10 +11,10 @@ class TractShape {
         int length;
 
     public:
-        TractShape (int length = 8) : length (length) {
+        TractShape (int length = 32) : length (length) {
             diameter = new double[length];
             for (int i = 0; i < length; i++)
-                diameter[i] = 1;
+                diameter[i] = 0.5;
         }
 
         ~TractShape () {
@@ -23,7 +23,7 @@ class TractShape {
 
         // get an interpolate value given a normalized position
         double sample (double i) {
-            // linear interpolation ig
+            // linear interpolation ig lol
             double position = i * (length - 1);
             int i0 = (int) floor (position);
             int i1 = fmin (length - 1, i0 + 1);
@@ -33,6 +33,13 @@ class TractShape {
             double s1 = diameter[i1] * weight1;
             return s0 + s1;
         }
+
+        // the above but set instead
+        void set_sample (double n, double sample) {
+            // just set nearest ig lol
+            int i = floor (n * length + 0.5);
+            diameter[i] = sample;
+        }
 };
 
 // represents a synth instance
@@ -40,6 +47,7 @@ class Nanceloid {
     private:
         // waveguide stuff
         int waveguide_length = 0;
+        double reflection_damping = 0.04;
         // right and left going
         double *r = nullptr;
         double *l = nullptr;
