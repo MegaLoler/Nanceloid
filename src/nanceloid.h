@@ -48,7 +48,11 @@ class TractShape {
                 double target_sample = target.sample (position);
                 diameter[i] += (target_sample - diameter[i]) * strength;
             }
+            velic_closure += (target.velic_closure - velic_closure) * strength;
         }
+
+        // public members
+        double velic_closure = 0;       // closure of the nasal cavity opening
 };
 
 // represents a synth instance
@@ -128,6 +132,9 @@ class Nanceloid {
 
         // get the current shape
         TractShape &get_shape ();
+
+        // get the id of the current shape
+        int get_shape_id ();
 
         // public members
         Parameters params;      // the live synth parameters

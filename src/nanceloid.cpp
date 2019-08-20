@@ -155,6 +155,10 @@ TractShape &Nanceloid::get_shape () {
     return shapes[shape_i];
 }
 
+int Nanceloid::get_shape_id () {
+    return shape_i;
+}
+
 void Nanceloid::update_reflections () {
     // calculate the segment impedances
     double impedance[waveguide_length];

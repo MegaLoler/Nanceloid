@@ -149,6 +149,17 @@ int main (int argc, char **argv) {
     window.setPosition ((desktop_size - (sf::Vector2i) window.getSize ()) / 2);
     window.setFramerateLimit (60);
 
+    sf::Font font;
+    if (!font.loadFromFile("font.ttf"))
+        exit_error ("Could not load font!");
+    sf::Text text;
+    text.setFont (font);
+    text.setString ("Hi");
+    text.setCharacterSize (12);
+    text.setPosition(-1, -1);
+    text.setScale(2.0 / screen_width, 2.0 / screen_height);
+    text.setStyle (sf::Text::Regular);
+
     sf::View view (sf::FloatRect(-1, -1, 2, 2));
     window.setView (view);
     
@@ -174,10 +185,14 @@ int main (int argc, char **argv) {
             lines[j].position = sf::Vector2f (n * 2 - 1, sample);
             lines2[j].position = sf::Vector2f (n * 2 - 1, -sample);
         }
-        window.draw(lines);
-        window.draw(lines2);
-
-        window.display();
+        stringstream display_string;
+        display_string << "Patch #" << synth->get_shape_id () << "\n";
+        display_string << "Velic closure: " << (int) round (synth->shape.velic_closure * 100) << "%\n";
+        text.setString (display_string.str ());
+        window.draw (lines);
+        window.draw (lines2);
+        window.draw (text);
+        window.display ();
 
         sf::Event event;
         while (window.pollEvent (event))
@@ -191,6 +206,13 @@ int main (int argc, char **argv) {
             else if (event.type == sf::Event::MouseMoved) {
                 mouse_x = (double) event.mouseMove.x / screen_width * 2 - 1;
                 mouse_y = (double) event.mouseMove.y / screen_height * 2 - 1;
+            }
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Escape) {
+                    window.close ();
+                } else if (event.key.code == sf::Keyboard::Tab) {
+                    synth->get_shape ().velic_closure = synth->get_shape ().velic_closure ?  0 : 1;
+                }
             }
             if (mouse_down) {
                 double sample = abs (mouse_y);
