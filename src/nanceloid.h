@@ -118,10 +118,11 @@ class Nanceloid {
         double vibrato_osc = 0;     // output of vibrato lfo
         double frequency = 0;       // current intended playing frequency
         double target_pressure = 0; // unfiltered current input pressure
-        double pressure = 0;        // current input pressure
-        double voicing = 0;         // current closeness of the vocal cords
+        double pressure = 0;        // subglottal pressure from lungs
+        double glottal_rest_area = 0;   // neutral area of glottis
+        double voicing = 0;         // related to glottal area at rest
+        double cord_tension = 0;    // tension of the vocal folds
 
-        // vocal folds
         double x = 0;               // displacement
         double v = 0;               // velocity
         double w = 0;               // angular velocity

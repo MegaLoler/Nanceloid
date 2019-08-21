@@ -70,19 +70,20 @@ void Nanceloid::run (float *out) {
         pressure = (target_pressure * weight + pressure) / (1 + weight);
 
         // glottal source
-        // TODO: fix lol
-        double displacement = x + 1;//(1 - voicing) + 0.01;
-        double opening = displacement * displacement;
-        double flow = (pressure - l[0]) * opening;
-        double pressure_force = -flow * flow / 2.0;
-        double a = -w * w * x - w * v / q + pressure_force;
-        v += a * dt;
-        x += v * dt;
+        // parameters are:
+        // - pressure (subglottal pressure)
+        // - glottal_rest_area (neutral cross sectional area at glottis)
+        // - cord_tension (vocal cord tension)
+        double glottal_area = glottal_rest_area;//TODO
+        double pressure_drop = pressure - l[0];
+        double flow = 2 * pressure_drop * glottal_area;
+        double pressure_force = -flow * flow / 2;
+        double glottal_output = pressure_force;
 
         // update ends of waveguide
         int end = waveguide_length - 1;
         int nose_end = nose_length - 1;
-        r_[0]   = l[0]   * l_junction[0] + pressure_force;
+        r_[0]   = l[0]   * l_junction[0] + glottal_output;
         l_[end] = r[end] * r_junction[end];
         nl_[nose_end] = nr[nose_end] * params.refl_right.value;
 
@@ -202,6 +203,8 @@ void Nanceloid::run_control () {
 
     // crossfade voicing
     voicing += (params.voicing.value - voicing) * params.crossfade.value;
+    double glottal_radius = voicing / 2;
+    glottal_rest_area = glottal_radius * glottal_radius * M_PI;
 
     // update target frequency
     double semitones = note.note + note.detune + vibrato_osc;
@@ -210,7 +213,6 @@ void Nanceloid::run_control () {
     // pitch correction
     // TODO: actually do it
     // TODO ALSO: portamento
-    w = frequency;
 
     // update shape
     shape.crossfade (get_shape (), params.crossfade.value);
@@ -260,7 +262,8 @@ void Nanceloid::set_shape_id (int id) {
 double Nanceloid::get_impedance (int i) {
     double n = (double) i / (waveguide_length - 1);
     double diameter = shape.sample (n);
-    double area = diameter * 2; // works ig lol
+    double radius = diameter / 2;
+    double area = radius * radius * M_PI;
     return 1 / (area + epsilon);
 }
 

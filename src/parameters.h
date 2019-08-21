@@ -68,13 +68,13 @@ struct Parameters {
     Parameter nose_admittance = Parameter ("Nose Admittance",  "NoseAdmt", "",      0,    1,    0,   1,     0.25);
     Parameter crossfade       = Parameter ("Crossfade Tract",  "Crossfad", "%",     0,    1,    0,   100,   0.2);
     Parameter turbulence      = Parameter ("Turbulence",       "Friction", "%",     0,    1,    0,   100,   0.1);
-    Parameter voicing         = Parameter ("Voicing",          "Voicing",  "%",     0,    2,    0,   200,   1);
+    Parameter voicing         = Parameter ("Voicing",          "Voicing",  "%",     0,    1,    0,   100,   1);
 
     // musical and audio parameters
     Parameter tremolo_rate    = Parameter ("Tremolo Rate",     "Trm.Rate", "hz",    1,    16,   1,   16,    5);
-    Parameter tremolo_depth   = Parameter ("Tremolo Depth",    "Trm.Dept", "%",     0,    1,    0,   100,   0.25);
+    Parameter tremolo_depth   = Parameter ("Tremolo Depth",    "Trm.Dept", "%",     0,    1,    0,   100,   0);
     Parameter vibrato_rate    = Parameter ("Vibrato Rate",     "Vib.Rate", "hz",    1,    16,   1,   16,    5);
-    Parameter vibrato_depth   = Parameter ("Vibrato Depth",    "Vib.Dept", "cents", 0,    2,    0,   200,   0.25);
+    Parameter vibrato_depth   = Parameter ("Vibrato Depth",    "Vib.Dept", "cents", 0,    2,    0,   200,   0);
     Parameter adsr_attack     = Parameter ("ADSR Attack",      "Attack",   "ms",    0,    1,    0,   1000,  0.1);
     Parameter adsr_decay      = Parameter ("ADSR Decay",       "Decay",    "ms",    0,    1,    0,   1000,  0.1);
     Parameter adsr_sustain    = Parameter ("ADSR Sustain",     "Sustain",  "%",     0,    1,    0,   100,   1);
