@@ -8,6 +8,10 @@ double noise () {
     return (double) rand () / RAND_MAX;
 }
 
+double clip (double value) {
+    return fmin (1, fmax (-1, value));
+}
+
 Nanceloid::~Nanceloid () {
     free ();
 }
@@ -103,15 +107,15 @@ void Nanceloid::run (float *out) {
             double l_refl = l[j1] * l_junction[j1];
             double r_turb = abs (r_refl) * params.turbulence.value * noise ();
             double l_turb = abs (l_refl) * params.turbulence.value * noise ();
-            r_[j1] = r[j0] - r_refl + l_refl * refl_c + r_turb;
-            l_[j0] = l[j1] - l_refl + r_refl * refl_c + l_turb;
+            r_[j1] = clip (r[j0] - r_refl + l_refl * refl_c + l_turb);
+            l_[j0] = clip (l[j1] - l_refl + r_refl * refl_c + r_turb);
         }
         // update nose
         for (int j = 0; j < nose_length - 1; j++) {
             int j0 = j;
             int j1 = j + 1;
-            nr_[j1] = nr[j0];
-            nl_[j0] = nl[j1];
+            nr_[j1] = clip (nr[j0]);
+            nl_[j0] = clip (nl[j1]);
         }
 
         // swap buffers
@@ -229,11 +233,15 @@ int Nanceloid::get_shape_id () {
     return shape_i;
 }
 
+void Nanceloid::set_shape_id (int id) {
+    shape_i = id;
+}
+
 double Nanceloid::get_impedance (int i) {
     double n = (double) i / (waveguide_length - 1);
     double diameter = shape.sample (n);
     double area = diameter * 2; // works ig lol
-    return 1 / (area + 0.00001);
+    return 1 / (area + epsilon);
 }
 
 void Nanceloid::update_reflections () {
@@ -260,7 +268,7 @@ void Nanceloid::update_reflections () {
     // throat mouth nose junction reflection coefficients and transmittance weights
     double throat_z = get_impedance (throat_i);
     double mouth_z = get_impedance (mouth_i);
-    double nose_z = 1.0 / (params.nose_admittance.value * (1 - shape.velic_closure) + 0.00001);
+    double nose_z = 1.0 / (params.nose_admittance.value * (1 - shape.velic_closure) + epsilon);
     double throat_y = 1.0 / throat_z;
     double mouth_y = 1.0 / mouth_z;
     double nose_y = 1.0 / nose_z;
@@ -279,6 +287,23 @@ void Nanceloid::update_reflections () {
     mouth_to_nose_w = nose_y / throat_nose_y;
     nose_to_throat_w = throat_y / throat_mouth_y;
     nose_to_mouth_w = mouth_y / throat_mouth_y;
+}
+
+void Nanceloid::note_on (int note, double velocity) {
+    this->note.note = note;
+    this->note.velocity = velocity / 127.0;
+    this->note.start_time = clock;
+}
+
+void Nanceloid::note_off (int note) {
+    if (note == this->note.note) {
+        this->note.velocity = 0;
+        this->note.start_time = clock;
+    }
+}
+
+int Nanceloid::playing_note () {
+    return note.velocity ? note.note : -1;
 }
 
 void Nanceloid::midi (uint8_t *data) {
@@ -318,15 +343,11 @@ void Nanceloid::midi (uint8_t *data) {
         // handle note off events
         uint8_t note = data[1];
 
-        if (note == this->note.note) {
-
 #ifdef DEBUG
             cout << "Received midi note off event: 0x" << hex << (int) note << endl;
 #endif
 
-            this->note.velocity = 0;
-            this->note.start_time = clock;
-        }
+        note_off (note);
 
     } else if (type == 0x90) {
 
@@ -338,9 +359,7 @@ void Nanceloid::midi (uint8_t *data) {
         cout << "Received midi note on event: 0x" << hex << (int) note << " 0x" << hex << (int) velocity << endl;
 #endif
 
-        this->note.note = note;
-        this->note.velocity = velocity / 127.0;
-        this->note.start_time = clock;
+        note_on (note, velocity / 127.0);
 
     } else if (type == 0xe0) {
 

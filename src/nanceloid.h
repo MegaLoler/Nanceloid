@@ -69,6 +69,7 @@ class Nanceloid {
         int mouth_i = 0;
         double reflection_damping = 0.04;
         double max_impedance = 20;
+        double epsilon = 0.00001;
         // right and left going
         double *r = nullptr;
         double *l = nullptr;
@@ -125,30 +126,30 @@ class Nanceloid {
         const double pressure_smoothing = 100;
         const int control_rate_divider = 1000;  // sample clock divider for low frequency rate
 
+        // free resources
+        void free ();
+
+        // create and initialize the waveguide
+        void init ();
+
         // get the impedance given the index of the waveguide segment
         double get_impedance (int i);
+
+        // precalculate the reflection coefficients for each junction
+        void update_reflections ();
+
+        // runs at control rate
+        void run_control ();
 
     public:
         Nanceloid () {};
         ~Nanceloid () ;
 
-        // free resources
-        void free ();
-
         // update the sample rate
         void set_rate (double rate);
 
-        // create and initialize the waveguide
-        void init ();
-
-        // precalculate the reflection coefficients for each junction
-        void update_reflections ();
-
         // run the voice for one frame setting stereo output samples
         void run (float *out);
-
-        // runs at control rate
-        void run_control ();
 
         // process a midi event
         void midi (uint8_t *data);
@@ -158,6 +159,19 @@ class Nanceloid {
 
         // get the id of the current shape
         int get_shape_id ();
+
+        // set the current shape given its id
+        void set_shape_id (int id);
+
+        // play a note
+        void note_on (int note, double velocity);
+
+        // stop playing
+        void note_off (int note);
+
+        // returns the currently playing note
+        // -1 for not playing
+        int playing_note ();
 
         // public members
         Parameters params;      // the live synth parameters

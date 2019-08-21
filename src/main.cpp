@@ -213,16 +213,26 @@ int main (int argc, char **argv) {
                 else if (event.type == sf::Event::MouseMoved) {
                     mouse_x = (double) event.mouseMove.x / screen_width * 2 - 1;
                     mouse_y = (double) event.mouseMove.y / screen_height * 2 - 1;
-                }
-                if (event.type == sf::Event::KeyPressed) {
-                    if (event.key.code == sf::Keyboard::Escape) {
+                } else if (event.type == sf::Event::KeyPressed) {
+                    if (event.key.code == sf::Keyboard::Escape)
                         window.close ();
-                    } else if (event.key.code == sf::Keyboard::Tab) {
+                    else if (event.key.code == sf::Keyboard::Tab)
                         synth->get_shape ().velic_closure = synth->get_shape ().velic_closure ?  0 : 1;
+                    else if (event.key.code == sf::Keyboard::Space) {
+                        int note = synth->playing_note ();
+                        if (note == -1)
+                            synth->note_on (45, 1);
+                        else
+                            synth->note_off (note);
                     }
+                } else if (event.type == sf::Event::TextEntered) {
+                    // switch to patches corresponding to lower case letters
+                    char c = event.text.unicode;
+                    if (c >= 97 && c <= 122)
+                        synth->set_shape_id (c);
                 }
                 if (mouse_down) {
-                    double sample = abs (mouse_y);
+                    double sample = fmax (0, mouse_y);
                     double n = (mouse_x + 1) / 2;
                     synth->get_shape ().set_sample (n, sample);
                 }

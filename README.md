@@ -47,7 +47,6 @@ _TODO: explain n stuff lol_
 ## Immediate todo list
 
 - patch saving
-- turbulence
 - brass source
 - add intermittant sources
 - get vst working again
