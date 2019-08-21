@@ -2,6 +2,9 @@
 
 a vocal synth using digital waveguides n stuff lol
 
+work in progressssssss~~~~~~~~~~
+probably broken maybe
+
 ![Screenshot](screenshot.gif)
 
 ## Dependencies
