@@ -62,24 +62,24 @@ struct Parameter {
 struct Parameters {
 
     // physical parameters
-    Parameter tract_length  = Parameter ("Tract Length",     "TractLen", "cm",    8,    24,   8,   24,    17.5);
-    Parameter refl_left     = Parameter ("Left Reflection",  "Left Rfl", "%",     0,    1,    0,   100,   0.75);
-    Parameter refl_right    = Parameter ("Right Reflection", "RightRfl", "%",    -0.5, -1,   -50, -100,  -0.9);
-    Parameter refl_nose     = Parameter ("Nose Reflection",  "Nose Rfl", "%",    -0.5, -1,   -50, -100,  -0.95);
-    Parameter crossfade     = Parameter ("Crossfade Tract",  "Crossfad", "%",     0,    1,    0,   100,   0.2);
+    Parameter tract_length    = Parameter ("Tract Length",     "TractLen", "cm",    8,    24,   8,   24,    17.5);
+    Parameter refl_left       = Parameter ("Left Reflection",  "Left Rfl", "%",     0,    1,    0,   100,   0.75);
+    Parameter refl_right      = Parameter ("Right Reflection", "RightRfl", "%",    -0.5, -1,   -50, -100,  -0.9);
+    Parameter nose_admittance = Parameter ("Nose Admittance",  "NoseAdmt", "",      0,    1,    0,   1,     0.5);
+    Parameter crossfade       = Parameter ("Crossfade Tract",  "Crossfad", "%",     0,    1,    0,   100,   0.2);
 
     // musical and audio parameters
-    Parameter tremolo_rate  = Parameter ("Tremolo Rate",     "Trm.Rate", "hz",    1,    16,   1,   16,    5);
-    Parameter tremolo_depth = Parameter ("Tremolo Depth",    "Trm.Dept", "%",     0,    1,    0,   100,   0.25);
-    Parameter vibrato_rate  = Parameter ("Vibrato Rate",     "Vib.Rate", "hz",    1,    16,   1,   16,    5);
-    Parameter vibrato_depth = Parameter ("Vibrato Depth",    "Vib.Dept", "cents", 0,    2,    0,   200,   0.25);
-    Parameter adsr_attack   = Parameter ("ADSR Attack",      "Attack",   "ms",    0,    1,    0,   1000,  0.1);
-    Parameter adsr_decay    = Parameter ("ADSR Decay",       "Decay",    "ms",    0,    1,    0,   1000,  0.1);
-    Parameter adsr_sustain  = Parameter ("ADSR Sustain",     "Sustain",  "%",     0,    1,    0,   100,   1);
-    Parameter adsr_release  = Parameter ("ADSR Release",     "Release",  "ms",    0,    2,    0,   2000,  0.1);
-    Parameter min_velocity  = Parameter ("Minimum Velocity", "Min. Vel", "%",     0,    1,    0,   100,   0.5);
-    Parameter panning       = Parameter ("Panning",          "Panning",  "%",    -1,    1,   -100, 100,   0);
-    Parameter volume        = Parameter ("Volume",           "Volume",   "%",     0,    1,    0,   100,   0.25);
+    Parameter tremolo_rate    = Parameter ("Tremolo Rate",     "Trm.Rate", "hz",    1,    16,   1,   16,    5);
+    Parameter tremolo_depth   = Parameter ("Tremolo Depth",    "Trm.Dept", "%",     0,    1,    0,   100,   0.25);
+    Parameter vibrato_rate    = Parameter ("Vibrato Rate",     "Vib.Rate", "hz",    1,    16,   1,   16,    5);
+    Parameter vibrato_depth   = Parameter ("Vibrato Depth",    "Vib.Dept", "cents", 0,    2,    0,   200,   0.25);
+    Parameter adsr_attack     = Parameter ("ADSR Attack",      "Attack",   "ms",    0,    1,    0,   1000,  0.1);
+    Parameter adsr_decay      = Parameter ("ADSR Decay",       "Decay",    "ms",    0,    1,    0,   1000,  0.1);
+    Parameter adsr_sustain    = Parameter ("ADSR Sustain",     "Sustain",  "%",     0,    1,    0,   100,   1);
+    Parameter adsr_release    = Parameter ("ADSR Release",     "Release",  "ms",    0,    2,    0,   2000,  0.1);
+    Parameter min_velocity    = Parameter ("Minimum Velocity", "Min. Vel", "%",     0,    1,    0,   100,   0.5);
+    Parameter panning         = Parameter ("Panning",          "Panning",  "%",    -1,    1,   -100, 100,   0);
+    Parameter volume          = Parameter ("Volume",           "Volume",   "%",     0,    1,    0,   100,   0.25);
 
     // return an array of the parameters
     Parameter *as_array () {

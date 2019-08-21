@@ -65,6 +65,8 @@ class Nanceloid {
         // waveguide stuff
         int waveguide_length = 0;
         int nose_length = 0;
+        int throat_i = 0;
+        int mouth_i = 0;
         double reflection_damping = 0.04;
         // right and left going
         double *r = nullptr;
@@ -111,6 +113,9 @@ class Nanceloid {
         const int super_sampling = 1;
         const double pressure_smoothing = 100;
         const int control_rate_divider = 1000;  // sample clock divider for low frequency rate
+
+        // get the impedance given the index of the waveguide segment
+        double get_impedance (int i);
 
     public:
         Nanceloid () {};

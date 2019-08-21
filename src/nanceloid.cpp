@@ -61,15 +61,52 @@ void Nanceloid::run (float *out) {
         int nose_end = nose_length - 1;
         r_[0]   = l[0]   * l_junction[0] + osc;
         l_[end] = r[end] * r_junction[end];
-        nl_[nose_end] = nr[nose_end] * params.refl_nose.value;
+        nl_[nose_end] = nr[nose_end] * params.refl_right.value;
 
         // update nose throat mouth junction
-        int throat_i = waveguide_length - nose_length - 1;
-        int mouth_i = throat_i + 1;
-        double r_refl = r[throat_i] * r_junction[throat_i];
-        double l_refl = l[mouth_i] * r_junction[mouth_i];
-        r_[mouth_i] = r[throat_i] - r_refl + l_refl * (1 - reflection_damping);
-        l_[throat_i] = l[mouth_i] - l_refl + r_refl * (1 - reflection_damping);
+        double refl_c = 1 - reflection_damping;
+        double throat_z = get_impedance (throat_i);
+        double mouth_z = get_impedance (mouth_i);
+        double nose_z = 1.0 / (params.nose_admittance.value * (1 - shape.velic_closure) + 0.00001);
+        double throat_y = 1.0 / throat_z;
+        double mouth_y = 1.0 / mouth_z;
+        double nose_y = 1.0 / nose_z;
+        double mouth_nose_y = mouth_y + nose_y;
+        double throat_nose_y = throat_y + nose_y;
+        double throat_mouth_y = throat_y + mouth_y;
+        double mouth_nose_z = 1.0 / mouth_nose_y;
+        double throat_nose_z = 1.0 / throat_nose_y;
+        double throat_mouth_z = 1.0 / throat_mouth_y;
+        double throat_refl_c = (mouth_nose_z - throat_z) / (mouth_nose_z + throat_z);
+        double mouth_refl_c = (throat_nose_z - mouth_z) / (throat_nose_z + mouth_z);
+        double nose_refl_c = (throat_mouth_z - nose_z) / (throat_mouth_z + nose_z);
+        double throat_out = r[throat_i];
+        double mouth_out = l[mouth_i];
+        double nose_out = nl[0];
+        double throat_refl = throat_refl_c * throat_out;
+        double mouth_refl = mouth_refl_c * mouth_out;
+        double nose_refl = nose_refl_c * nose_out;
+        double throat_trans = throat_out - throat_refl;
+        double mouth_trans = mouth_out - mouth_refl;
+        double nose_trans = nose_out - nose_refl;
+        double throat_to_mouth_w = mouth_y / mouth_nose_y;
+        double throat_to_nose_w = nose_y / mouth_nose_y;
+        double mouth_to_throat_w = throat_y / throat_nose_y;
+        double mouth_to_nose_w = nose_y / throat_nose_y;
+        double nose_to_throat_w = throat_y / throat_mouth_y;
+        double nose_to_mouth_w = mouth_y / throat_mouth_y;
+        double throat_to_mouth = throat_to_mouth_w * throat_trans;
+        double throat_to_nose = throat_to_nose_w * throat_trans;
+        double mouth_to_throat = mouth_to_throat_w * mouth_trans;
+        double mouth_to_nose = mouth_to_nose_w * mouth_trans;
+        double nose_to_throat = nose_to_throat_w * nose_trans;
+        double nose_to_mouth = nose_to_mouth_w * nose_trans;
+        double throat_in = mouth_to_throat + nose_to_throat + throat_refl * refl_c;
+        double mouth_in = throat_to_mouth + nose_to_mouth + mouth_refl * refl_c;
+        double nose_in = throat_to_nose + mouth_to_nose + nose_refl * refl_c;
+        l_[throat_i] = throat_in;
+        r_[mouth_i] = mouth_in;
+        nr_[0] = nose_in;
 
         // update throat
         for (int j = 0; j < throat_i; j++) {
@@ -77,8 +114,8 @@ void Nanceloid::run (float *out) {
             int j1 = j + 1;
             double r_refl = r[j0] * r_junction[j0];
             double l_refl = l[j1] * l_junction[j1];
-            r_[j1] = r[j0] - r_refl + l_refl * (1 - reflection_damping);
-            l_[j0] = l[j1] - l_refl + r_refl * (1 - reflection_damping);
+            r_[j1] = r[j0] - r_refl + l_refl * refl_c;
+            l_[j0] = l[j1] - l_refl + r_refl * refl_c;
         }
         // update mouth
         for (int j = mouth_i; j < waveguide_length - 1; j++) {
@@ -86,8 +123,8 @@ void Nanceloid::run (float *out) {
             int j1 = j + 1;
             double r_refl = r[j0] * r_junction[j0];
             double l_refl = l[j1] * l_junction[j1];
-            r_[j1] = r[j0] - r_refl + l_refl * (1 - reflection_damping);
-            l_[j0] = l[j1] - l_refl + r_refl * (1 - reflection_damping);
+            r_[j1] = r[j0] - r_refl + l_refl * refl_c;
+            l_[j0] = l[j1] - l_refl + r_refl * refl_c;
         }
         // update nose
         for (int j = 0; j < nose_length - 1; j++) {
@@ -112,11 +149,11 @@ void Nanceloid::run (float *out) {
         nl_ = nl__;
 
         // accumulate sound output from right end of waveguide
-        double mouth_radiance = 1 - r_junction[waveguide_length - 1];
-        double nose_radiance = 1 - params.refl_nose.value;
-        double mouth_output = r[waveguide_length - 1] * mouth_radiance;
-        double nose_output = nr[nose_length - 1] * nose_radiance;
-        output += mouth_output + nose_output;
+        double mouth_radiance = 1 - r_junction[end];
+        double nose_radiance = 1 - params.refl_right.value;
+        double mouth_output = r[end] * mouth_radiance;
+        double nose_output = nr[nose_end] * nose_radiance;
+        output += (mouth_output + nose_output) * 0.25;
     }
 
     // mix and return the samples
@@ -184,6 +221,10 @@ void Nanceloid::init () {
     waveguide_length = (int) floor (params.tract_length.value * rate / speed_of_sound);
     nose_length = waveguide_length / 2;
 
+    // indices of throat and mouth at junction
+    throat_i = waveguide_length - nose_length - 1;
+    mouth_i = throat_i + 1;
+
     // create the new arrays
     r = new double[waveguide_length];
     l = new double[waveguide_length];
@@ -208,14 +249,18 @@ int Nanceloid::get_shape_id () {
     return shape_i;
 }
 
+double Nanceloid::get_impedance (int i) {
+    double n = (double) i / (waveguide_length - 1);
+    double diameter = shape.sample (n);
+    double area = diameter * 2; // works ig lol
+    return 1 / (area + 0.0001);
+}
+
 void Nanceloid::update_reflections () {
     // calculate the segment impedances
     double impedance[waveguide_length];
     for (int i = 0; i < waveguide_length; i++) {
-        double n = (double) i / (waveguide_length - 1);
-        double diameter = shape.sample (n);
-        double area = diameter * 2; // works ig lol
-        impedance[i] = 1 / (area + 0.0001);
+        impedance[i] = get_impedance (i);
     }
     // calculate right going coefficients
     for (int i = 0; i < waveguide_length - 1; i++) {
