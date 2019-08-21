@@ -122,11 +122,10 @@ class Nanceloid {
         double glottal_rest_area = 0;   // neutral area of glottis
         double voicing = 0;         // related to glottal area at rest
         double cord_tension = 0;    // tension of the vocal folds
-
-        double x = 0;               // displacement
-        double v = 0;               // velocity
-        double w = 0;               // angular velocity
-        double q = 100;             // quality factor
+        double x1 = 0;              // mass 1 displacement
+        double x2 = 0;              // mass 1 displacement
+        double v1 = 0;              // mass 1 velocity
+        double v2 = 0;              // mass 1 velocity
 
         // hardcoded parameters
         const double speed_of_sound = 34300;    // cm/s
