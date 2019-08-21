@@ -93,6 +93,8 @@ void Nanceloid::run (float *out) {
 
         // update mouth and throat
         for (int j = 0; j < waveguide_length - 1; j++) {
+            // skip the nose throat mouth junction
+            // since it was handled up there
             if (j == throat_i)
                 continue;
             int j0 = j;

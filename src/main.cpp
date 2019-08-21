@@ -66,10 +66,12 @@ void setup_midi () {
 }
 
 void print_usage_and_exit (char *command) {
-    cerr << "Usage: " << command << " [-c channel] [-b buffer size] [-s sample rate]\n\n";
+    cerr << "Usage: " << command << " [-c channel] [-b buffer size] [-s sample rate] [-d]\n\n";
     cerr << "-c channel\n\tSpecify the midi channel to listen on.\n\tIf left unspecified it will listen on all channels.\n\n";
-    cerr << "-b buffer size\n\tSpecify the size of the audio buffer in number of samples.\n\tIf left unspecified it is " << default_buffer_size << ".\n\n" << flush;
-    cerr << "-s sample rate\n\tSpecify the audio sampling rate in samples per second.\n\tIf left unspecified it is " << default_sample_rate << ".\n\n" << flush;
+    cerr << "-b buffer size\n\tSpecify the size of the audio buffer in number of samples.\n\tIf left unspecified it is " << default_buffer_size << ".\n\n";
+    cerr << "-s sample rate\n\tSpecify the audio sampling rate in samples per second.\n\tIf left unspecified it is " << default_sample_rate << ".\n\n";
+    cerr << "-d\n\tDisable the GUI.\n\n";
+    cerr << flush;
     exit (EXIT_FAILURE);
 }
 
@@ -115,10 +117,11 @@ int main (int argc, char **argv) {
     // default cli args
     float buffer_size = default_buffer_size;
     float sample_rate = default_sample_rate;
+    int enable_gui = true;
 
     // parse cli args
     int c;
-    while ((c = getopt (argc, argv, "c:")) != -1) {
+    while ((c = getopt (argc, argv, "c:b:s:d")) != -1) {
         switch (c) {
             case 'c':
                 midi_channel = atoi (optarg);
@@ -128,6 +131,9 @@ int main (int argc, char **argv) {
                 break;
             case 's':
                 sample_rate = atoi (optarg);
+                break;
+            case 'd':
+                enable_gui = false;
                 break;
             default:
                 print_usage_and_exit (argv[0]);
@@ -140,86 +146,91 @@ int main (int argc, char **argv) {
     // setup midi
     setup_midi ();
 
-    // setup sfml
-    const int screen_width = 600;
-    const int screen_height = 200;
-    sf::RenderWindow window (sf::VideoMode(screen_width, screen_height), "Nanceloid", sf::Style::Default);
-    auto desktop = sf::VideoMode::getDesktopMode ();
-    sf::Vector2i desktop_size (desktop.width, desktop.height);
-    window.setPosition ((desktop_size - (sf::Vector2i) window.getSize ()) / 2);
-    window.setFramerateLimit (60);
-
-    sf::Font font;
-    if (!font.loadFromFile("font.ttf"))
-        exit_error ("Could not load font!");
-    sf::Text text;
-    text.setFont (font);
-    text.setString ("Hi");
-    text.setCharacterSize (12);
-    text.setPosition(-1, -1);
-    text.setScale(2.0 / screen_width, 2.0 / screen_height);
-    text.setStyle (sf::Text::Regular);
-
-    sf::View view (sf::FloatRect(-1, -1, 2, 2));
-    window.setView (view);
-    
     // create and start playing the audio stream
     SoundStream stream (synth, buffer_size, sample_rate);
     stream.play ();
 
-    // event loop
-    bool mouse_down = false;
-    double mouse_x = 0;
-    double mouse_y = 0;
-    while (window.isOpen ())
-    {
-        window.clear();
+    if (enable_gui) {
+        // setup gui window
+        const int screen_width = 600;
+        const int screen_height = 200;
+        sf::RenderWindow window (sf::VideoMode(screen_width, screen_height), "Nanceloid", sf::Style::Default);
+        auto desktop = sf::VideoMode::getDesktopMode ();
+        sf::Vector2i desktop_size (desktop.width, desktop.height);
+        window.setPosition ((desktop_size - (sf::Vector2i) window.getSize ()) / 2);
+        window.setFramerateLimit (60);
 
-        // draw tract shape
-        const int res = 64;
-        sf::VertexArray lines (sf::LinesStrip, res);
-        sf::VertexArray lines2 (sf::LinesStrip, res);
-        for (int j = 0; j < res; j++) {
-            double n = (double) j / (res - 1);
-            double sample = synth->shape.sample (n);
-            lines[j].position = sf::Vector2f (n * 2 - 1, sample);
-            lines2[j].position = sf::Vector2f (n * 2 - 1, -sample);
-        }
-        stringstream display_string;
-        display_string << "Patch #" << synth->get_shape_id () << "\n";
-        display_string << "Velic closure: " << (int) round (synth->shape.velic_closure * 100) << "%\n";
-        text.setString (display_string.str ());
-        window.draw (lines);
-        window.draw (lines2);
-        window.draw (text);
-        window.display ();
+        sf::Font font;
+        if (!font.loadFromFile("font.ttf"))
+            exit_error ("Could not load font!");
+        sf::Text text;
+        text.setFont (font);
+        text.setString ("Hi");
+        text.setCharacterSize (12);
+        text.setPosition(-1, -1);
+        text.setScale(2.0 / screen_width, 2.0 / screen_height);
+        text.setStyle (sf::Text::Regular);
 
-        sf::Event event;
-        while (window.pollEvent (event))
+        sf::View view (sf::FloatRect(-1, -1, 2, 2));
+        window.setView (view);
+        
+        // event loop
+        bool mouse_down = false;
+        double mouse_x = 0;
+        double mouse_y = 0;
+        while (window.isOpen ())
         {
-            if (event.type == sf::Event::Closed)
-                window.close ();
-            else if (event.type == sf::Event::MouseButtonPressed)
-                mouse_down = true;
-            else if (event.type == sf::Event::MouseButtonReleased)
-                mouse_down = false;
-            else if (event.type == sf::Event::MouseMoved) {
-                mouse_x = (double) event.mouseMove.x / screen_width * 2 - 1;
-                mouse_y = (double) event.mouseMove.y / screen_height * 2 - 1;
+            window.clear();
+
+            // draw tract shape
+            const int res = 64;
+            sf::VertexArray lines (sf::LinesStrip, res);
+            sf::VertexArray lines2 (sf::LinesStrip, res);
+            for (int j = 0; j < res; j++) {
+                double n = (double) j / (res - 1);
+                double sample = synth->shape.sample (n);
+                lines[j].position = sf::Vector2f (n * 2 - 1, sample);
+                lines2[j].position = sf::Vector2f (n * 2 - 1, -sample);
             }
-            if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Escape) {
+            stringstream display_string;
+            display_string << "Patch #" << synth->get_shape_id () << "\n";
+            display_string << "Velic closure: " << (int) round (synth->shape.velic_closure * 100) << "%\n";
+            text.setString (display_string.str ());
+            window.draw (lines);
+            window.draw (lines2);
+            window.draw (text);
+            window.display ();
+
+            sf::Event event;
+            while (window.pollEvent (event))
+            {
+                if (event.type == sf::Event::Closed)
                     window.close ();
-                } else if (event.key.code == sf::Keyboard::Tab) {
-                    synth->get_shape ().velic_closure = synth->get_shape ().velic_closure ?  0 : 1;
+                else if (event.type == sf::Event::MouseButtonPressed)
+                    mouse_down = true;
+                else if (event.type == sf::Event::MouseButtonReleased)
+                    mouse_down = false;
+                else if (event.type == sf::Event::MouseMoved) {
+                    mouse_x = (double) event.mouseMove.x / screen_width * 2 - 1;
+                    mouse_y = (double) event.mouseMove.y / screen_height * 2 - 1;
+                }
+                if (event.type == sf::Event::KeyPressed) {
+                    if (event.key.code == sf::Keyboard::Escape) {
+                        window.close ();
+                    } else if (event.key.code == sf::Keyboard::Tab) {
+                        synth->get_shape ().velic_closure = synth->get_shape ().velic_closure ?  0 : 1;
+                    }
+                }
+                if (mouse_down) {
+                    double sample = abs (mouse_y);
+                    double n = (mouse_x + 1) / 2;
+                    synth->get_shape ().set_sample (n, sample);
                 }
             }
-            if (mouse_down) {
-                double sample = abs (mouse_y);
-                double n = (mouse_x + 1) / 2;
-                synth->get_shape ().set_sample (n, sample);
-            }
         }
+    } else {
+        while (stream.getStatus () == sf::Sound::Playing)
+            sf::sleep (sf::seconds (1));
     }
 
     // cleanup and done
