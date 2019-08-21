@@ -2,6 +2,8 @@
 
 a vocal synth using digital waveguides n stuff lol
 
+![Screenshot](screenshot.gif)
+
 ## Dependencies
 
 In order to build and run the standalone synth you will need [SFML](sfml-dev.org) and [RtMidi](https://github.com/thestk/rtmidi).
@@ -41,7 +43,6 @@ _TODO: explain n stuff lol_
 
 ## Immediate todo list
 
-- nasal
 - patch saving
 - turbulence
 - brass source

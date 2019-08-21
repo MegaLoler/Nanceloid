@@ -65,21 +65,6 @@ void Nanceloid::run (float *out) {
 
         // update nose throat mouth junction
         double refl_c = 1 - reflection_damping;
-        double throat_z = get_impedance (throat_i);
-        double mouth_z = get_impedance (mouth_i);
-        double nose_z = 1.0 / (params.nose_admittance.value * (1 - shape.velic_closure) + 0.00001);
-        double throat_y = 1.0 / throat_z;
-        double mouth_y = 1.0 / mouth_z;
-        double nose_y = 1.0 / nose_z;
-        double mouth_nose_y = mouth_y + nose_y;
-        double throat_nose_y = throat_y + nose_y;
-        double throat_mouth_y = throat_y + mouth_y;
-        double mouth_nose_z = 1.0 / mouth_nose_y;
-        double throat_nose_z = 1.0 / throat_nose_y;
-        double throat_mouth_z = 1.0 / throat_mouth_y;
-        double throat_refl_c = (mouth_nose_z - throat_z) / (mouth_nose_z + throat_z);
-        double mouth_refl_c = (throat_nose_z - mouth_z) / (throat_nose_z + mouth_z);
-        double nose_refl_c = (throat_mouth_z - nose_z) / (throat_mouth_z + nose_z);
         double throat_out = r[throat_i];
         double mouth_out = l[mouth_i];
         double nose_out = nl[0];
@@ -89,12 +74,6 @@ void Nanceloid::run (float *out) {
         double throat_trans = throat_out - throat_refl;
         double mouth_trans = mouth_out - mouth_refl;
         double nose_trans = nose_out - nose_refl;
-        double throat_to_mouth_w = mouth_y / mouth_nose_y;
-        double throat_to_nose_w = nose_y / mouth_nose_y;
-        double mouth_to_throat_w = throat_y / throat_nose_y;
-        double mouth_to_nose_w = nose_y / throat_nose_y;
-        double nose_to_throat_w = throat_y / throat_mouth_y;
-        double nose_to_mouth_w = mouth_y / throat_mouth_y;
         double throat_to_mouth = throat_to_mouth_w * throat_trans;
         double throat_to_nose = throat_to_nose_w * throat_trans;
         double mouth_to_throat = mouth_to_throat_w * mouth_trans;
@@ -253,7 +232,7 @@ double Nanceloid::get_impedance (int i) {
     double n = (double) i / (waveguide_length - 1);
     double diameter = shape.sample (n);
     double area = diameter * 2; // works ig lol
-    return 1 / (area + 0.0001);
+    return 1 / (area + 0.00001);
 }
 
 void Nanceloid::update_reflections () {
@@ -266,17 +245,39 @@ void Nanceloid::update_reflections () {
     for (int i = 0; i < waveguide_length - 1; i++) {
         double z0 = impedance[i];
         double z1 = impedance[i + 1];
-        r_junction[i] = (z1 - z0) / (z1 + z0);
+        r_junction[i] = z1 > max_impedance ? 1 : (z1 - z0) / (z1 + z0);
     }
     // calculate left going coefficients
     for (int i = 1; i < waveguide_length; i++) {
         double z0 = impedance[i];
         double z1 = impedance[i - 1];
-        l_junction[i] = (z1 - z0) / (z1 + z0);
+        l_junction[i] = z1 > max_impedance ? 1 : (z1 - z0) / (z1 + z0);
     }
     // update end reflections
     r_junction[waveguide_length - 1] = params.refl_right.value;
     l_junction[0] = params.refl_left.value;
+    // throat mouth nose junction reflection coefficients and transmittance weights
+    double throat_z = get_impedance (throat_i);
+    double mouth_z = get_impedance (mouth_i);
+    double nose_z = 1.0 / (params.nose_admittance.value * (1 - shape.velic_closure) + 0.00001);
+    double throat_y = 1.0 / throat_z;
+    double mouth_y = 1.0 / mouth_z;
+    double nose_y = 1.0 / nose_z;
+    double mouth_nose_y = mouth_y + nose_y;
+    double throat_nose_y = throat_y + nose_y;
+    double throat_mouth_y = throat_y + mouth_y;
+    double mouth_nose_z = 1.0 / mouth_nose_y;
+    double throat_nose_z = 1.0 / throat_nose_y;
+    double throat_mouth_z = 1.0 / throat_mouth_y;
+    throat_refl_c = (mouth_nose_z - throat_z) / (mouth_nose_z + throat_z);
+    mouth_refl_c = (throat_nose_z - mouth_z) / (throat_nose_z + mouth_z);
+    nose_refl_c = (throat_mouth_z - nose_z) / (throat_mouth_z + nose_z);
+    throat_to_mouth_w = mouth_y / mouth_nose_y;
+    throat_to_nose_w = nose_y / mouth_nose_y;
+    mouth_to_throat_w = throat_y / throat_nose_y;
+    mouth_to_nose_w = nose_y / throat_nose_y;
+    nose_to_throat_w = throat_y / throat_mouth_y;
+    nose_to_mouth_w = mouth_y / throat_mouth_y;
 }
 
 void Nanceloid::midi (uint8_t *data) {

@@ -68,6 +68,7 @@ class Nanceloid {
         int throat_i = 0;
         int mouth_i = 0;
         double reflection_damping = 0.04;
+        double max_impedance = 20;
         // right and left going
         double *r = nullptr;
         double *l = nullptr;
@@ -83,6 +84,16 @@ class Nanceloid {
         // backbuffers for the nose
         double *nr_ = nullptr;
         double *nl_ = nullptr;
+        // nose throat mouth junction stuff
+        double throat_refl_c;
+        double mouth_refl_c;
+        double nose_refl_c;
+        double throat_to_mouth_w;
+        double throat_to_nose_w;
+        double mouth_to_throat_w;
+        double mouth_to_nose_w;
+        double nose_to_throat_w;
+        double nose_to_mouth_w;
 
         // current midi note
         struct {
