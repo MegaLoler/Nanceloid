@@ -64,6 +64,7 @@ class Nanceloid {
 
         // waveguide stuff
         int waveguide_length = 0;
+        int nose_length = 0;
         double reflection_damping = 0.04;
         // right and left going
         double *r = nullptr;
@@ -74,6 +75,12 @@ class Nanceloid {
         // reflection coefficients at each junction
         double *r_junction = nullptr;
         double *l_junction = nullptr;
+        // right and left going for the nose
+        double *nr = nullptr;
+        double *nl = nullptr;
+        // backbuffers for the nose
+        double *nr_ = nullptr;
+        double *nl_ = nullptr;
 
         // current midi note
         struct {

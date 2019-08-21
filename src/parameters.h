@@ -64,7 +64,8 @@ struct Parameters {
     // physical parameters
     Parameter tract_length  = Parameter ("Tract Length",     "TractLen", "cm",    8,    24,   8,   24,    17.5);
     Parameter refl_left     = Parameter ("Left Reflection",  "Left Rfl", "%",     0,    1,    0,   100,   0.75);
-    Parameter refl_right    = Parameter ("Right Reflection", "RightRfl", "%",     0.5, -1,    0,  -100,  -0.9);
+    Parameter refl_right    = Parameter ("Right Reflection", "RightRfl", "%",    -0.5, -1,   -50, -100,  -0.9);
+    Parameter refl_nose     = Parameter ("Nose Reflection",  "Nose Rfl", "%",    -0.5, -1,   -50, -100,  -0.95);
     Parameter crossfade     = Parameter ("Crossfade Tract",  "Crossfad", "%",     0,    1,    0,   100,   0.2);
 
     // musical and audio parameters

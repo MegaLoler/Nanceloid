@@ -21,6 +21,14 @@ void Nanceloid::free () {
         delete r_junction;
     if (l_junction != nullptr)
         delete l_junction;
+    if (nr != nullptr)
+        delete nr;
+    if (nl != nullptr)
+        delete nl;
+    if (nr_ != nullptr)
+        delete nr_;
+    if (nl_ != nullptr)
+        delete nl_;
 }
 
 void Nanceloid::set_rate (double rate) {
@@ -50,17 +58,43 @@ void Nanceloid::run (float *out) {
 
         // update ends of waveguide
         int end = waveguide_length - 1;
+        int nose_end = nose_length - 1;
         r_[0]   = l[0]   * l_junction[0] + osc;
         l_[end] = r[end] * r_junction[end];
+        nl_[nose_end] = nr[nose_end] * params.refl_nose.value;
 
-        // update inner of waveguide
-        for (int j = 0; j < waveguide_length; j++) {
+        // update nose throat mouth junction
+        int throat_i = waveguide_length - nose_length - 1;
+        int mouth_i = throat_i + 1;
+        double r_refl = r[throat_i] * r_junction[throat_i];
+        double l_refl = l[mouth_i] * r_junction[mouth_i];
+        r_[mouth_i] = r[throat_i] - r_refl + l_refl * (1 - reflection_damping);
+        l_[throat_i] = l[mouth_i] - l_refl + r_refl * (1 - reflection_damping);
+
+        // update throat
+        for (int j = 0; j < throat_i; j++) {
             int j0 = j;
             int j1 = j + 1;
             double r_refl = r[j0] * r_junction[j0];
             double l_refl = l[j1] * l_junction[j1];
             r_[j1] = r[j0] - r_refl + l_refl * (1 - reflection_damping);
             l_[j0] = l[j1] - l_refl + r_refl * (1 - reflection_damping);
+        }
+        // update mouth
+        for (int j = mouth_i; j < waveguide_length - 1; j++) {
+            int j0 = j;
+            int j1 = j + 1;
+            double r_refl = r[j0] * r_junction[j0];
+            double l_refl = l[j1] * l_junction[j1];
+            r_[j1] = r[j0] - r_refl + l_refl * (1 - reflection_damping);
+            l_[j0] = l[j1] - l_refl + r_refl * (1 - reflection_damping);
+        }
+        // update nose
+        for (int j = 0; j < nose_length - 1; j++) {
+            int j0 = j;
+            int j1 = j + 1;
+            nr_[j1] = nr[j0];
+            nl_[j0] = nl[j1];
         }
 
         // swap buffers
@@ -70,9 +104,19 @@ void Nanceloid::run (float *out) {
         l = l_;
         r_ = r__;
         l_ = l__;
+        double *nr__ = nr;
+        double *nl__ = nl;
+        nr = nr_;
+        nl = nl_;
+        nr_ = nr__;
+        nl_ = nl__;
 
         // accumulate sound output from right end of waveguide
-        output += r[waveguide_length - 1];
+        double mouth_radiance = 1 - r_junction[waveguide_length - 1];
+        double nose_radiance = 1 - params.refl_nose.value;
+        double mouth_output = r[waveguide_length - 1] * mouth_radiance;
+        double nose_output = nr[nose_length - 1] * nose_radiance;
+        output += mouth_output + nose_output;
     }
 
     // mix and return the samples
@@ -138,6 +182,7 @@ void Nanceloid::init () {
 
     // calculate number of segments based on desired length
     waveguide_length = (int) floor (params.tract_length.value * rate / speed_of_sound);
+    nose_length = waveguide_length / 2;
 
     // create the new arrays
     r = new double[waveguide_length];
@@ -146,6 +191,10 @@ void Nanceloid::init () {
     l_ = new double[waveguide_length];
     r_junction = new double[waveguide_length];
     l_junction = new double[waveguide_length];
+    nr = new double[nose_length];
+    nl = new double[nose_length];
+    nr_ = new double[nose_length];
+    nl_ = new double[nose_length];
 
     // precalculate reflection coefficients
     update_reflections ();

@@ -41,8 +41,8 @@ _TODO: explain n stuff lol_
 
 ## Immediate todo list
 
+- nasal
 - patch saving
-- cross fading
 - turbulence
 - brass source
 - add intermittant sources
