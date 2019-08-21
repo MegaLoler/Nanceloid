@@ -9,7 +9,7 @@ probably broken maybe
 
 ## Dependencies
 
-In order to build and run the standalone synth you will need [SFML](sfml-dev.org) and [RtMidi](https://github.com/thestk/rtmidi).
+In order to build and run the standalone synth you will need [SFML](https://sfml-dev.org) and [RtMidi](https://github.com/thestk/rtmidi).
 
 In order to build the VST plugins you will need the following:
 - `i686-w64-mingw32-g++`
