@@ -105,12 +105,21 @@ class SoundStream : public sf::SoundStream {
                 synth->run (samples);
                 m_samples[i]     = (sf::Int16) (samples[0] * max);
                 m_samples[i + 1] = (sf::Int16) (samples[1] * max);
+                float mix = (samples[0] + samples[1]) / 2.0;
+                scope[scope_i++] = mix;
+                scope_i %= scope_max_size;
             }
 
             return true;
         }
         
         virtual void onSeek (sf::Time timeOffset) {}
+
+        // oscciloscope view
+        static const int scope_max_size = 1024;
+        float scope[scope_max_size];
+        int scope_i = 0;
+
 };
 
 int main (int argc, char **argv) {
@@ -173,7 +182,7 @@ int main (int argc, char **argv) {
 
         sf::View view (sf::FloatRect(-1, -1, 2, 2));
         window.setView (view);
-        
+
         // event loop
         bool mouse_down = false;
         double mouse_x = 0;
@@ -192,12 +201,28 @@ int main (int argc, char **argv) {
                 lines[j].position = sf::Vector2f (n * 2 - 1, sample);
                 lines2[j].position = sf::Vector2f (n * 2 - 1, -sample);
             }
+            // text display
             stringstream display_string;
             display_string << "Patch #" << synth->get_shape_id () << "\n";
             display_string << "Velic closure: " << (int) round (synth->shape.velic_closure * 100) << "%\n";
+            display_string << "Voicing: " << (int) round (synth->get_voicing () * 100) << "%\n";
             text.setString (display_string.str ());
+            // scope
+            int scope_size = sample_rate / fmax (1, synth->get_frequency ());
+            sf::VertexArray lines_scope (sf::LinesStrip, scope_size);
+            for (int j = 0; j < scope_size; j++) {
+                double n = (double) j / (scope_size - 1);
+                int i = stream.scope_i - scope_size + j;
+                while (i < 0)
+                    i += stream.scope_max_size;
+                float sample = stream.scope[i];
+                lines_scope[j].position = sf::Vector2f (n * 2 - 1, sample);
+                lines_scope[j].color = sf::Color::Red;
+            }
+            // draw em
             window.draw (lines);
             window.draw (lines2);
+            window.draw (lines_scope);
             window.draw (text);
             window.display ();
 
@@ -213,11 +238,15 @@ int main (int argc, char **argv) {
                 else if (event.type == sf::Event::MouseMoved) {
                     mouse_x = (double) event.mouseMove.x / screen_width * 2 - 1;
                     mouse_y = (double) event.mouseMove.y / screen_height * 2 - 1;
+                    mouse_x = fmax (-1, fmin (1, mouse_x));
+                    mouse_y = fmax (-1, fmin (1, mouse_y));
                 } else if (event.type == sf::Event::KeyPressed) {
                     if (event.key.code == sf::Keyboard::Escape)
                         window.close ();
                     else if (event.key.code == sf::Keyboard::Tab)
                         synth->get_shape ().velic_closure = synth->get_shape ().velic_closure ?  0 : 1;
+                    else if (event.key.code == sf::Keyboard::Backspace)
+                        synth->params.voicing.value = synth->params.voicing.value ?  0 : 1;
                     else if (event.key.code == sf::Keyboard::Space) {
                         int note = synth->playing_note ();
                         if (note == -1)

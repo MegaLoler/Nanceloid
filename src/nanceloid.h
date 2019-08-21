@@ -52,7 +52,7 @@ class TractShape {
         }
 
         // public members
-        double velic_closure = 0;       // closure of the nasal cavity opening
+        double velic_closure = 1;       // closure of the nasal cavity opening
 };
 
 // represents a synth instance
@@ -108,10 +108,10 @@ class Nanceloid {
         double rate = 0;            // audio sampling rate
         double control_rate = 0;    // low frequency control rate
         int clock = 0;              // sample clock
+        double dt;                  // sampling rate delta time
 
         // state
         double sample = 0;          // last sample
-        double osc_phase = 0;       // current phase of the primary oscillator
         double tremolo_phase = 0;   // current phase of tremolo lfo
         double vibrato_phase = 0;   // current phase of vibrato lfo
         double tremolo_osc = 0;     // output of tremolo lfo
@@ -119,6 +119,13 @@ class Nanceloid {
         double frequency = 0;       // current intended playing frequency
         double target_pressure = 0; // unfiltered current input pressure
         double pressure = 0;        // current input pressure
+        double voicing = 0;         // current closeness of the vocal cords
+
+        // vocal folds
+        double x = 0;               // displacement
+        double v = 0;               // velocity
+        double w = 0;               // angular velocity
+        double q = 100;             // quality factor
 
         // hardcoded parameters
         const double speed_of_sound = 34300;    // cm/s
@@ -172,6 +179,12 @@ class Nanceloid {
         // returns the currently playing note
         // -1 for not playing
         int playing_note ();
+
+        // get the current intended playing frequency
+        double get_frequency ();
+
+        // get the current voicing
+        double get_voicing ();
 
         // public members
         Parameters params;      // the live synth parameters

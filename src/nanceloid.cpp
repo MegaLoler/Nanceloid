@@ -43,8 +43,17 @@ void Nanceloid::set_rate (double rate) {
     if (rate != this->rate) {
         this->rate = rate * super_sampling;
         control_rate = this->rate / control_rate_divider;
+        dt = 1.0 / rate;
         init ();
     }
+}
+
+double Nanceloid::get_frequency () {
+    return frequency;
+}
+
+double Nanceloid::get_voicing () {
+    return voicing;
 }
 
 void Nanceloid::run (float *out) {
@@ -61,13 +70,19 @@ void Nanceloid::run (float *out) {
         pressure = (target_pressure * weight + pressure) / (1 + weight);
 
         // glottal source
-        double osc = sin (fmod (osc_phase, 1) * 2 - 1) * pressure;
-        osc_phase += frequency / rate;
+        // TODO: fix lol
+        double displacement = x + 1;//(1 - voicing) + 0.01;
+        double opening = displacement * displacement;
+        double flow = (pressure - l[0]) * opening;
+        double pressure_force = -flow * flow / 2.0;
+        double a = -w * w * x - w * v / q + pressure_force;
+        v += a * dt;
+        x += v * dt;
 
         // update ends of waveguide
         int end = waveguide_length - 1;
         int nose_end = nose_length - 1;
-        r_[0]   = l[0]   * l_junction[0] + osc + pressure;
+        r_[0]   = l[0]   * l_junction[0] + pressure_force;
         l_[end] = r[end] * r_junction[end];
         nl_[nose_end] = nr[nose_end] * params.refl_right.value;
 
@@ -185,12 +200,17 @@ void Nanceloid::run_control () {
     }
     target_pressure *= note.velocity * (1 - params.min_velocity.value) + params.min_velocity.value;
 
+    // crossfade voicing
+    voicing += (params.voicing.value - voicing) * params.crossfade.value;
+
     // update target frequency
     double semitones = note.note + note.detune + vibrato_osc;
     frequency = 440 * pow (2.0, (semitones - 69) / 12);
 
     // pitch correction
-    // TODO
+    // TODO: actually do it
+    // TODO ALSO: portamento
+    w = frequency;
 
     // update shape
     shape.crossfade (get_shape (), params.crossfade.value);
@@ -291,7 +311,7 @@ void Nanceloid::update_reflections () {
 
 void Nanceloid::note_on (int note, double velocity) {
     this->note.note = note;
-    this->note.velocity = velocity / 127.0;
+    this->note.velocity = velocity;
     this->note.start_time = clock;
 }
 

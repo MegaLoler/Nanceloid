@@ -68,6 +68,7 @@ struct Parameters {
     Parameter nose_admittance = Parameter ("Nose Admittance",  "NoseAdmt", "",      0,    1,    0,   1,     0.25);
     Parameter crossfade       = Parameter ("Crossfade Tract",  "Crossfad", "%",     0,    1,    0,   100,   0.2);
     Parameter turbulence      = Parameter ("Turbulence",       "Friction", "%",     0,    1,    0,   100,   0.1);
+    Parameter voicing         = Parameter ("Voicing",          "Voicing",  "%",     0,    2,    0,   200,   1);
 
     // musical and audio parameters
     Parameter tremolo_rate    = Parameter ("Tremolo Rate",     "Trm.Rate", "hz",    1,    16,   1,   16,    5);
