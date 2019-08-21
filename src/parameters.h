@@ -67,6 +67,7 @@ struct Parameters {
     Parameter refl_right      = Parameter ("Right Reflection", "RightRfl", "%",    -0.5, -1,   -50, -100,  -0.9);
     Parameter nose_admittance = Parameter ("Nose Admittance",  "NoseAdmt", "",      0,    1,    0,   1,     0.25);
     Parameter crossfade       = Parameter ("Crossfade Tract",  "Crossfad", "%",     0,    1,    0,   100,   0.2);
+    Parameter turbulence      = Parameter ("Turbulence",       "Friction", "%",     0,    1,    0,   100,   0.1);
 
     // musical and audio parameters
     Parameter tremolo_rate    = Parameter ("Tremolo Rate",     "Trm.Rate", "hz",    1,    16,   1,   16,    5);

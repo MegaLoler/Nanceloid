@@ -4,6 +4,10 @@
 
 using namespace std;
 
+double noise () {
+    return (double) rand () / RAND_MAX;
+}
+
 Nanceloid::~Nanceloid () {
     free ();
 }
@@ -59,7 +63,7 @@ void Nanceloid::run (float *out) {
         // update ends of waveguide
         int end = waveguide_length - 1;
         int nose_end = nose_length - 1;
-        r_[0]   = l[0]   * l_junction[0] + osc;
+        r_[0]   = l[0]   * l_junction[0] + osc + pressure;
         l_[end] = r[end] * r_junction[end];
         nl_[nose_end] = nr[nose_end] * params.refl_right.value;
 
@@ -87,23 +91,18 @@ void Nanceloid::run (float *out) {
         r_[mouth_i] = mouth_in;
         nr_[0] = nose_in;
 
-        // update throat
-        for (int j = 0; j < throat_i; j++) {
+        // update mouth and throat
+        for (int j = 0; j < waveguide_length - 1; j++) {
+            if (j == throat_i)
+                continue;
             int j0 = j;
             int j1 = j + 1;
             double r_refl = r[j0] * r_junction[j0];
             double l_refl = l[j1] * l_junction[j1];
-            r_[j1] = r[j0] - r_refl + l_refl * refl_c;
-            l_[j0] = l[j1] - l_refl + r_refl * refl_c;
-        }
-        // update mouth
-        for (int j = mouth_i; j < waveguide_length - 1; j++) {
-            int j0 = j;
-            int j1 = j + 1;
-            double r_refl = r[j0] * r_junction[j0];
-            double l_refl = l[j1] * l_junction[j1];
-            r_[j1] = r[j0] - r_refl + l_refl * refl_c;
-            l_[j0] = l[j1] - l_refl + r_refl * refl_c;
+            double r_turb = abs (r_refl) * params.turbulence.value * noise ();
+            double l_turb = abs (l_refl) * params.turbulence.value * noise ();
+            r_[j1] = r[j0] - r_refl + l_refl * refl_c + r_turb;
+            l_[j0] = l[j1] - l_refl + r_refl * refl_c + l_turb;
         }
         // update nose
         for (int j = 0; j < nose_length - 1; j++) {
@@ -132,7 +131,7 @@ void Nanceloid::run (float *out) {
         double nose_radiance = 1 - params.refl_right.value;
         double mouth_output = r[end] * mouth_radiance;
         double nose_output = nr[nose_end] * nose_radiance;
-        output += (mouth_output + nose_output) * 0.25;
+        output += (mouth_output + nose_output);
     }
 
     // mix and return the samples
