@@ -117,7 +117,7 @@ void Nanceloid::run (float *out) {
         double r1 = 2 * g1_ * sqrt (k1 * m1);
         double r2 = 2 * g2_ * sqrt (k2 * m2);
         // pressure and flow
-        double vel = sqrt (2 * (pressure - l[0]) / rho);// * ((area1 + area2) / 2);
+        double vel = sqrt (2 * (pressure - l[0]) / rho) * ((area1 + area2) / 2);
         double P11 = pressure - rho * vel * vel / (2 * area1 * area1);
         double P12 = P11 - 12 * visc * slit_length * slit_length * d1 / (area1 * area1 * area1) * vel;
         double P21 = P12 + rho / 2 * vel * vel * (1 / (area2 * area2) - 1 / (area1 * area1));
