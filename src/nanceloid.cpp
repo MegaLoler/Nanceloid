@@ -81,13 +81,12 @@ void Nanceloid::run (float *out) {
         const double nk2 = 100;     // non linearity in spring restoring force
         const double nh1 = 500;     // non linearity in collision force
         const double nh2 = 500;     // non linearity in collision force
-        const double m1 = 0.075;    // mass 1
-        const double m2 = 0.075;    // mass 2
+        const double m1 = 1;        // mass 1
+        const double m2 = 1;        // mass 2
         const double d1 = 0.15;     // length of mass 1 cm
         const double d2 = 0.15;     // length of mass 2 cm
         const double rho = 1.225;   // air density
-        const double visc = 1;      // shear viscotiy TODO: ?
-        double flow = pressure - l[0];
+        const double visc = 18.6;   // air viscosity
         double g1_ = g1;
         double g2_ = g2;
         double k1 = 80000;   // TODO: how this relate to frequency?
@@ -96,10 +95,10 @@ void Nanceloid::run (float *out) {
         double h1 = 3 * k1;         // linear stiffness of collision force
         double h2 = 3 * k2;         // linear stiffness of collision force
         double rest_disp = glottal_rest_area / (2 * slit_length);
-        double area1 = glottal_rest_area + 2 * slit_length * x1;
-        double area2 = glottal_rest_area + 2 * slit_length * x2;
         double disp1 = x1 + rest_disp;
         double disp2 = x2 + rest_disp;
+        double area1 = glottal_rest_area + 2 * slit_length * disp1;
+        double area2 = glottal_rest_area + 2 * slit_length * disp2;
         // spring restoration forces
         double f_spring1 = k1 * (x1 + nk1 * x1 * x1 * x1);
         double f_spring2 = k2 * (x2 + nk2 * x2 * x2 * x2);
@@ -118,23 +117,20 @@ void Nanceloid::run (float *out) {
         double r1 = 2 * g1_ * sqrt (k1 * m1);
         double r2 = 2 * g2_ * sqrt (k2 * m2);
         // pressure and flow
-        // TODO: finish
-        double vel1 = flow / area1;
-        double vel1_sq = vel1 * vel1;
-        double vel2 = flow / area2;
-        double vel2_sq = vel2 * vel2;
-        double P11 = pressure - 1.37 * rho / 2 * vel1_sq;
-        double P12 = P11 - 12 * visc * slit_length * slit_length * d1 / (area1 * area1 * area1) * flow;
-        double P21 = rho / 2 * flow * flow * (1 / (area2 * area2) - 1 / (area1 * area1));
-        double P22 = P21 - 12 * visc * slit_length * slit_length * d2 / (area2 * area2 * area2) * flow;
-        double glottal_output = P22 + rho / 2 * vel2_sq * 2;
+        double vel = sqrt (2 * (pressure - l[0]) / rho);// * ((area1 + area2) / 2);
+        double P11 = pressure - rho * vel * vel / (2 * area1 * area1);
+        double P12 = P11 - 12 * visc * slit_length * slit_length * d1 / (area1 * area1 * area1) * vel;
+        double P21 = P12 + rho / 2 * vel * vel * (1 / (area2 * area2) - 1 / (area1 * area1));
+        double P22 = P21 - 12 * visc * slit_length * slit_length * d2 / (area2 * area2 * area2) * vel;
+        double glottal_output = vel / 100;//P22;
+        cout << glottal_output << endl;
         // driving forces
         double driving_force1 = pressure;
         double driving_force2 = 0;
         if (disp1 > 0) {
             if (disp2 > 0) {
                 driving_force1 = (P11 + P12) / 2 * d1 * slit_length;
-                driving_force2 = (P21 + P22) / 2 * d1 * slit_length;
+                driving_force2 = (P21 + P22) / 2 * d2 * slit_length;
             } else {
                 driving_force2 = pressure;
             }
@@ -314,6 +310,14 @@ void Nanceloid::init () {
     nl = new double[nose_length];
     nr_ = new double[nose_length];
     nl_ = new double[nose_length];
+
+    // clear them
+    for (int i = 0; i < waveguide_length; i++) {
+        r[i] = l[i] = r_[i] = l_[i] = r_junction[i] = l_junction[i] = 0;
+    }
+    for (int i = 0; i < nose_length; i++) {
+        nr[i] = nl[i] = nr_[i] = nl_[i] = 0;
+    }
 
     // precalculate reflection coefficients
     update_reflections ();
