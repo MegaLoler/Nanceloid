@@ -85,7 +85,7 @@ void Nanceloid::run (float *out) {
         //v += f / m * dt;
         //x += v * dt;
         //double glottal_output = pressure_force;
-        double glottal_output = fmod (x, 1) * pressure;
+        double glottal_output = fmod (x, 1) * pressure * voicing + pressure * (1 - voicing);
         x += frequency / rate;
 
         // update ends of waveguide
@@ -129,8 +129,8 @@ void Nanceloid::run (float *out) {
             int j1 = j + 1;
             double r_refl = r[j0] * r_junction[j0];
             double l_refl = l[j1] * l_junction[j1];
-            double r_turb = abs (r_refl) * params.turbulence.value * noise ();
-            double l_turb = abs (l_refl) * params.turbulence.value * noise ();
+            double r_turb = fmax (0, r_refl) * params.turbulence.value * noise ();
+            double l_turb = fmax (0, l_refl) * params.turbulence.value * noise ();
             r_[j1] = clip (r[j0] - r_refl + l_refl * refl_c + l_turb);
             l_[j0] = clip (l[j1] - l_refl + r_refl * refl_c + r_turb);
         }

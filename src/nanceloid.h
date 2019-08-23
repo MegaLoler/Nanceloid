@@ -67,7 +67,7 @@ class Nanceloid {
         int nose_length = 0;
         int throat_i = 0;
         int mouth_i = 0;
-        double reflection_damping = 0.04;
+        double reflection_damping = 0.01;
         double max_impedance = 500;
         double epsilon = 0.00001;
         // right and left going

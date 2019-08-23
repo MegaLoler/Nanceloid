@@ -66,8 +66,8 @@ struct Parameters {
     Parameter refl_left       = Parameter ("Left Reflection",  "Left Rfl", "%",     0,    1,    0,   100,   0.75);
     Parameter refl_right      = Parameter ("Right Reflection", "RightRfl", "%",    -0.5, -1,   -50, -100,  -0.9);
     Parameter nose_admittance = Parameter ("Nose Admittance",  "NoseAdmt", "",      0,    1,    0,   1,     0.25);
-    Parameter crossfade       = Parameter ("Crossfade Tract",  "Crossfad", "%",     0,    1,    0,   100,   0.2);
-    Parameter turbulence      = Parameter ("Turbulence",       "Friction", "%",     0,    1,    0,   100,   0.2);
+    Parameter crossfade       = Parameter ("Crossfade Tract",  "Crossfad", "%",     0,    1,    0,   100,   0.4);
+    Parameter turbulence      = Parameter ("Turbulence",       "Friction", "%",     0,    1,    0,   100,   0.1);
     Parameter voicing         = Parameter ("Voicing",          "Voicing",  "%",     0,    1,    0,   100,   1);
 
     // musical and audio parameters
