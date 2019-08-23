@@ -70,82 +70,23 @@ void Nanceloid::run (float *out) {
         pressure = (target_pressure * weight + pressure) / (1 + weight);
 
         // glottal source
-        // parameters are:
-        // - pressure (subglottal pressure)
-        // - glottal_rest_area (neutral cross sectional area at glottis)
-        // - cord_tension (vocal cord tension)
-        const double slit_length = 0.28;
-        const double g1 = 0.1;      // damping ratio on mass 1
-        const double g2 = 0.6;      // damping ratio on mass 2
-        const double nk1 = 100;     // non linearity in spring restoring force
-        const double nk2 = 100;     // non linearity in spring restoring force
-        const double nh1 = 500;     // non linearity in collision force
-        const double nh2 = 500;     // non linearity in collision force
-        const double m1 = 1;        // mass 1
-        const double m2 = 1;        // mass 2
-        const double d1 = 0.15;     // length of mass 1 cm
-        const double d2 = 0.15;     // length of mass 2 cm
-        const double rho = 1.225;   // air density
-        const double visc = 18.6;   // air viscosity
-        double g1_ = g1;
-        double g2_ = g2;
-        double k1 = 80000;   // TODO: how this relate to frequency?
-        double k2 = 80;
-        double kc = 25000;          // mass coupling tension
-        double h1 = 3 * k1;         // linear stiffness of collision force
-        double h2 = 3 * k2;         // linear stiffness of collision force
-        double rest_disp = glottal_rest_area / (2 * slit_length);
-        double disp1 = x1 + rest_disp;
-        double disp2 = x2 + rest_disp;
-        double area1 = glottal_rest_area + 2 * slit_length * disp1;
-        double area2 = glottal_rest_area + 2 * slit_length * disp2;
-        // spring restoration forces
-        double f_spring1 = k1 * (x1 + nk1 * x1 * x1 * x1);
-        double f_spring2 = k2 * (x2 + nk2 * x2 * x2 * x2);
-        // collision forces
-        double f_collision1 = 0;
-        double f_collision2 = 0;
-        if (disp1 <= 0) {
-            f_collision1 = h1 * (disp1 + nh1 * disp1 * disp1 * disp1);
-            g1_ += 1;
-        }
-        if (disp2 <= 0) {
-            f_collision2 = h2 * (disp2 + nh2 * disp2 * disp2 * disp2);
-            g2_ += 1;
-        }
-        // damping coefficients
-        double r1 = 2 * g1_ * sqrt (k1 * m1);
-        double r2 = 2 * g2_ * sqrt (k2 * m2);
-        // pressure and flow
-        double vel = sqrt (2 * (pressure - l[0]) / rho) * ((area1 + area2) / 2);
-        double P11 = pressure - rho * vel * vel / (2 * area1 * area1);
-        double P12 = P11 - 12 * visc * slit_length * slit_length * d1 / (area1 * area1 * area1) * vel;
-        double P21 = P12 + rho / 2 * vel * vel * (1 / (area2 * area2) - 1 / (area1 * area1));
-        double P22 = P21 - 12 * visc * slit_length * slit_length * d2 / (area2 * area2 * area2) * vel;
-        double glottal_output = vel / 100;//P22;
-        cout << glottal_output << endl;
-        // driving forces
-        double driving_force1 = pressure;
-        double driving_force2 = 0;
-        if (disp1 > 0) {
-            if (disp2 > 0) {
-                driving_force1 = (P11 + P12) / 2 * d1 * slit_length;
-                driving_force2 = (P21 + P22) / 2 * d2 * slit_length;
-            } else {
-                driving_force2 = pressure;
-            }
-        }
-        // mass coupling force
-        double coupling1 = kc * (x1 - x2);
-        double coupling2 = kc * (x2 - x1);
-        // sum forces
-        double f1 = -f_spring1 - f_collision1 - coupling1 - v1 * r1 + driving_force1;
-        double f2 = -f_spring2 - f_collision2 - coupling2 - v2 * r2 + driving_force2;
-        // integrate mass displacement
-        v1 += f1 / m1 * dt;
-        v2 += f2 / m2 * dt;
-        x1 += v1 * dt;
-        x2 += v2 * dt;
+        //const double m = 1;
+        //const double damping = 0.1;
+        //const double non_linearity = 1;
+        //double displacement = x + (1 - voicing);
+        //double area = displacement * displacement * M_PI;
+        //double effective_area = area + 0.1;
+        //double flow = 2 * (effective_area * pressure - area * l[0]);
+        //double pressure_force = -flow * flow / 2;
+        //double spring_force = cord_tension * (x + non_linearity * x * x * x);
+        //double damping_force = damping * v;
+        //double collision_force = fmin (0, 100 * (x + 500 * x * x * x));
+        //double f = -spring_force - damping_force - collision_force + pressure_force;
+        //v += f / m * dt;
+        //x += v * dt;
+        //double glottal_output = pressure_force;
+        double glottal_output = fmod (x, 1) * pressure;
+        x += frequency / rate;
 
         // update ends of waveguide
         int end = waveguide_length - 1;
@@ -270,8 +211,6 @@ void Nanceloid::run_control () {
 
     // crossfade voicing
     voicing += (params.voicing.value - voicing) * params.crossfade.value;
-    double glottal_radius = (1 - voicing) / 2 + 0.01;
-    glottal_rest_area = glottal_radius * glottal_radius * M_PI;
 
     // update target frequency
     double semitones = note.note + note.detune + vibrato_osc;

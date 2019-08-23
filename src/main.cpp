@@ -163,7 +163,7 @@ int main (int argc, char **argv) {
         // setup gui window
         const int screen_width = 600;
         const int screen_height = 200;
-        sf::RenderWindow window (sf::VideoMode(screen_width, screen_height), "Nanceloid", sf::Style::Default);
+        sf::RenderWindow window (sf::VideoMode (screen_width, screen_height), "Nanceloid", sf::Style::Default);
         auto desktop = sf::VideoMode::getDesktopMode ();
         sf::Vector2i desktop_size (desktop.width, desktop.height);
         window.setPosition ((desktop_size - (sf::Vector2i) window.getSize ()) / 2);
@@ -176,8 +176,8 @@ int main (int argc, char **argv) {
         text.setFont (font);
         text.setString ("Hi");
         text.setCharacterSize (12);
-        text.setPosition(-1, -1);
-        text.setScale(2.0 / screen_width, 2.0 / screen_height);
+        text.setPosition (-1, -1);
+        text.setScale (2.0 / screen_width, 2.0 / screen_height);
         text.setStyle (sf::Text::Regular);
 
         sf::View view (sf::FloatRect(-1, -1, 2, 2));
@@ -189,7 +189,7 @@ int main (int argc, char **argv) {
         double mouse_y = 0;
         while (window.isOpen ())
         {
-            window.clear();
+            window.clear ();
 
             // draw tract shape
             const int res = 64;
