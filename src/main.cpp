@@ -207,6 +207,7 @@ int main (int argc, char **argv) {
             display_string << "Velic closure: " << (int) round (synth->shape.velic_closure * 100) << "%\n";
             display_string << "Voicing:       " << (int) round (synth->get_voicing () * 100) << "%\n";
             display_string << "Second Fold:   " << (int) round (synth->params.second_fold.value * 100) << "%\n";
+            display_string << "Uvula:         " << (int) round (synth->params.uvula.value * 100) << "%\n";
             text.setString (display_string.str ());
             // scope
             int scope_size = sample_rate / fmax (1, synth->get_frequency ());
@@ -244,6 +245,8 @@ int main (int argc, char **argv) {
                 } else if (event.type == sf::Event::KeyPressed) {
                     if (event.key.code == sf::Keyboard::Escape)
                         window.close ();
+                    else if (event.key.code == sf::Keyboard::Equal)
+                        synth->params.uvula.value = synth->params.uvula.value ?  0 : 1;
                     else if (event.key.code == sf::Keyboard::Enter)
                         synth->params.second_fold.value = synth->params.second_fold.value ?  0 : 0.1;
                     else if (event.key.code == sf::Keyboard::Tab)

@@ -73,11 +73,11 @@ struct Parameters {
     Parameter uvula           = Parameter ("Uvula",            "Uvula",    "%",     0,    1,    0,   100,   0);
 
     // musical and audio parameters
-    Parameter portamento      = Parameter ("Portamento",       "Portmnto", "%",     0,    1,    0,   100,   0.5);
-    Parameter tremolo_rate    = Parameter ("Tremolo Rate",     "Trm.Rate", "hz",    1,    16,   1,   16,    5);
-    Parameter tremolo_depth   = Parameter ("Tremolo Depth",    "Trm.Dept", "%",     0,    1,    0,   100,   0);
+    Parameter portamento      = Parameter ("Portamento",       "Portmnto", "%",     0,    1,    0,   100,   0.2);
+    Parameter tremolo_rate    = Parameter ("Tremolo Rate",     "Trm.Rate", "hz",    1,    16,   1,   16,    1);
+    Parameter tremolo_depth   = Parameter ("Tremolo Depth",    "Trm.Dept", "%",     0,    1,    0,   100,   0.1);
     Parameter vibrato_rate    = Parameter ("Vibrato Rate",     "Vib.Rate", "hz",    1,    16,   1,   16,    5);
-    Parameter vibrato_depth   = Parameter ("Vibrato Depth",    "Vib.Dept", "cents", 0,    2,    0,   200,   0);
+    Parameter vibrato_depth   = Parameter ("Vibrato Depth",    "Vib.Dept", "cents", 0,    2,    0,   200,   0.5);
     Parameter adsr_attack     = Parameter ("ADSR Attack",      "Attack",   "ms",    0,    1,    0,   1000,  0.0);
     Parameter adsr_decay      = Parameter ("ADSR Decay",       "Decay",    "ms",    0,    1,    0,   1000,  0.1);
     Parameter adsr_sustain    = Parameter ("ADSR Sustain",     "Sustain",  "%",     0,    1,    0,   100,   1);
