@@ -5,6 +5,8 @@ a vocal synth using digital waveguides n stuff lol
 work in progressssssss~~~~~~~~~~
 probably broken maybe
 
+![Video](crying.mp4)
+
 ![Screenshot](screenshot.gif)
 
 ## Dependencies
