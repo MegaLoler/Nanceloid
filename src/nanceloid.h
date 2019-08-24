@@ -120,11 +120,15 @@ class Nanceloid {
         double tremolo_osc = 0;         // output of tremolo lfo
         double vibrato_osc = 0;         // output of vibrato lfo
         double frequency = 0;           // current intended playing frequency
-        double detected_frequency = 0;  // current detected frequency
         double target_pressure = 0;     // unfiltered current input pressure
         double pressure = 0;            // subglottal pressure from lungs
         double voicing = 0;             // related to glottal area at rest
         double cord_tension = 0;        // tension of the vocal folds
+        // pitch correction/detection
+        double detected_frequency = 0;  // current detected frequency
+        static const int scope_size = 1024;
+        double scope[scope_size];
+        int scope_i = 0;
         // the masses used for folds etc
         double x = 0;
         double x2 = 0;
@@ -194,6 +198,9 @@ class Nanceloid {
 
         // get the current voicing
         double get_voicing ();
+
+        // get a sample from the scope
+        double get_scope (int offset);
 
         // public members
         Parameters params;      // the live synth parameters

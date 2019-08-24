@@ -105,21 +105,12 @@ class SoundStream : public sf::SoundStream {
                 synth->run (samples);
                 m_samples[i]     = (sf::Int16) (samples[0] * max);
                 m_samples[i + 1] = (sf::Int16) (samples[1] * max);
-                float mix = (samples[0] + samples[1]) / 2.0;
-                scope[scope_i++] = mix;
-                scope_i %= scope_max_size;
             }
 
             return true;
         }
         
         virtual void onSeek (sf::Time timeOffset) {}
-
-        // oscciloscope view
-        static const int scope_max_size = 1024;
-        float scope[scope_max_size];
-        int scope_i = 0;
-
 };
 
 int main (int argc, char **argv) {
@@ -216,10 +207,7 @@ int main (int argc, char **argv) {
             sf::VertexArray lines_scope (sf::LinesStrip, scope_size);
             for (int j = 0; j < scope_size; j++) {
                 double n = (double) j / (scope_size - 1);
-                int i = stream.scope_i - scope_size + j;
-                while (i < 0)
-                    i += stream.scope_max_size;
-                float sample = stream.scope[i];
+                float sample = synth->get_scope (j - scope_size);
                 lines_scope[j].position = sf::Vector2f (n * 2 - 1, sample);
                 lines_scope[j].color = sf::Color::Red;
             }

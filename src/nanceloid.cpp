@@ -213,6 +213,8 @@ void Nanceloid::run (float *out) {
     double target_sample = output / super_sampling * params.volume.value;   // output volume
     double pan = params.panning.get_normalized_value () / 2;                // panning
     sample = (target_sample + sample) / 2;                                  // cheap filter
+    scope[scope_i++] = sample;
+    scope_i %= scope_size;
     out[0] = cos (pan * M_PI) * sample;
     out[1] = sin (pan * M_PI) * sample;
 }
@@ -258,10 +260,10 @@ void Nanceloid::run_control () {
     double semitones = note.note + note.detune + vibrato_osc;
     double target_frequency = 440 * pow (2.0, (semitones - 69) / 12);
     frequency += (target_frequency - frequency) * params.portamento.value;
+    cord_tension = pow (frequency * 2 * M_PI, 2.0);
 
     // pitch correction
-    // TODO: actually do it
-    cord_tension = pow (frequency * 2 * M_PI, 2.0);
+    
 
     // update shape
     shape.crossfade (get_shape (), params.crossfade.value);
@@ -466,4 +468,12 @@ void Nanceloid::midi (uint8_t *data) {
 
         shape_i = id;
     }
+}
+
+double Nanceloid::get_scope (int offset) {
+    int i = scope_i + offset;
+    while (i < 0)
+        i += scope_size;
+    i %= scope_size;
+    return scope[i];
 }
