@@ -50,7 +50,8 @@ _TODO: explain n stuff lol_
 
 - patch saving
 - improve adsr for abrupt state changes
-- add intermittant sources
+- turbulence
+- improve vocal folds...
 - get vst working again
 - reverb
 - junction resolution parameter to optimize for very long waveguides ?? maybe
