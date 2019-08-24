@@ -101,7 +101,10 @@ class Nanceloid {
             double note     = 0;    // midi note value
             double detune   = 0;    // offset in semitones
             double velocity = 0;    // note velocity (0 to 1)
-            int start_time = 0;     // sample clock time of note event
+            int on_time     = 0;    // sample clock time of note on event
+            int off_time    = 0;    // sample clock time of note off event
+            bool on         = 0;    // whether its playing or not
+            double start_pressure = 0;  // value at start of adsr
         } note;                     // info about the current note to play
 
         // sampling parameters and timing
@@ -111,16 +114,17 @@ class Nanceloid {
         double dt;                  // sampling rate delta time
 
         // state
-        double sample = 0;          // last sample
-        double tremolo_phase = 0;   // current phase of tremolo lfo
-        double vibrato_phase = 0;   // current phase of vibrato lfo
-        double tremolo_osc = 0;     // output of tremolo lfo
-        double vibrato_osc = 0;     // output of vibrato lfo
-        double frequency = 0;       // current intended playing frequency
-        double target_pressure = 0; // unfiltered current input pressure
-        double pressure = 0;        // subglottal pressure from lungs
-        double voicing = 0;         // related to glottal area at rest
-        double cord_tension = 0;    // tension of the vocal folds
+        double sample = 0;              // last sample
+        double tremolo_phase = 0;       // current phase of tremolo lfo
+        double vibrato_phase = 0;       // current phase of vibrato lfo
+        double tremolo_osc = 0;         // output of tremolo lfo
+        double vibrato_osc = 0;         // output of vibrato lfo
+        double frequency = 0;           // current intended playing frequency
+        double detected_frequency = 0;  // current detected frequency
+        double target_pressure = 0;     // unfiltered current input pressure
+        double pressure = 0;            // subglottal pressure from lungs
+        double voicing = 0;             // related to glottal area at rest
+        double cord_tension = 0;        // tension of the vocal folds
         // the masses used for folds etc
         double x = 0;
         double x2 = 0;
@@ -184,6 +188,9 @@ class Nanceloid {
 
         // get the current intended playing frequency
         double get_frequency ();
+
+        // get the current detected playing frequency
+        double get_detected_frequency ();
 
         // get the current voicing
         double get_voicing ();

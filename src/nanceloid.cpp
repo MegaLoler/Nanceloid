@@ -48,6 +48,10 @@ void Nanceloid::set_rate (double rate) {
     }
 }
 
+double Nanceloid::get_detected_frequency () {
+    return detected_frequency;
+}
+
 double Nanceloid::get_frequency () {
     return frequency;
 }
@@ -168,8 +172,10 @@ void Nanceloid::run (float *out) {
             double r_refl = r[j0] * r_junction[j0];
             double l_refl = l[j1] * l_junction[j1];
             // TODO: flow turbelence
-            double r_turb = 0;//fmax (0, r_refl) * params.turbulence.value * noise ();
-            double l_turb = 0;//fmax (0, l_refl) * params.turbulence.value * noise ();
+            double r_turb = 0;
+            double l_turb = 0;
+            //double r_turb = fmax (0, r_refl) * params.turbulence.value * noise ();
+            //double l_turb = fmax (0, l_refl) * params.turbulence.value * noise ();
             r_[j1] = clip (r[j0] - r_refl + l_refl * refl_c + l_turb);
             l_[j0] = clip (l[j1] - l_refl + r_refl * refl_c + r_turb);
         }
@@ -220,31 +226,28 @@ void Nanceloid::run_control () {
     vibrato_osc = sin (vibrato_phase * M_PI * 2) * params.vibrato_depth.value;
     vibrato_phase += params.vibrato_rate.value / control_rate;
 
-    // run adsr envelope to get current input pressure
-    double delta_clock = clock - note.start_time;  // samples since note event
-    double delta_time = delta_clock / rate;        // seconds since note event
-    double sustain = params.adsr_sustain.value;    // effective sustain level
-    sustain *= tremolo_osc;
-      
     target_pressure = 0;
     if (note.note) {
-        if (note.velocity) {
-            // note is on
-            if (delta_time < params.adsr_attack.value)
-                // attack
-                target_pressure = delta_time / params.adsr_attack.value;
-            else if (delta_time < params.adsr_attack.value + params.adsr_decay.value)
-                // decay
-                target_pressure = 1 - (1 - sustain) * (delta_time - params.adsr_attack.value) / params.adsr_decay.value;
-            else
-                // sustain
-                target_pressure = sustain;
-        } else {
-            // note is off
-            if (delta_time < params.adsr_attack.value)
-                // release
-                target_pressure = sustain - sustain * delta_time / params.adsr_release.value;
-        }
+
+        // run adsr envelope to get current input pressure
+        double off_time = fmax ((note.off_time - note.on_time) / rate, params.adsr_attack.value + params.adsr_decay.value);
+        double delta_clock = clock - note.on_time;     // samples since note event
+        double delta_time = delta_clock / rate;        // seconds since note event
+        double sustain = params.adsr_sustain.value;    // effective sustain level
+        sustain *= tremolo_osc;
+
+        if (delta_time < params.adsr_attack.value)
+            // attack
+            target_pressure = note.start_pressure + (1 - note.start_pressure) * delta_time / params.adsr_attack.value;
+        else if (delta_time < params.adsr_attack.value + params.adsr_decay.value)
+            // decay
+            target_pressure = 1 - (1 - sustain) * (delta_time - params.adsr_attack.value) / params.adsr_decay.value;
+        else if (note.on)
+            // sustain
+            target_pressure = sustain;
+        else if (delta_time < off_time + params.adsr_release.value)
+            // release
+            target_pressure = sustain - sustain * (delta_time - off_time) / params.adsr_release.value;
     }
     target_pressure *= note.velocity * (1 - params.min_velocity.value) + params.min_velocity.value;
 
@@ -370,18 +373,20 @@ void Nanceloid::update_reflections () {
 void Nanceloid::note_on (int note, double velocity) {
     this->note.note = note;
     this->note.velocity = velocity;
-    this->note.start_time = clock;
+    this->note.on_time = clock;
+    this->note.on = true;
+    this->note.start_pressure = target_pressure;
 }
 
 void Nanceloid::note_off (int note) {
     if (note == this->note.note) {
-        this->note.velocity = 0;
-        this->note.start_time = clock;
+        this->note.off_time = clock;
+        this->note.on = false;
     }
 }
 
 int Nanceloid::playing_note () {
-    return note.velocity ? note.note : -1;
+    return note.on ? note.note : -1;
 }
 
 void Nanceloid::midi (uint8_t *data) {

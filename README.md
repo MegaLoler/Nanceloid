@@ -49,7 +49,6 @@ _TODO: explain n stuff lol_
 ## Immediate todo list
 
 - patch saving
-- improve adsr for abrupt state changes
 - turbulence
 - improve vocal folds...
 - auto pitch correction
