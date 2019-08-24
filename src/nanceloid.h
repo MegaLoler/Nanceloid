@@ -68,7 +68,7 @@ class Nanceloid {
         int throat_i = 0;
         int mouth_i = 0;
         double reflection_damping = 0.01;
-        double max_impedance = 500;
+        double max_impedance = 1000;
         double epsilon = 0.00001;
         // right and left going
         double *r = nullptr;
@@ -121,8 +121,13 @@ class Nanceloid {
         double pressure = 0;        // subglottal pressure from lungs
         double voicing = 0;         // related to glottal area at rest
         double cord_tension = 0;    // tension of the vocal folds
+        // the masses used for folds etc
         double x = 0;
+        double x2 = 0;
+        double x3 = 0;
         double v = 0;
+        double v2 = 0;
+        double v3 = 0;
 
         // hardcoded parameters
         const double speed_of_sound = 34300;    // cm/s

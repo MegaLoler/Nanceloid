@@ -203,9 +203,10 @@ int main (int argc, char **argv) {
             }
             // text display
             stringstream display_string;
-            display_string << "Patch #" << synth->get_shape_id () << "\n";
+            display_string << "Patch         #" << synth->get_shape_id () << "\n";
             display_string << "Velic closure: " << (int) round (synth->shape.velic_closure * 100) << "%\n";
-            display_string << "Voicing: " << (int) round (synth->get_voicing () * 100) << "%\n";
+            display_string << "Voicing:       " << (int) round (synth->get_voicing () * 100) << "%\n";
+            display_string << "Second Fold:   " << (int) round (synth->params.second_fold.value * 100) << "%\n";
             text.setString (display_string.str ());
             // scope
             int scope_size = sample_rate / fmax (1, synth->get_frequency ());
@@ -243,6 +244,8 @@ int main (int argc, char **argv) {
                 } else if (event.type == sf::Event::KeyPressed) {
                     if (event.key.code == sf::Keyboard::Escape)
                         window.close ();
+                    else if (event.key.code == sf::Keyboard::Enter)
+                        synth->params.second_fold.value = synth->params.second_fold.value ?  0 : 0.1;
                     else if (event.key.code == sf::Keyboard::Tab)
                         synth->get_shape ().velic_closure = synth->get_shape ().velic_closure ?  0 : 1;
                     else if (event.key.code == sf::Keyboard::Backspace)
@@ -250,7 +253,7 @@ int main (int argc, char **argv) {
                     else if (event.key.code == sf::Keyboard::Space) {
                         int note = synth->playing_note ();
                         if (note == -1)
-                            synth->note_on (45, 1);
+                            synth->note_on (45+12+3, 1);
                         else
                             synth->note_off (note);
                     }

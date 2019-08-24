@@ -47,7 +47,7 @@ _TODO: explain n stuff lol_
 ## Immediate todo list
 
 - patch saving
-- some kind of vocal fold model
+- improve adsr for abrupt state changes
 - add intermittant sources
 - get vst working again
 - reverb

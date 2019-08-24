@@ -9,7 +9,7 @@ double noise () {
 }
 
 double clip (double value) {
-    return fmin (1, fmax (-1, value));
+    return fmin (5, fmax (-5, value));
 }
 
 Nanceloid::~Nanceloid () {
@@ -69,24 +69,62 @@ void Nanceloid::run (float *out) {
         double weight = 1 / (pressure_smoothing + 1);
         pressure = (target_pressure * weight + pressure) / (1 + weight);
 
-        // glottal source
-        //const double m = 1;
-        //const double damping = 0.1;
-        //const double non_linearity = 1;
-        //double displacement = x + (1 - voicing);
-        //double area = displacement * displacement * M_PI;
-        //double effective_area = area + 0.1;
-        //double flow = 2 * (effective_area * pressure - area * l[0]);
-        //double pressure_force = -flow * flow / 2;
-        //double spring_force = cord_tension * (x + non_linearity * x * x * x);
-        //double damping_force = damping * v;
-        //double collision_force = fmin (0, 100 * (x + 500 * x * x * x));
-        //double f = -spring_force - damping_force - collision_force + pressure_force;
-        //v += f / m * dt;
-        //x += v * dt;
-        //double glottal_output = pressure_force;
-        double glottal_output = fmod (x, 1) * pressure * voicing + pressure * (1 - voicing);
-        x += frequency / rate;
+        // glottal source and uvula
+        const double amp = 0.1;
+        const double damping = 0.1;
+        const double tract_coupling = 0.1;  // folds coulping to resonator
+        const double uvula_tract_coupling = 0.5; // uvula couplng to resonator
+        const double fold_coupling_k = 1 * cord_tension / 2;
+        const double n = 10;
+        const double nd = 5;
+        const double uvula = params.uvula.value;
+        const double fold_2_c = params.second_fold.value; // how present the second simulated fold is
+        const double uvula_frequency = 100;
+        const double uvula_tension = pow (uvula_frequency * 2 * M_PI, 2.0);
+        double coupling_spring = fold_coupling_k * (x2 - x);
+        // first fold
+        double delta_pressure = pressure + l[0] * tract_coupling;
+        double a = -cord_tension * (x + n * x * x * x) - damping * (v + nd * v * x * x) * frequency + delta_pressure * amp * cord_tension * (1 + n) + coupling_spring;
+        // second fold
+        double delta_pressure2 = (r[0] + l[1]) * tract_coupling;
+        double a2 = -cord_tension * (x2 + n * x2 * x2 * x2) - damping * (v2 + nd * v2 * x2 * x2) * frequency + delta_pressure2 * amp * cord_tension * (1 + n) - coupling_spring;
+        // uvula
+        int ui = mouth_i + 1;
+        double delta_pressure3 = (r[ui] + l[ui + 1]) * uvula_tract_coupling;
+        double a3 = -uvula_tension * (x3 + n * x3 * x3 * x3) - damping * (v3 + nd * v3 * x3 * x3) * uvula_frequency + delta_pressure3 * amp * uvula_tension * (1 + n);
+        // integrate
+        v  += a  * dt;
+        v2 += a2 * dt;
+        v3 += a3 * dt;
+        x  += v  * dt;
+        x2 += v2 * dt;
+        x3 += v3 * dt;
+        // update waveguide
+        // first fold
+        shape.set_sample (0, fmax (0, x));
+        // second fold
+        double i2 = 1.0 / (waveguide_length - 1);
+        double x2_ = (shape.sample (i2) + x2 * fold_2_c) / (1 + fold_2_c);
+        shape.set_sample (i2, fmax (0, x2_));
+        // uvula
+        double i3 = (double) ui / (waveguide_length - 1);
+        double x3_ = shape.sample (i3) + x3 * uvula;
+        shape.set_sample (i3, fmax (0, x3_));
+        // update reflection coefficients
+        double z0 = get_impedance (0);
+        double z1 = get_impedance (1);
+        double z2 = get_impedance (2);
+        double zu0 = get_impedance (ui);
+        double zu1 = get_impedance (ui + 1);
+        r_junction[0] = z1 > max_impedance ? 1 : (z1 - z0) / (z1 + z0);
+        l_junction[1] = z0 > max_impedance ? 1 : (z0 - z1) / (z0 + z1);
+        r_junction[1] = z2 > max_impedance ? 1 : (z2 - z1) / (z2 + z1);
+        l_junction[2] = z1 > max_impedance ? 1 : (z1 - z2) / (z1 + z2);
+        r_junction[ui]     = zu1 > max_impedance ? 1 : (zu1 - zu0) / (zu1 + zu0);
+        l_junction[ui + 1] = zu0 > max_impedance ? 1 : (zu0 - zu1) / (zu0 + zu1);
+        // glottal output
+        double disp = pow (x + 1 - voicing, 2.0) * M_PI;
+        double glottal_output = pressure * disp;
 
         // update ends of waveguide
         int end = waveguide_length - 1;
@@ -129,8 +167,9 @@ void Nanceloid::run (float *out) {
             int j1 = j + 1;
             double r_refl = r[j0] * r_junction[j0];
             double l_refl = l[j1] * l_junction[j1];
-            double r_turb = fmax (0, r_refl) * params.turbulence.value * noise ();
-            double l_turb = fmax (0, l_refl) * params.turbulence.value * noise ();
+            // TODO: flow turbelence
+            double r_turb = 0;//fmax (0, r_refl) * params.turbulence.value * noise ();
+            double l_turb = 0;//fmax (0, l_refl) * params.turbulence.value * noise ();
             r_[j1] = clip (r[j0] - r_refl + l_refl * refl_c + l_turb);
             l_[j0] = clip (l[j1] - l_refl + r_refl * refl_c + r_turb);
         }
@@ -214,12 +253,12 @@ void Nanceloid::run_control () {
 
     // update target frequency
     double semitones = note.note + note.detune + vibrato_osc;
-    frequency = 440 * pow (2.0, (semitones - 69) / 12);
-    // TODO: portamento
+    double target_frequency = 440 * pow (2.0, (semitones - 69) / 12);
+    frequency += (target_frequency - frequency) * params.portamento.value;
 
     // pitch correction
     // TODO: actually do it
-    cord_tension = frequency * frequency;
+    cord_tension = pow (frequency * 2 * M_PI, 2.0);
 
     // update shape
     shape.crossfade (get_shape (), params.crossfade.value);
@@ -231,7 +270,8 @@ void Nanceloid::init () {
     free ();
 
     // calculate number of segments based on desired length
-    waveguide_length = (int) floor (params.tract_length.value * rate / speed_of_sound);
+    // +2 for the 2 vocal fold segments
+    waveguide_length = (int) floor (params.tract_length.value * rate / speed_of_sound) + 2;
     nose_length = waveguide_length / 2;
 
     // indices of throat and mouth at junction
