@@ -519,18 +519,39 @@ void Nanceloid::midi (uint8_t *data) {
     }
 }
 
-double Nanceloid::get_scope (int offset) {
-    int i = scope_i + offset;
-    while (i < 0)
-        i += scope_size;
-    i %= scope_size;
-    return scope[i];
+void Nanceloid::prepare_scope () {
+    if (detected_frequency) {
+        // num samples in scape
+        int samples = rate / detected_frequency;
+        // scan relevant region of scope for min and max samples and their indices
+        int j = scope_i - samples;
+        if (j < scope_size)
+            j += scope_size;
+        double min = 1000;
+        for (int i = 0; i < samples; i++) {
+            double s = scope[j];
+            if (s < min) {
+                min = s;
+                sync_scope_i = j;
+            }
+            // wrap index
+            j--;
+            if (j < 0)
+                j += scope_size;
+        }
+        sync_scope_samples = samples;
+    }
 }
 
-double Nanceloid::get_auto_scope (int i) {
-    return auto_correlation[i] / auto_correlation_max;
+double Nanceloid::get_scope (double n) {
+    if (detected_frequency) {
+        int i = (int) floor (sync_scope_i + n * sync_scope_samples);
+        i %= scope_size;
+        return scope[i];
+    }
+    return 0;
 }
 
-int Nanceloid::get_scope_size () {
-    return scope_size;
+int Nanceloid::get_scope_samples () {
+    return sync_scope_samples;
 }

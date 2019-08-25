@@ -203,12 +203,12 @@ int main (int argc, char **argv) {
             display_string << "Detected:      " << round (synth->get_detected_frequency () * 100) / 100 << "hz\n";
             text.setString (display_string.str ());
             // scope
-            double freq = synth->get_detected_frequency ();
-            int scope_size = sample_rate / fmax (1, freq);
-            sf::VertexArray lines_scope (sf::LinesStrip, scope_size);
-            for (int j = 0; j < scope_size; j++) {
-                double n = (double) j / (scope_size - 1);
-                float sample = synth->get_scope (j - scope_size);
+            synth->prepare_scope ();
+            int samples = synth->get_scope_samples ();
+            sf::VertexArray lines_scope (sf::LinesStrip, samples);
+            for (int j = 0; j < samples; j++) {
+                double n = (double) j / (samples - 1);
+                float sample = synth->get_scope (n);
                 lines_scope[j].position = sf::Vector2f (n * 2 - 1, -sample);
                 lines_scope[j].color = sf::Color::Red;
             }

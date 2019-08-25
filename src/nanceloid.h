@@ -125,6 +125,8 @@ class Nanceloid {
         double voicing = 0;             // related to glottal area at rest
         double cord_tension = 0;        // tension of the vocal folds
         // pitch correction/detection
+        int sync_scope_samples = 0;
+        int sync_scope_i = 0;
         int scope_i = 0;
         static const int scope_size = 1024;
         double scope_max = 0;           // max value in scope
@@ -202,14 +204,14 @@ class Nanceloid {
         // get the current voicing
         double get_voicing ();
 
-        // get a sample from the scope
-        double get_scope (int offset);
+        // get a sample from the viewing scope using position 0 to 1
+        double get_scope (double n);
 
-        // get sample from normalized auto correlation
-        double get_auto_scope (int i);
+        // get the number of samples in the viewing scope
+        int get_scope_samples ();
 
-        // get size of scopes
-        int get_scope_size ();
+        // prepare the scope for viewing
+        void prepare_scope ();
 
         // public members
         Parameters params;      // the live synth parameters
