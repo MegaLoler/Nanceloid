@@ -262,6 +262,55 @@ void Nanceloid::run_control () {
     frequency += (target_frequency - frequency) * params.portamento.value;
     cord_tension = pow (frequency * 2 * M_PI, 2.0);
 
+    // pitch detection via auto correlation
+    // calculate auto correlation
+    // also find peaks
+    auto_correlation_max = 0;
+    int max_peak_i = 0;
+    bool last_was_down = false;
+    double new_scope_max = 0;
+    for (int i = 0; i < scope_size; i++) {
+        // find auto correlation value at lag = i
+        double s = 0;
+        for (int j = 0; j < scope_size; j++) {
+            int j2 = j - i;
+            if (j2 >= 0) {
+                double s0 = scope[j];
+                double s1 = scope[j2];
+                s += s0 * s1;
+            }
+        }
+        auto_correlation[i] = s;
+
+        // find scope max while we r at it
+        if (scope[i] > new_scope_max)
+            new_scope_max = scope[i];
+
+        // find max sample for normalization later
+        if (s > auto_correlation_max)
+            auto_correlation_max = s;
+
+        // find peaks
+        bool down = true;
+        if (i > 0) {
+            double last_s = auto_correlation[i - 1];
+            down = s < last_s;
+        }
+        if (down && !last_was_down) {
+            // found a peak at i
+            // ignore i = 0 because thats the first peak and we are looking for the second local maximum
+            if (i > 0 && (max_peak_i == 0 || s > auto_correlation[max_peak_i]))
+                max_peak_i = i;
+        }
+        last_was_down = down;
+    }
+    // calculate pitch by period between local maximums of auto correlation
+    if (scope_max > epsilon)
+        detected_frequency = max_peak_i ? (double) rate / max_peak_i : 0;
+    else
+        detected_frequency = 0;
+    scope_max = new_scope_max;
+
     // pitch correction
     
 
@@ -476,4 +525,12 @@ double Nanceloid::get_scope (int offset) {
         i += scope_size;
     i %= scope_size;
     return scope[i];
+}
+
+double Nanceloid::get_auto_scope (int i) {
+    return auto_correlation[i] / auto_correlation_max;
+}
+
+int Nanceloid::get_scope_size () {
+    return scope_size;
 }

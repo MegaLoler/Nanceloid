@@ -203,17 +203,28 @@ int main (int argc, char **argv) {
             display_string << "Detected:      " << round (synth->get_detected_frequency () * 100) / 100 << "hz\n";
             text.setString (display_string.str ());
             // scope
-            int scope_size = sample_rate / fmax (1, synth->get_frequency ());
+            double freq = synth->get_detected_frequency ();
+            int scope_size = sample_rate / fmax (1, freq);
             sf::VertexArray lines_scope (sf::LinesStrip, scope_size);
             for (int j = 0; j < scope_size; j++) {
                 double n = (double) j / (scope_size - 1);
                 float sample = synth->get_scope (j - scope_size);
-                lines_scope[j].position = sf::Vector2f (n * 2 - 1, sample);
+                lines_scope[j].position = sf::Vector2f (n * 2 - 1, -sample);
                 lines_scope[j].color = sf::Color::Red;
             }
+            // scope auto correlation
+            //int scope_size2 = synth->get_scope_size ();
+            //sf::VertexArray lines_scope2 (sf::LinesStrip, scope_size2);
+            //for (int j = 0; j < scope_size2; j++) {
+            //    double n = (double) j / (scope_size2 - 1);
+            //    float sample = freq ? synth->get_auto_scope (j) : 0;
+            //    lines_scope2[j].position = sf::Vector2f (n * 2 - 1, -sample);
+            //    lines_scope2[j].color = sf::Color::Blue;
+            //}
             // draw em
             window.draw (lines);
             window.draw (lines2);
+            //window.draw (lines_scope2);
             window.draw (lines_scope);
             window.draw (text);
             window.display ();
