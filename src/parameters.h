@@ -71,6 +71,9 @@ struct Parameters {
     Parameter voicing         = Parameter ("Voicing",          "Voicing",  "%",     0,    1,    0,   100,   1);
     Parameter second_fold     = Parameter ("Second Fold",      "Snd.Fold", "%",     0,    1,    0,   100,   0.1);
     Parameter uvula           = Parameter ("Uvula",            "Uvula",    "%",     0,    1,    0,   100,   0);
+    Parameter coupling        = Parameter ("Tract Coupling",   "Coupling", "%",     0,    1,    0,   100,   0.1);
+    Parameter correction      = Parameter ("Pitch Correction", "PCorrect", "%",     0,    1,    0,   100,   0.2);
+    Parameter max_error_scale = Parameter ("Max Error Scale",  "ErrScale", "%",     0,    2,    0,   200,   0.5);
 
     // musical and audio parameters
     Parameter portamento      = Parameter ("Portamento",       "Portmnto", "%",     0,    1,    0,   100,   0.2);

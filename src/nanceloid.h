@@ -134,6 +134,7 @@ class Nanceloid {
         double auto_correlation[scope_size];
         double auto_correlation_max = 1;
         double detected_frequency = 1;  // current detected frequency
+        double error = 0;               // frequency error
         // the masses used for folds etc
         double x = 0;
         double x2 = 0;

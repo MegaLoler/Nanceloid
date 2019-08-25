@@ -76,7 +76,6 @@ void Nanceloid::run (float *out) {
         // glottal source and uvula
         const double amp = 0.1;
         const double damping = 0.1;
-        const double tract_coupling = 0.1;  // folds coulping to resonator
         const double uvula_tract_coupling = 0.5; // uvula couplng to resonator
         const double fold_coupling_k = 1 * cord_tension / 2;
         const double n = 10;
@@ -87,10 +86,10 @@ void Nanceloid::run (float *out) {
         const double uvula_tension = pow (uvula_frequency * 2 * M_PI, 2.0);
         double coupling_spring = fold_coupling_k * (x2 - x);
         // first fold
-        double delta_pressure = pressure + l[0] * tract_coupling;
+        double delta_pressure = pressure + l[0] * params.coupling.value;
         double a = -cord_tension * (x + n * x * x * x) - damping * (v + nd * v * x * x) * frequency + delta_pressure * amp * cord_tension * (1 + n) + coupling_spring;
         // second fold
-        double delta_pressure2 = (r[0] + l[1]) * tract_coupling;
+        double delta_pressure2 = (r[0] + l[1]) * params.coupling.value;
         double a2 = -cord_tension * (x2 + n * x2 * x2 * x2) - damping * (v2 + nd * v2 * x2 * x2) * frequency + delta_pressure2 * amp * cord_tension * (1 + n) - coupling_spring;
         // uvula
         int ui = mouth_i + 1;
@@ -256,12 +255,6 @@ void Nanceloid::run_control () {
     // crossfade voicing
     voicing += (params.voicing.value - voicing) * params.crossfade.value;
 
-    // update target frequency
-    double semitones = note.note + note.detune + vibrato_osc;
-    double target_frequency = 440 * pow (2.0, (semitones - 69) / 12);
-    frequency += (target_frequency - frequency) * params.portamento.value;
-    cord_tension = pow (frequency * 2 * M_PI, 2.0);
-
     // pitch detection via auto correlation
     // calculate auto correlation
     // also find peaks
@@ -306,13 +299,26 @@ void Nanceloid::run_control () {
     }
     // calculate pitch by period between local maximums of auto correlation
     if (scope_max > epsilon)
-        detected_frequency = max_peak_i ? (double) rate / max_peak_i : 0;
+        detected_frequency = max_peak_i ? (double) rate / max_peak_i / 2 : 0;
     else
         detected_frequency = 0;
     scope_max = new_scope_max;
 
+    // update target frequency
+    double semitones = note.note + note.detune + vibrato_osc;
+    double target_frequency = 440 * pow (2.0, (semitones - 69) / 12);
+    frequency += (target_frequency - frequency) * params.portamento.value;
+
     // pitch correction
-    
+    if (detected_frequency) {
+        double delta = frequency - detected_frequency;
+        if (!(error > frequency * pow (2, params.max_error_scale.value)
+                    || error < - frequency * pow (2, -params.max_error_scale.value)))
+            error += delta * params.correction.value;
+    }
+    if (detected_frequency == 0)
+        error -= error * params.correction.value;
+    cord_tension = pow ((frequency + error * params.correction.value) * 2 * M_PI, 2.0);
 
     // update shape
     shape.crossfade (get_shape (), params.crossfade.value);
