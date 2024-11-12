@@ -5,7 +5,11 @@ a vocal synth using digital waveguides n stuff lol
 work in progressssssss~~~~~~~~~~
 probably broken maybe
 
-![Video](crying.mp4)
+
+
+https://github.com/user-attachments/assets/902e1bfe-b9d2-44ab-8c74-3c218ded497c
+
+
 
 ![Screenshot](screenshot.gif)
 
